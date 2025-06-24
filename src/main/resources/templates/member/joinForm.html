@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원 가입</title>
+</head>
+<style>
+  body{
+    font-family: sans-serif;
+    padding: 20px;
+    border: 1px solid gainsboro;
+  }
+  h3,div{
+    text-align:center;
+    margin-bottom: 20px;
+  }
+.field-err{
+  color: red;
+  font-size: 0.8em;
+  margin-top: 3px;
+  }
+.global-err{
+  color: red;
+  text-align: center;
+  margin-bottom: 10px;
+}
+button{
+  padding: 6px 16px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+</style>
+<body>
+<h3>회 원 가 입</h3>
+<form th:action="@{/member/join}" th:method="post" th:object="${joinForm}">
+  <div th:if="${#fields.hasGlobalErrors()}">
+    <p class="global-err" th:each="err:${#fields.globalErrors()}" th:text="${err}"></p>
+  </div>
+  <div>
+    <label th:for="id"> 아이디 : </label><input type="text" th:field="*{id}">
+    <div class="field-err" th:each="err : ${#fields.errors('id')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div>
+    <label th:for="pwd"> 비밀번호 : </label><input type="password" th:field="*{pwd}">
+    <div class="field-err" th:each="err : ${#fields.errors('pwd')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div>
+    <label th:for="pwdChk"> 비밀번호확인 : </label><input type="password" th:field="*{pwdChk}">
+    <div class="field-err" th:each="err : ${#fields.errors('pwdChk')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div>
+    <label th:for="email"> 이메일주소 : </label><input type="email" th:field="*{email}">
+    <div class="field-err" th:each="err : ${#fields.errors('email')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div>
+    <label th:for="tel"> 전화번호 : </label><input type="tel" th:field="*{tel}">
+    <div class="field-err" th:each="err : ${#fields.errors('tel')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div>
+    <label for="region">지역</label>
+    <select name="region" id="region">
+      <option value="" selected>==선택==</option>
+      <option value="서울" th:selected="${joinForm.region == '서울'}">서울</option>
+      <option value="부산" th:selected="${joinForm.region == '부산'}">부산</option>
+      <option value="대구" th:selected="${joinForm.region == '대구'}">대구</option>
+      <option value="울산" th:selected="${joinForm.region == '울산'}">울산</option>
+    </select>
+  </div>
+  <div>
+    <label for="gender">성별:</label>
+    <select name="gender" id="gender" th:field="*{gender}">
+      <option value="">-- 선택하세요 --</option>
+      <option value="남">남</option>
+      <option value="여">여</option>
+    </select>
+  </div>
+  <div>
+    <label th:for="nickname"> 별칭 : </label><input type="text" th:field="*{nickname}">
+    <div class="field-err" th:each="err : ${#fields.errors('nickname')}">
+      <span th:text="${err}"></span>
+    </div>
+  </div>
+  <div><button>가입</button><button type="reset">취소</button></div>
+  <a href="/">뒤로가기</a>
+</form>
+
+</body>
+</html>

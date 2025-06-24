@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모닥불즈</title>
+  <link rel="stylesheet" href="" th:href="@{/css/common.css}">
+</head>
+<body>
+<!-- 로그인 전 탑 메뉴 -->
+<th:block th:fragment="beforeLoginTop">
+  <div class="topmenu" th:if="${session.isEmpty()}">
+    <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{member/join}">회원가입</a></p>
+  </div>
+</th:block>
+
+<!-- 로그인 후 탑 메뉴 -->
+<th:block th:fragment="afterLoginTop">
+  <div class="topmenu" th:if="${!session.isEmpty()}">
+    <p>
+      <span th:text="${session.loginMember.nickname} + '님, 환영합니다!'"></span>
+      <span>||</span>
+      <a th:href="@{/logout}" id="logout">로그아웃</a>
+    </p>
+  </div>
+</th:block>
+
+<!-- 헤더 -->
+<header>
+  <div class="header-left">
+    <img th:src="@{/images/모닥불즈로고.jpg}" alt="모닥불즈 로고 아이콘" class="logo-icon" />
+    <div class="logo-text">
+      <div class="logo-main">모닥<span class="highlight">불</span>즈</div>
+      <div class="logo-sub">캠핑장 리뷰 및 정보공유 서비스</div>
+    </div>
+  </div>
+  <div class="header-center">
+    <div>Camping with us !</div>
+    <div>Camping with fire !</div>
+  </div>
+  <div class="header-right">
+
+    <img th:src="@{/images/켐핑카로고.jpg}" alt="캠핑 밴" class="van-img" />
+  </div>
+</header>
+
+<main>
+  <section class="search-area">
+    <h2>캠핑장 & 글램핑장</h2>
+    <form>
+      <label for="keyword">키워드</label>
+      <input type="text" id="keyword" name="keyword" />
+      <label for="region">지역</label>
+      <input type="text" id="region" name="region" />
+      <label for="theme">테마</label>
+      <input type="text" id="theme" name="theme" />
+    </form>
+    <div class="tags">
+      <span>#노지</span>
+      <span>#근교</span>
+      <span>#오토 캠핑</span>
+      <span>#조용한</span>
+      <span>#아이와 함께</span>
+      <span>#애견동반</span>
+      <span>#불멍</span>
+    </div>
+  </section>
+
+  <section class="content-area">
+    <div class="notice">
+      <strong>공지</strong> <span>[신규]</span> 업데이트 안내
+    </div>
+
+    <div class="box review">
+      <h3>
+        리뷰
+        <span class="more">더보기</span>
+      </h3>
+      <ul>
+        <li>이번에 경주 다녀왔는데 좋았어요</li> <!--나중에 링크로 게시글연결-->
+        <li>너무 더웠어요ㅠㅠ</li>
+        <li>부산 애견동반 추천!</li>
+        <li>여기 좀 아닌듯</li>
+      </ul>
+    </div>
+
+    <div class="box community">
+      <h3>
+        커뮤니티
+        <span class="more">더보기</span>
+      </h3>
+      <ul>
+        <li>여기 분위기 어때요??</li>  <!--리뷰랑 커뮤 글 합쳐서 보여주고 네이버카페처럼 앞에 카테고리만 리뷰,커뮤로 보려지게 할까요??-->
+        <li>방습매트 추천 좀</li>
+        <li>서울 근교 대형견 동반 추천</li>
+        <li>초보캠퍼 꿀팁</li>
+      </ul>
+    </div>
+
+    <div class="box recommend">
+      <h3>
+        추천 캠핑장
+        <span class="more">더보기</span>
+      </h3>
+      <div class="recommend-camps">
+        <div class="camp">
+          <!--            <img src="/images/laraland.jpg" alt="라라랜드 캠핑장" /> &lt;!&ndash;링크로 연결&ndash;&gt;-->
+          <div class="camp-name">라라랜드 캠핑장</div>
+        </div>
+        <div class="camp">
+          <!--            <img src="/images/seohaerang.jpg" alt="서해랑 B3 카라반" />-->
+          <div class="camp-name">서해랑 B3 카라반</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
