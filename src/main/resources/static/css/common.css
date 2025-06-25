@@ -1,261 +1,313 @@
 /* 전체 바탕 및 기본 폰트 */
 body {
-  background-color: #f9f3e7;
-  font-family: 'Nanum Gothic', sans-serif, Arial, sans-serif;
-  margin: 0; padding: 0;
-  color: #333;
+    background-color: #fcf3de;
+    font-family: 'Nanum Gothic', sans-serif, Arial, sans-serif;
+    margin: 0; padding: 0;
+    color: #333;
 }
 
 /* 탑 메뉴 */
 .topmenu {
-  background-color: #6e7d4d;
-  color: #fff;
-  padding: 6px 20px;
-  text-align: right;
-  font-size: 0.9rem;
-  font-weight: 500;
+    background-color: #84925a;
+    color: #fff;
+    padding: 6px 20px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 .topmenu a {
-  color: #fff;
-  text-decoration: none;
-  margin: 0 6px;
+    color: #fff;
+    text-decoration: none;
+    margin: 0 6px;
 }
 .topmenu span {
-  color: #fff;
-  margin: 0 4px;
+    color: #fff;
+    margin: 0 4px;
 }
 
 /* 헤더 */
 header {
-  background-color: #7a8a5f;
-  display: flex;
-  align-items: center;
-  padding: 12px 30px;
-  color: #f0e6d2;
-  gap: 20px;
-  user-select: none;
+    background-color: #6a794f;
+    display: flex;
+    align-items: center;
+    padding: 12px 30px;
+    color: #f0e6d2;
+    gap: 20px;
+    user-select: none;
 }
 .header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1 1 300px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 300px;
 }
 .logo-icon {
-  width: 50px;
-  height: 50px;
+    width: 50px;
+    height: 50px;
 }
 .logo-text {
-  display: flex;
-  flex-direction: column;
-  font-weight: 700;
-  user-select: text;
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+    user-select: text;
 }
 .logo-main {
-  font-size: 2.2rem;
-  color: #f3d88b;
-  letter-spacing: -1px;
+    font-size: 2.2rem;
+    color: #fcf3de;
+    letter-spacing: -1px;
 }
 .highlight {
-  color: #f9d87a;
+    color: #ffc250;
 }
 .logo-sub {
-  font-size: 0.85rem;
-  font-weight: 400;
-  margin-top: 2px;
-  color: #d9d9b8;
-  user-select: text;
+    font-size: 0.85rem;
+    font-weight: 400;
+    margin-top: 2px;
+    color: #d9d9b8;
+    user-select: text;
 }
 .header-center {
-  flex: 1 1 200px;
-  font-size: 0.9rem;
-  line-height: 1.3;
-  text-align: center;
-  font-weight: 500;
-  color: #d9d9b8;
-  user-select: none;
+    flex: 1 1 200px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    text-align: center;
+    font-weight: 500;
+    color: #d9d9b8;
+    user-select: none;
 }
 .header-right {
-  flex: 1 1 200px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 15px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #f9f3e7;
-  user-select: none;
+    flex: 1 1 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #f9f3e7;
+    user-select: none;
 }
 .login-link {
-  color: #f9f3e7;
-  text-decoration: none;
-  white-space: nowrap;
+    color: #f9f3e7;
+    text-decoration: none;
+    white-space: nowrap;
 }
 .login-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 .van-img {
-  width: 90px;
-  height: auto;
-  user-select: none;
+    width: 150px;
+    height: auto;
+    user-select: none;
 }
 
-/* 메인 영역 */
-main {
-  display: flex;
-  padding: 25px 30px;
-  gap: 25px;
-  box-sizing: border-box;
+/* 메인 전체  */
+.main-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 30px;
+    padding: 25px 30px;
+    box-sizing: border-box;
+    background-color: #fcf3de;
+}
+
+/* 상단 2단 검색/공지/추천 캠핑장 */
+.top-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.left-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* 검색 영역 */
 .search-area {
-  background-color: #7a8a5f;
-  padding: 20px 18px;
-  border-radius: 15px;
-  width: 320px;
-  color: #fff;
-  box-sizing: border-box;
-  user-select: none;
+    background-color: #6a794f;
+    padding: 20px 18px;
+    border-radius: 15px;
+    color: #fff;
 }
 .search-area h2 {
-  background-color: #f9f3e7;
-  color: #333;
-  padding: 8px 0;
-  border-radius: 15px;
-  text-align: center;
-  margin: 0 0 18px 0;
-  font-weight: 700;
-  font-size: 1.2rem;
-  user-select: text;
+    background-color: #fcfaf2;
+    color: #333;
+    padding: 8px 0;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 18px;
+}
+.search-box {
+    display: flex;
+    align-items: stretch;
+    gap: 30px;
+}
+.form-fields {
+    flex: 1;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.form-row label {
+    display: inline-block;
+    width: 60px;
+    font-weight: 700;
+}
+.form-row input[type="text"] {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: none;
+    font-size:0.9rem;
 }
 .search-area label {
-  display: block;
-  margin-top: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  user-select: text;
+    display: inline-block;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 .search-area input[type="text"] {
-  width: 100%;
-  padding: 7px 10px;
-  margin-top: 6px;
-  border-radius: 8px;
-  border: none;
-  font-size: 0.9rem;
-  box-sizing: border-box;
-}
-.search-area input[type="text"]:focus {
-  outline: 2px solid #f3d88b;
+    width: 100%;
+    padding: 7px 10px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
 }
 .search-area .tags {
-  margin-top: 18px;
-  user-select: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 5px;
 }
 .search-area .tags span {
-  background-color: #f9f3e7;
-  color: #7a8a5f;
-  padding: 5px 14px;
-  border-radius: 20px;
-  margin-right: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
+    background-color: #f9f3e7;
+    color: #7a8a5f;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-right: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
 }
-.search-area .tags span:hover {
-  background-color: #f3d88b;
+.search-form {
+    width: 100%
+}
+.search-btn {
+    width: 80px;
+    height: 200px;
+    border: none;
+    border-radius: 20px;
+    background-color: #6a794f;
+    background-image: url("/images/돋보기.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50px 50px;
+    cursor: pointer;
 }
 
-/* 콘텐츠 영역 */
-.content-area {
-  flex-grow: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-  box-sizing: border-box;
-}
-
-/* 공지 */
+/* 공지 영역 */
 .notice {
-  width: 100%;
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  color: #333;
-  user-select: text;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 15px 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
 }
 .notice span {
-  font-weight: 400;
-  color: #7a8a5f;
-  margin-left: 6px;
+    font-weight: 400;
+    color: #7a8a5f;
+    margin-left: 6px;
 }
 
-/* 박스 공통 */
+/* 추천 캠핑장 영역 */
+.recommend {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px 25px;
+}
+.recommend h3 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+.recommend-camps {
+    display: flex;
+    gap: 15px;
+}
+.camp {
+    flex: 1;
+    background-color: #f0f0f0;
+    text-align: center;
+    padding: 10px;
+    border-radius: 15px;
+}
+.camp-name {
+    margin-top: 8px;
+    font-weight: 700;
+}
+
+/* 하단 2단 리뷰/커뮤니티 */
+.bottom-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
 .box {
-  background-color: #fff;
-  border-radius: 20px;
-  padding: 20px 25px;
-  box-sizing: border-box;
-  flex: 1 1 320px;
-  min-width: 300px;
-  color: #333;
-  user-select: text;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 5px 25px;
 }
 .box h3 {
-  margin-top: 0;
-  font-weight: 700;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.3rem;
-  user-select: text;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
 }
-.box h3 .more {
-  font-size: 1rem;
-  color: #7a8a5f;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.2s ease;
+.more {
+    font-size: 1rem;
+    color: #7a8a5f;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
-.box h3 .more:hover {
-  color: #f3d88b;
+.more:hover {
+    color: #f3d88b;
 }
 
 /* 리스트 */
 ul {
-  padding-left: 22px;
-  margin: 12px 0 0 0;
+    padding-left: 20px;
+    margin: 0;
 }
-ul li {
-  margin-bottom: 8px;
-  font-size: 1rem;
-  line-height: 1.3;
+li {
+    margin-bottom: 8px;
 }
 
-/* 추천 캠핑장 */
-.recommend-camps {
-  display: flex;
-  gap: 15px;
-  margin-top: 15px;
+/* 자유게시판 버튼 (임시) */
+.btn-community {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background-color: #ff6600;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s;
 }
-.recommend-camps .camp {
-  flex: 1;
-  text-align: center;
-  user-select: none;
-}
-.recommend-camps img {
-  width: 100%;
-  border-radius: 15px;
-  height: 130px;
-  object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-.recommend-camps .camp-name {
-  margin-top: 8px;
-  font-weight: 700;
-  font-size: 1rem;
-  color: #333;
-  user-select: text;
+
+.btn-community:hover {
+  background-color: #e25500;
 }
