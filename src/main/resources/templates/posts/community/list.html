@@ -1,0 +1,38 @@
+<!-- templates/posts/community/list.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>자유 게시판 목록</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+<h1>자유 게시판</h1>
+
+<div th:if="${msg}" style="color: red;" th:text="${msg}">경고 메시지</div>
+<a href="/posts/community/new">글 작성</a>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>글 번호</th>
+    <th>제목</th>
+    <th>작성자</th>
+    <th>작성일</th>
+    <th>조회수</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="post : ${posts}">
+    <td th:text="${post.coId}">1</td>
+    <td>
+      <a th:href="@{/posts/community/{id}(id=${post.coId})}"
+         th:text="${post.title}">제목</a>
+    </td>
+    <td th:text="${post.writer}">작성자</td>
+    <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</td>
+    <td th:text="${post.viewC}">0</td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

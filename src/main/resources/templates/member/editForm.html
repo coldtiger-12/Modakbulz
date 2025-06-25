@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>회원정보 수정</title>
+  <link rel="stylesheet" href="" th:href="@{/css/member.css}">
+</head>
+<body>
+
+<div class="form-container">
+  <h2>회원정보 수정</h2>
+  <form th:object="${editForm}" th:action="@{/mypage/edit}" method="post"> <div class="form-group">
+    <label for="nickname">닉네임</label>
+    <input type="text" id="nickname" th:field="*{nickname}" required>
+  </div>
+
+    <div class="form-group">
+      <label for="tel">전화번호</label>
+      <input type="tel" id="tel" th:field="*{tel}" placeholder="'-' 없이 숫자만 입력" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">이메일(수정이 불가합니다.)</label>
+      <input type="email" id="email" th:field="*{email}" required readonly>
+    </div>
+
+    <div class="form-group">
+      <label for="region">지역</label>
+      <select name="region" id="region" th:field="*{region}">
+        <option value="" selected>==선택==</option>
+        <option value="서울">서울</option>
+        <option value="부산">부산</option>
+        <option value="대구">대구</option>
+        <option value="울산">울산</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button type="button" class="btn-cancel" onclick="location.href='/mypage'">취소</button>
+      <button type="submit" class="btn-submit">수정 완료</button>
+    </div>
+
+  </form>
+</div>
+</body>
+</html>

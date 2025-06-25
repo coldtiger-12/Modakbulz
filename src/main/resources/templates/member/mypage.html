@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지</title>
+  <link rel="stylesheet" th:href="@{/css/member.css}">
+</head>
+<body>
+<div class="form-container">
+  <h2>마이페이지</h2>
+  <p th:if="${session.loginMember != null}">
+    <span th:text="${session.loginMember.nickname}"></span>님, 환영합니다!
+  </p>
+
+  <div class="button-group" style="flex-direction: column; gap: 10px;">
+    <button type="button" class="btn-submit" onclick="location.href='/mypage/edit'">회원정보 수정</button>
+    <button type="button" class="btn-submit" onclick="location.href='/mypage/password'">비밀번호 변경</button>
+    <form th:action="@{/mypage/delete}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까?');">
+      <button type="submit" class="btn-cancel" style="width: 100%;">회원 탈퇴</button>
+    </form>
+    <button type="button" class="btn-cancel" onclick="location.href='/'">홈으로</button>
+  </div>
+</div>
+</body>
+</html>

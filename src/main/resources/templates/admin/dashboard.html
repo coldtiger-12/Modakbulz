@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드</title>
+</head>
+<style>
+  body {
+  font-family: Arial, sans-serif;
+  padding: 30px;
+  background: #f4f4f4;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+
+  .menu {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .menu a {
+    padding: 12px 20px;
+    background: #007acc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .menu a:hover {
+    background: #005fa3;
+  }
+</style>
+<body>
+
+<div class="container">
+  <h1> 관리자 대시 보드 </h1>
+
+  <div class="menu">
+    <a th:href="@{/admin/posts}">게시글 전체 관리</a>
+    <a th:href="@{/}">홈으로 돌아가기</a>
+  </div>
+</div>
+
+</body>
+</html>

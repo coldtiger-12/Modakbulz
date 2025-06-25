@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>접근 거부</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff0f0;
+      text-align: center;
+      padding: 100px;
+    }
+
+    h1 {
+      color: #cc0000;
+    }
+
+    p {
+      color: #444;
+      margin-top: 20px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007acc;
+    }
+  </style>
+</head>
+
+<body>
+<h1>🚫 접근이 거부되었습니다</h1>
+<p>관리자만 접근 가능한 페이지입니다.</p>
+<p><a th:href="@{/}">홈으로 돌아가기</a></p>
+</body>
+
+</html>

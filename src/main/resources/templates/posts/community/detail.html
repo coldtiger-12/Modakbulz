@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 상세</title>
+</head>
+<body>
+<h1 th:text="${post.title}">제목</h1>
+
+<p><strong>작성자:</strong> <span th:text="${post.writer}">작성자</span></p>
+<p><strong>작성일:</strong> <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+<p><strong>조회수:</strong> <span th:text="${post.viewC}">0</span></p>
+
+<hr>
+<div th:text="${post.content}">본문</div>
+<hr>
+
+<div>
+  <form th:action="@{/posts/community}" method="get" style="display: inline;">
+    <button type="submit">목록</button>
+  </form>
+  <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
+    <button type="submit">수정</button>
+  </form>
+  <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
+        onsubmit="return confirm('정말 삭제하시겠습니까?');">
+    <button type="submit">삭제</button>
+  </form>
+</div>
+
+</body>
+</html>
