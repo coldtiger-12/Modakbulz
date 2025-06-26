@@ -12,6 +12,10 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
+#gocamping
+gocamping:
+  api:
+    service-key: XgxDN4M9MKooR%2B5XPukrDf62%2BWTiA7kDwHygs5zhGSou4qAxEeNdJ1w6EzIlDJpIAJiGd7fMqO76ESZ%2FZvEmlw%3D%3D
 
 # 웹서버 포트
 server:
@@ -23,3 +27,4 @@ logging:
   level:
     root: info
     org.springframework.web: DEBUG
+

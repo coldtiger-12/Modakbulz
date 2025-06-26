@@ -95,9 +95,13 @@
         추천 캠핑장
         <span class="more">더보기</span>
       </h3>
-      <div class="recommend-camps">
-        <div class="camp"><div class="camp-name">라라랜드 캠핑장</div></div>
-        <div class="camp"><div class="camp-name">서해랑 B3 카라반</div></div>
+      <div class="recommend-camps" th:if="${recommendCamps}">
+        <div class="camp" th:each="camp : ${recommendCamps}">
+          <img th:src="${camp.firstImageUrl != null ? camp.firstImageUrl : '/images/모닥불즈로고.png'}"
+               alt="캠핑장 이미지" style="width:100%; height: 120px; object-fit: cover; border-radius: 10px;">
+          <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
+          <p th:text="${camp.lineIntro}" style="font-size: 0.8em; color: gray;"></p>
+        </div>
       </div>
     </section>
 
