@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>게시글 작성</title>
+  <link rel="stylesheet" href="/css/community.css">
+  <link rel="stylesheet" href="/css/common.css">
 </head>
 <body>
 
-<h1>게시글 작성</h1>
+<!-- 탑메뉴 -->
+<div th:replace="fragments/topmenu :: top"></div>
+
+<!-- 본문 내용 -->
+<h1 th:text="${formTitle}">게시글 작성</h1>
 
 <form action="#" th:action="@{/posts/community/save}" th:object="${communityForm}" method="post">
   <div>
@@ -15,15 +21,15 @@
     <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
   </div>
   <div>
-      <label for="writer">작성자</label>
-      <input type="text" id="writer" th:field="*{writer}" readonly />
+    <label for="writer">작성자</label>
+    <input type="text" id="writer" th:field="*{writer}" readonly />
   </div>
   <div>
     <label>내용</label>
     <textarea th:field="*{content}"></textarea>
     <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
   </div>
-  <button type="submit">등록</button>
+  <button type="submit">저장</button>
   <button type="button" onclick="location.href='/posts/community'">취소</button>
 </form>
 

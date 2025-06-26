@@ -1,7 +1,21 @@
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('/fonts/Paperlogy-5Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'SCDream';
+  src: url('/fonts/SCDream5.otf') format('opentype');
+  font-weight: 500;
+}
+
 /* 전체 바탕 및 기본 폰트 */
 body {
     background-color: #fcf3de;
-    font-family: 'Nanum Gothic', sans-serif, Arial, sans-serif;
+    font-family: 'Paperlogy', 'SCDream', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
     margin: 0; padding: 0;
     color: #333;
 }
@@ -162,7 +176,9 @@ header {
 .form-row label {
     display: inline-block;
     width: 60px;
-    font-weight: 700;
+    font-weight: 800;
+    padding-top: 5px;
+    padding-left: 10px;
 }
 .form-row input[type="text"] {
     flex: 1;
@@ -236,7 +252,6 @@ header {
     padding: 20px 25px;
 }
 .recommend h3 {
-    margin-top: 0;
     font-weight: 700;
     font-size: 1.3rem;
     margin-bottom: 15px;
