@@ -19,13 +19,18 @@
   <form th:action="@{/posts/community}" method="get" style="display: inline;">
     <button type="submit">목록</button>
   </form>
-  <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
-    <button type="submit">수정</button>
-  </form>
-  <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
-        onsubmit="return confirm('정말 삭제하시겠습니까?');">
-    <button type="submit">삭제</button>
-  </form>
+</div>
+
+<div th:if="${session.loginMember != null}">
+  <div th:if="${session.loginMember.gubun == 'A' or session.loginMember.id == post.coId}">
+    <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
+      <button type="submit">수정</button>
+    </form>
+    <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
+          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+      <button type="submit">삭제</button>
+    </form>
+  </div>
 </div>
 
 </body>
