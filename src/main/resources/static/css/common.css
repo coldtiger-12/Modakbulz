@@ -4,16 +4,10 @@
   font-weight: 500;
 }
 
-@font-face {
-  font-family: 'SCDream';
-  src: url('/fonts/SCDream5.otf') format('opentype');
-  font-weight: 500;
-}
-
 /* 전체 바탕 및 기본 폰트 */
 body {
     background-color: #fcf3de;
-    font-family: 'Paperlogy', 'SCDream', sans-serif;
+    font-family: 'Paperlogy', sans-serif;
     font-weight: 500;
     font-size: 16px;
     margin: 0; padding: 0;

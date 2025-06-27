@@ -21,9 +21,9 @@
       <span>||</span>
       <a th:href="@{/logout}" id="logout">로그아웃</a>
       <span>||</span>
-      <a th:href="@{/mypage}" id="mypage">마이페이지</a>
-      <span>||</span>
-      <a th:href="@{/admin}" id="admin">관리자 대시보드(테스트용)</a>
+      <a th:if="${session.loginMember.gubun == 'C'}" th:href="@{/mypage}" id="mypage">마이페이지</a>
+
+      <a th:if="${session.loginMember.gubun == 'A'}" th:href="@{/admin}" id="admin">관리자 대시보드</a>
     </p>
   </div>
 </th:block>
