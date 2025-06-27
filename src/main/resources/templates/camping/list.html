@@ -7,7 +7,14 @@
   <style>
     .camping-list-container { max-width: 1200px; margin: 30px auto; padding: 20px; }
     .camping-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-    .camp-card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .camp-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        position: relative; /* 자식 요소의 absolute 포지셔닝을 위해 추가 */
+    }
     .camp-card img { width: 100%; height: 200px; object-fit: cover; }
     .camp-card-body { padding: 15px; }
     .camp-card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
@@ -17,6 +24,26 @@
     .pagination a, .pagination span { margin: 0 5px; padding: 8px 12px; border: 1px solid #ddd; text-decoration: none; color: #333; }
     .pagination .active { font-weight: bold; background-color: #6a794f; color: white; border-color: #6a794f; }
     .pagination .disabled { color: #ccc; pointer-events: none; }
+    .scrap-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(0,0,0,0.5);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .scrap-btn.scrapped {
+        background-color: #ffc107;
+        color: white;
+    }
   </style>
 </head>
 <body>
@@ -28,12 +55,20 @@
   <h1>캠핑장 전체 목록</h1>
 
   <div class="camping-grid" th:if="${campPage != null && campPage.hasContent()}">
-    <div class.="camp-card" th:each="camp : ${campPage.content}">
-      <img th:src="${camp.firstImageUrl != null ? camp.firstImageUrl : '/images/모닥불즈로고.png'}" alt="캠핑장 이미지">
+    <div class="camp-card" th:each="camp : ${campPage.content}"
+         th:attr="data-content-id=${camp.contentId},
+                      data-faclt-nm=${camp.facltNm},
+                      data-addr1=${camp.addr1},
+                      data-image-url=${camp.firstImageUrl}">
+
+      <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/모닥불즈로고.png'}" alt="캠핑장 이미지">
+
+      <button class="scrap-btn">☆</button>
+
       <div class="camp-card-body">
         <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
         <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
-        <a th:href="${camp.homepage}" target="_blank" class="camp-card-link" th:if="${camp.homepage}">홈페이지</a>
+        <a th:href="${camp.homepage}" target="_blank" class="camp-card-link" th:if="${camp.homepage != null && !camp.homepage.isEmpty()}">홈페이지</a>
       </div>
     </div>
   </div>
@@ -55,7 +90,66 @@
     <a th:if="${campPage.hasNext()}" th:href="@{/camping(page=${campPage.number + 1})}">다음</a>
     <a th:href="@{/camping(page=${campPage.totalPages - 1})}" th:classappend="${campPage.last} ? 'disabled'">끝</a>
   </div>
+
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const scrapButtons = document.querySelectorAll('.scrap-btn');
+
+      scrapButtons.forEach(button => {
+          button.addEventListener('click', async (event) => {
+              // 로그인 상태 확인 (Thymeleaf의 인라인 스크립팅 활용)
+              const isLoggedIn = '[[${session.loginMember}]]' ? true : false;
+              if (!isLoggedIn) {
+                  alert('로그인이 필요한 기능입니다.');
+                  window.location.href = '/login';
+                  return;
+              }
+
+              const card = event.target.closest('.camp-card');
+              const scrapData = {
+                  contentId: card.dataset.contentId,
+                  facltNm: card.dataset.facltNm,
+                  addr1: card.dataset.addr1,
+                  firstImageUrl: card.dataset.imageUrl
+              };
+
+              try {
+                  const response = await fetch('/api/scraps/toggle', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(scrapData)
+                  });
+
+                  if (response.status === 401) { // Unauthorized
+                      alert('세션이 만료되었거나 로그인이 필요합니다.');
+                      window.location.href = '/login';
+                      return;
+                  }
+
+                  if (!response.ok) {
+                      throw new Error('스크랩 처리 중 오류가 발생했습니다.');
+                  }
+
+                  const result = await response.json();
+
+                  // 서버 응답(isScrapped)에 따라 버튼 스타일과 아이콘 변경
+                  if (result.isScrapped) {
+                      event.target.classList.add('scrapped');
+                      event.target.textContent = '★'; // 채워진 별
+                  } else {
+                      event.target.classList.remove('scrapped');
+                      event.target.textContent = '☆'; // 빈 별
+                  }
+
+              } catch (error) {
+                  console.error('Error:', error);
+                  alert(error.message);
+              }
+          });
+      });
+  });
+</script>
 </body>
 </html>
