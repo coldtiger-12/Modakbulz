@@ -4,35 +4,51 @@
 <head>
   <title>자유 게시판 목록</title>
   <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/community.css}">
 </head>
 <body>
-<h1>자유 게시판</h1>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<div th:if="${msg}" style="color: red;" th:text="${msg}">경고 메시지</div>
-<a href="/posts/community/new">글 작성</a>
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
-<table border="1">
-  <thead>
-  <tr>
-    <th>글 번호</th>
-    <th>제목</th>
-    <th>작성자</th>
-    <th>작성일</th>
-    <th>조회수</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="post : ${posts}">
-    <td th:text="${post.coId}">1</td>
-    <td>
-      <a th:href="@{/posts/community/{id}(id=${post.coId})}"
-         th:text="${post.title}">제목</a>
-    </td>
-    <td th:text="${post.writer}">작성자</td>
-    <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</td>
-    <td th:text="${post.viewC}">0</td>
-  </tr>
-  </tbody>
-</table>
+<!-- 메인 컨테이너 -->
+  <div class="container">
+    <div class="board-header">
+      <h1>커뮤니티 게시판</h1>
+      <div style="text-align: right; margin-bottom: 10px;">
+        <button type="button" class="write-btn" onclick="location.href='/posts/community/new'">글쓰기</button>
+      </div>
+    </div>
+
+    <div th:if="${msg}" class="warning-msg" th:text="${msg}">경고 메시지</div>
+
+    <table>
+      <thead>
+      <tr>
+        <th>글 번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+        <th>조회수</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="post : ${posts}">
+        <td th:text="${post.coId}">1</td>
+        <td>
+          <a th:href="@{/posts/community/{id}(id=${post.coId})}"
+             th:text="${post.title}">제목</a>
+        </td>
+        <td th:text="${post.writer}">작성자</td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</td>
+        <td th:text="${post.viewC}">0</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>

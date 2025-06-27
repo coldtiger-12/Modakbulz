@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>검색상세화면</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'SCDream', sans-serif;
+      background-color: #fcf3de;
+      color: #333;
+      user-select: none;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px 40px;
+      box-sizing: border-box;
+    }
+    .business-name {
+      margin-top: 20px;
+      font-weight: 900;
+      font-size: 2rem;
+      background: #c1c1c1;
+      width: fit-content;
+      padding: 5px 15px;
+      border-radius: 4px;
+      user-select: text;
+    }
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      user-select: none;
+    }
+    .info-table th, .info-table td {
+      border-bottom: 1px solid black;
+      padding: 8px 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .info-table th {
+      border-top: 1px solid black;
+    }
+    .info-table td.review-cell {
+      text-align: right;
+      position: relative;
+    }
+    .info-table td.review-cell button {
+      background: #ddd;
+      border: none;
+      border-radius: 15px;
+      padding: 5px 15px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+      transition: background-color 0.3s;
+    }
+    .info-table td.review-cell button:hover {
+      background-color: #bbb;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      grid-template-rows: auto auto auto;
+      grid-gap: 15px 20px;
+      margin-top: 20px;
+    }
+    .image-slider {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+      position: relative;
+      background: #999;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 220px;
+    }
+    .image-slider img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      user-select: none;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2.5rem;
+      color: white;
+      background: rgba(0,0,0,0.3);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      line-height: 40px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
+    }
+    .arrow:hover {
+      background: rgba(0,0,0,0.6);
+    }
+    .arrow.left {
+      left: 10px;
+    }
+    .arrow.right {
+      right: 10px;
+    }
+    .facility-box {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      background: #c1c1c1;
+      border-radius: 6px;
+      padding: 15px;
+      user-select: text;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+    .facility-icons {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      opacity: 0.5;
+    }
+    .facility-icons img {
+      width: 40px;
+      height: 40px;
+      user-select: none;
+    }
+    .bottom-boxes {
+      grid-column: 1 / 3;
+      grid-row: 3 / 4;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 15px;
+      user-select: text;
+      margin-top: 15px;
+    }
+    .bottom-box {
+      background: #c1c1c1;
+      border-radius: 6px;
+      padding: 15px;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+    .bottom-box.keywords {
+      font-weight: 700;
+    }
+    .bottom-box.keywords div {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-weight: 400;
+    }
+    .bottom-box.keywords div span {
+      background: white;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: #333;
+      flex: 1 1 45%;
+      text-align: center;
+      user-select: none;
+    }
+    .map-box {
+      width: 100%;
+      height: 150px;
+      background: #999;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #444;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid black;
+      margin: 25px 0 0 0;
+    }
+    footer {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.9rem;
+      color: #555;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="business-name">업장이름</div>
+
+    <table class="info-table" aria-label="업장 정보">
+      <thead>
+        <tr>
+          <th>업장 유형</th>
+          <th>등록일</th>
+          <th>업데이트일</th>
+          <th>리뷰</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>캠핑 글램핑 카라반</td>
+          <td>25.01.12</td>
+          <td>25.06.12</td>
+          <td class="review-cell">
+            123 <button type="button" aria-label="전체 리뷰 보기">>전체보기</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="main-grid">
+      <div class="image-slider">
+        <span class="arrow left" onclick="prevImage()">&#10094;</span>
+        <img src="/images/sample1.jpg" alt="업장 사진" id="slider-image" />
+        <span class="arrow right" onclick="nextImage()">&#10095;</span>
+      </div>
+
+      <div class="facility-box">
+        등록된 편의 시설
+        <div class="facility-icons">
+          <img src="/images/toilet.svg" alt="화장실" />
+          <img src="/images/shower.svg" alt="샤워장" />
+          <img src="/images/water.svg" alt="개수대" />
+          <img src="/images/car.svg" alt="주차장" />
+        </div>
+      </div>
+
+      <div class="bottom-boxes">
+        <div class="bottom-box map-box">
+          주변 인프라 api 지도
+        </div>
+        <div class="bottom-box address-box">
+          주소<br />
+          한국 어딘가<br />
+          연락처<br />
+          010-1234-5678
+        </div>
+        <div class="bottom-box keywords">
+          언급된 키워드
+          <div>
+            <span>뷰가 좋아요</span>
+            <span>사진이 잘 나와</span>
+            <span>아이들과 함께</span>
+            <span>연인과 함께</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <footer>푸터</footer>
+  </div>
+
+  <script>
+    const images = [
+      '/images/sample1.jpg',
+      '/images/sample2.jpg',
+      '/images/sample3.jpg'
+    ];
+    let currentIndex = 0;
+
+    function showImage(index) {
+      const img = document.getElementById('slider-image');
+      img.src = images[index];
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      showImage(currentIndex);
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex + 1) % images.length;
+      showImage(currentIndex);
+    }
+  </script>
+</body>
+</html>

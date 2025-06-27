@@ -54,6 +54,7 @@ header {
     align-items: center;
     gap: 12px;
     flex: 1 1 300px;
+    text-decoration: none;
 }
 .logo-icon {
     width: 50px;
@@ -247,31 +248,56 @@ header {
 
 /* 추천 캠핑장 영역 */
 .recommend {
+    max-widthL 500px;
     background-color: #fff;
     border-radius: 20px;
-    padding: 20px 25px;
+    padding: 5px 25px;
 }
 .recommend h3 {
     font-weight: 700;
     font-size: 1.3rem;
     margin-bottom: 15px;
 }
+.recommend-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+    max-width: 550px;
+    margin: 0 auto;
+}
 .recommend-camps {
     display: flex;
     gap: 15px;
+    padding: 5px;
 }
 .camp {
-    flex: 1;
+    flex: 0 0 calc(50% - 10px);
     background-color: #f0f0f0;
     text-align: center;
     padding: 10px;
     border-radius: 15px;
+    min-width: 240px;
+    box-sizing: border-box;
+}
+.camp img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 6px;
 }
 .camp-name {
-    margin-top: 8px;
+    margin: 8px 0 4px;
     font-weight: 700;
 }
-
+.camp p {
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.2;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: block;
+}
 /* 하단 2단 리뷰/커뮤니티 */
 .bottom-area {
     display: grid;
@@ -296,9 +322,11 @@ header {
     color: #7a8a5f;
     cursor: pointer;
     transition: color 0.2s ease;
+    text-decoration: none;
 }
 .more:hover {
     color: #f3d88b;
+    text-decoration: none;
 }
 
 /* 리스트 */

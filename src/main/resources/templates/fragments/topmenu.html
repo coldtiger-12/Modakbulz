@@ -1,0 +1,52 @@
+<!-- templates/fragments/topmenu.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- 로그인 전 -->
+<th:block th:fragment="beforeLoginTop">
+  <div class="topmenu" th:if="${session.isEmpty()}">
+    <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{/member/join}">회원가입</a></p>
+  </div>
+</th:block>
+
+<!-- 로그인 후 -->
+<th:block th:fragment="afterLoginTop">
+  <div class="topmenu" th:if="${!session.isEmpty()}">
+    <p>
+      <span th:text="${session.loginMember.nickname} + '님, 환영합니다!'"></span>
+      <span>||</span>
+      <a th:href="@{/logout}" id="logout">로그아웃</a>
+      <span>||</span>
+      <a th:href="@{/mypage}" id="mypage">마이페이지</a>
+      <span>||</span>
+      <a th:href="@{/admin}" id="admin">관리자 대시보드(테스트용)</a>
+    </p>
+  </div>
+</th:block>
+
+<!-- 헤더 전체 -->
+<th:block th:fragment="header">
+  <header>
+    <a href="/" class="header-left">
+      <img th:src="@{/images/모닥불즈로고.png}" alt="모닥불즈 로고 아이콘" class="logo-icon" />
+      <div class="logo-text">
+        <div class="logo-main">모닥<span class="highlight">불</span>즈</div>
+        <div class="logo-sub">캠핑장 리뷰 및 정보공유 서비스</div>
+      </div>
+    </a>
+    <div class="header-center">
+      <div>Camping with us !</div>
+      <div>Camping with fire !</div>
+    </div>
+    <div class="header-right">
+      <img th:src="@{/images/캠핑카로고.png}" alt="캠핑 밴" class="van-img" />
+    </div>
+  </header>
+</th:block>
+
+</body>
+</html>

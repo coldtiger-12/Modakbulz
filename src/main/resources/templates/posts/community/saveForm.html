@@ -7,31 +7,35 @@
   <link rel="stylesheet" href="/css/common.css">
 </head>
 <body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 탑메뉴 -->
-<div th:replace="fragments/topmenu :: top"></div>
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
 <!-- 본문 내용 -->
-<h1 th:text="${formTitle}">게시글 작성</h1>
+<main class="container">
+  <h1>게시글 작성</h1>
 
-<form action="#" th:action="@{/posts/community/save}" th:object="${communityForm}" method="post">
-  <div>
-    <label>제목</label>
-    <input type="text" th:field="*{title}" />
-    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-  </div>
-  <div>
-    <label for="writer">작성자</label>
-    <input type="text" id="writer" th:field="*{writer}" readonly />
-  </div>
-  <div>
-    <label>내용</label>
-    <textarea th:field="*{content}"></textarea>
-    <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
-  </div>
-  <button type="submit">저장</button>
-  <button type="button" onclick="location.href='/posts/community'">취소</button>
-</form>
-
+  <form action="#" th:action="@{/posts/community/save}" th:object="${communityForm}" method="post">
+    <div>
+      <label>제목</label>
+      <input type="text" th:field="*{title}" />
+      <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+    </div>
+    <div>
+      <label for="writer">작성자</label>
+      <input type="text" id="writer" th:field="*{writer}" readonly />
+    </div>
+    <div>
+      <label>내용</label>
+      <textarea th:field="*{content}"></textarea>
+      <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+    </div>
+    <button type="submit">저장</button>
+    <button type="button" onclick="location.href='/posts/community'">취소</button>
+  </form>
+</main>
 </body>
 </html>

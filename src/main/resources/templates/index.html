@@ -9,46 +9,14 @@
   <link rel="stylesheet" href="" th:href="@{/css/common.css}">
 </head>
 <body>
-<!-- 로그인 전 탑 메뉴 -->
-<th:block th:fragment="beforeLoginTop">
-  <div class="topmenu" th:if="${session.isEmpty()}">
-    <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{member/join}">회원가입</a></p>
-  </div>
-</th:block>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 로그인 후 탑 메뉴 -->
-<th:block th:fragment="afterLoginTop">
-  <div class="topmenu" th:if="${!session.isEmpty()}">
-    <p>
-      <span th:text="${session.loginMember.nickname} + '님, 환영합니다!'"></span>
-      <span>||</span>
-      <a th:href="@{/logout}" id="logout">로그아웃</a>
-      <span>||</span>
-      <a th:href="@{/mypage}" id="mypage">마이페이지</a>
-      <span>||</span>
-      <a th:href="@{/admin}" id="admin">관리자 대시보드(테스트용)</a>
-    </p>
-  </div>
-</th:block>
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
-<!-- 헤더 -->
-<header>
-  <div class="header-left">
-    <img th:src="@{/images/모닥불즈로고.png}" alt="모닥불즈 로고 아이콘" class="logo-icon" />
-    <div class="logo-text">
-      <div class="logo-main">모닥<span class="highlight">불</span>즈</div>
-      <div class="logo-sub">캠핑장 리뷰 및 정보공유 서비스</div>
-    </div>
-  </div>
-  <div class="header-center">
-    <div>Camping with us !</div>
-    <div>Camping with fire !</div>
-  </div>
-  <div class="header-right">
-    <img th:src="@{/images/캠핑카로고.png}" alt="캠핑 밴" class="van-img" />
-  </div>
-</header>
-
+<!-- 메인 페이지 -->
 <div class="main-container">
 
   <!-- 상단 -->
@@ -95,12 +63,16 @@
         추천 캠핑장
         <a th:href="@{/camping}" class="more">더보기</a>
       </h3>
-      <div class="recommend-camps" th:if="${recommendCamps}">
-        <div class="camp" th:each="camp : ${recommendCamps}">
-          <img th:src="${camp.firstImageUrl != null ? camp.firstImageUrl : '/images/모닥불즈로고.png'}"
-               alt="캠핑장 이미지" style="width:100%; height: 120px; object-fit: cover; border-radius: 10px;">
-          <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
-          <p th:text="${camp.lineIntro}" style="font-size: 0.8em; color: gray;"></p>
+      <div class="recommend-scroll">
+        <div class="recommend-camps" th:if="${recommendCamps}">
+          <div class="camp" th:each="camp : ${recommendCamps}">
+            <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
+              ? camp.firstImageUrl
+              : '/images/임시사진.png'}"
+                 alt="캠핑장 이미지">
+            <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
+            <p th:text="${camp.lineIntro}"></p>
+          </div>
         </div>
       </div>
     </section>
@@ -125,7 +97,7 @@
     <div class="community box">
       <h3>
         커뮤니티
-        <span class="more">더보기</span>
+        <a class="more" href="/posts/community">더보기</a>
       </h3>
       <ul>
         <li>여기 분위기 어때요??</li>
@@ -133,9 +105,6 @@
         <li>서울 근교 대형견 동반 추천</li>
         <li>초보캠퍼 꿀팁</li>
       </ul>
-      <div class="board-link"> <!-- 임시 자유게시판 링크 -->
-        <a th:href="@{/posts/community}" class="btn-community">자유게시판 가기</a>
-      </div>
     </div>
   </div>
 

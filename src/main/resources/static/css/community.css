@@ -8,11 +8,11 @@
 }
 
 h1 {
-    color: #6b7b4e;
     font-size: 1.8rem;
     margin-bottom: 20px;
 }
 
+/* 글쓰기 폼 스타일 */
 label {
     display: block;
     margin-top: 15px;
@@ -34,6 +34,7 @@ textarea {
     resize: vertical;
 }
 
+/* 버튼 스타일 */
 button {
     margin-top: 20px;
     padding: 10px 20px;
@@ -48,6 +49,18 @@ button {
 
 button + button {
     margin-left: 10px;
+}
+
+.write-btn {
+    background-color: #6b7b4e;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
 }
 
 .table {

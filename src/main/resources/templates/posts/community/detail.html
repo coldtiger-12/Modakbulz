@@ -7,8 +7,12 @@
   <link rel="stylesheet" href="" th:href="@{/css/community.css}">
 </head>
 <body>
-<!-- 탑 메뉴 -->
-<div th:replace="fragments/topmenu :: top"></div>
+<!-- 탑메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
 <!-- 게시글 상세 내용 -->
 <main class="container">
