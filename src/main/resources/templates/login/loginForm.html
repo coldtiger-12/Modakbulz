@@ -5,57 +5,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>로 그 인</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
-<style>
-  body{
-    font-family: sans-serif;
-    padding: 20px;
-    border: 1px solid gainsboro;
-  }
-  h3,div{
-    text-align:center;
-    margin-bottom: 20px;
-  }
-  div{
-
-  }
-  .field-err{
-    color: red;
-    font-size: 0.8em;
-    margin-top: 3px;
-   }
-  button{
-    padding: 6px 16px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-</style>
 <body>
-<h3>회원 로그인</h3>
-<form action="" method="post" th:object="${loginForm}">
-
-  <!--    글로벌 오류 출력-->
-  <div th:if="${#fields.hasGlobalErrors()}">
-    <div class="field-err" th:each="err : ${#fields.globalErrors()}">
-      <span th:text="${err}"></span>
-    </div>
+<div class="login-container">
+  <img src="/images/모닥불즈로고.png" alt="로고" class="login-logo">
+  <div class="login-title">로그인</div>
+  <div class="login-desc">
+    로그인을 하시면 커뮤니티 및 기능을 이용하실 수 있습니다.<br>
+    두아이의 캠핑기록지를 통해 더 쉽게 캠핑지를 찾으세요!
   </div>
 
-  <div>
-    <label th:for="id">아이디 : </label><input type="text" th:field="*{id}">
-    <div class="field-err" th:each="err : ${#fields.errors('id')}">
-      <span th:text="${err}"></span>
+  <form action="" method="post" th:object="${loginForm}">
+    <div th:if="${#fields.hasGlobalErrors()}">
+      <div class="field-err" th:each="err : ${#fields.globalErrors()}">
+        <span th:text="${err}"></span>
+      </div>
     </div>
-  </div>
-  <div>
-    <label th:for="pwd">비밀번호 : </label><input type="password" th:field="*{pwd}">
-    <div class="field-err" th:each="err : ${#fields.errors('pwd')}">
-      <span th:text="${err}"></span>
-    </div>
-  </div>
 
-  <div><button>로그인</button></div>
-  <a href="/">뒤로가기</a>
-</form>
+    <div class="login-form-group">
+      <label th:for="id">아이디</label>
+      <input type="text" th:field="*{id}">
+      <div class="field-err" th:each="err : ${#fields.errors('id')}">
+        <span th:text="${err}"></span>
+      </div>
+    </div>
+
+    <div class="login-form-group">
+      <label th:for="pwd">비밀번호</label>
+      <input type="password" th:field="*{pwd}">
+      <div class="field-err" th:each="err : ${#fields.errors('pwd')}">
+        <span th:text="${err}"></span>
+      </div>
+    </div>
+
+    <button type="submit" class="login-button">로그인</button>
+
+    <div class="social-buttons">
+      <button type="button" class="kakao-btn">카카오 로그인</button>
+      <button type="button" class="naver-btn">네이버 로그인</button>
+    </div>
+
+    <a href="/" class="back-link">뒤로가기</a>
+  </form>
+</div>
 </body>
 </html>

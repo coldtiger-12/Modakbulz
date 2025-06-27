@@ -1,0 +1,131 @@
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('../fonts/Paperlogy-5Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+body {
+  background-color: #A4B465;
+  font-family: 'Paperlogy';
+  font-weight: 500;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.login-container {
+      max-width: 400px;
+      margin: 50px auto;
+      background-color: #F5ECD5;
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 100px;
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #6a794f;
+    }
+
+    .login-desc {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .login-form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .login-form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .login-form-group input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+
+    .field-err {
+      color: red;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 10px;
+      background-color: #84925a;
+      color: #fff;
+      font-weight: 600;
+      font-family: 'Paperlogy';
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    .login-button:hover {
+      background-color: #6a794f;
+    }
+
+    .social-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .social-buttons button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-family: 'Paperlogy';
+      border: none;
+      cursor: pointer;
+    }
+
+    .kakao-btn {
+      background-color: #ffe812;
+      color: #3c1e1e;
+    }
+
+    .naver-btn {
+      background-color: #1ec800;
+      color: white;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #fff;
+      text-decoration: none;
+      background-color: #A4B465;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+
+    .back-link:hover {
+      background-color: #8b9b4d;
+    }
