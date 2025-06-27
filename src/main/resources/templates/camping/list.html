@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>전체 캠핑장 목록</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <style>
+    .camping-list-container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+    .camping-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+    .camp-card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .camp-card img { width: 100%; height: 200px; object-fit: cover; }
+    .camp-card-body { padding: 15px; }
+    .camp-card-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
+    .camp-card-text { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+    .camp-card-link { display: inline-block; font-size: 0.9rem; color: #007bff; text-decoration: none; }
+    .pagination { display: flex; justify-content: center; align-items: center; margin-top: 40px; }
+    .pagination a, .pagination span { margin: 0 5px; padding: 8px 12px; border: 1px solid #ddd; text-decoration: none; color: #333; }
+    .pagination .active { font-weight: bold; background-color: #6a794f; color: white; border-color: #6a794f; }
+    .pagination .disabled { color: #ccc; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<header>
+</header>
+
+<div class="camping-list-container">
+  <h1>캠핑장 전체 목록</h1>
+
+  <div class="camping-grid" th:if="${campPage != null && campPage.hasContent()}">
+    <div class.="camp-card" th:each="camp : ${campPage.content}">
+      <img th:src="${camp.firstImageUrl != null ? camp.firstImageUrl : '/images/모닥불즈로고.png'}" alt="캠핑장 이미지">
+      <div class="camp-card-body">
+        <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
+        <a th:href="${camp.homepage}" target="_blank" class="camp-card-link" th:if="${camp.homepage}">홈페이지</a>
+      </div>
+    </div>
+  </div>
+  <div th:if="${campPage == null || !campPage.hasContent()}">
+    <p>등록된 캠핑장 정보가 없습니다.</p>
+  </div>
+
+  <div class="pagination" th:if="${campPage != null && campPage.totalPages > 1}">
+    <a th:href="@{/camping(page=0)}" th:classappend="${campPage.first} ? 'disabled'">처음</a>
+    <a th:if="${campPage.hasPrevious()}" th:href="@{/camping(page=${campPage.number - 1})}">이전</a>
+
+    <span th:each="pageNumber : ${#numbers.sequence(0, campPage.totalPages - 1)}"
+          th:if="${pageNumber >= campPage.number - 2 and pageNumber <= campPage.number + 2}">
+            <a th:href="@{/camping(page=${pageNumber})}"
+               th:text="${pageNumber + 1}"
+               th:classappend="${pageNumber == campPage.number} ? 'active'"></a>
+        </span>
+
+    <a th:if="${campPage.hasNext()}" th:href="@{/camping(page=${campPage.number + 1})}">다음</a>
+    <a th:href="@{/camping(page=${campPage.totalPages - 1})}" th:classappend="${campPage.last} ? 'disabled'">끝</a>
+  </div>
+</div>
+
+</body>
+</html>

@@ -93,7 +93,7 @@
     <section class="recommend box">
       <h3>
         추천 캠핑장
-        <span class="more">더보기</span>
+        <a th:href="@{/camping}" class="more">더보기</a>
       </h3>
       <div class="recommend-camps" th:if="${recommendCamps}">
         <div class="camp" th:each="camp : ${recommendCamps}">
