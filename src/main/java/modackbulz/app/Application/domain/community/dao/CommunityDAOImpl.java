@@ -72,4 +72,15 @@ public class CommunityDAOImpl implements CommunityDAO {
     String sql = "UPDATE COMMUNITY SET VIEW_C = TO_CHAR(TO_NUMBER(NVL(VIEW_C, '0')) + 1) WHERE CO_ID = :id";
     template.update(sql, Map.of("id", id));
   }
+
+  @Override
+  public List<Community> findRecentPosts(int count) {
+    String sql = """
+        SELECT * FROM (
+          SELECT * FROM COMMUNITY ORDER BY CREATED_AT DESC
+        ) WHERE ROWNUM <= :count
+        """;
+    Map<String, Object> param = Map.of("count",count);
+    return template.query(sql, param, BeanPropertyRowMapper.newInstance(Community.class));
+  }
 }

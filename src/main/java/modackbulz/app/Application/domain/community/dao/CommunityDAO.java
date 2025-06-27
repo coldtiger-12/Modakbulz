@@ -27,5 +27,8 @@ public interface CommunityDAO {
 
   // 게시글 조회수 증가 (VIEW_C + 1)
   void increaseViewCount(Long id);
+
+  // 최근 게시글 불러오기
+  List<Community> findRecentPosts(int count);
 }
 

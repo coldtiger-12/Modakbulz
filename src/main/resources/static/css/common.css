@@ -337,7 +337,10 @@ ul {
 li {
     margin-bottom: 8px;
 }
-
+a {
+    color: #000;
+    text-decoration: none;
+}
 /* 자유게시판 버튼 (임시) */
 .btn-community {
   display: inline-block;

@@ -3,6 +3,8 @@ package modackbulz.app.Application.web;
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
+import modackbulz.app.Application.domain.community.dao.CommunityDAO;
+import modackbulz.app.Application.entity.Community;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import java.util.List;
 public class HomeController {
 
   private final GoCampingService goCampingService;
+  private final CommunityDAO communityDAO;
 
   @GetMapping("/")
   public String home(Model model) {
@@ -23,6 +26,10 @@ public class HomeController {
 
     // 변환된 리스트를 모델에 추가합니다.
     model.addAttribute("recommendCamps", campList);
+
+    //커뮤니티 최근 글 5개 가져오기
+    List<Community> recentPosts = communityDAO.findRecentPosts(5);
+    model.addAttribute("recentPosts", recentPosts);
 
     return "index";
   }

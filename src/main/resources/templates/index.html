@@ -100,10 +100,9 @@
         <a class="more" href="/posts/community">더보기</a>
       </h3>
       <ul>
-        <li>여기 분위기 어때요??</li>
-        <li>방습매트 추천 좀</li>
-        <li>서울 근교 대형견 동반 추천</li>
-        <li>초보캠퍼 꿀팁</li>
+        <li th:each="post : ${recentPosts}">
+          <a th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
+        </li>
       </ul>
     </div>
   </div>

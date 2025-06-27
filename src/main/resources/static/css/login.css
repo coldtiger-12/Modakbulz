@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #A4B465;
+  background-color: #f5ecd5;
   font-family: 'Paperlogy';
   font-weight: 500;
   font-size: 16px;
@@ -18,7 +18,7 @@ body {
 .login-container {
       max-width: 400px;
       margin: 50px auto;
-      background-color: #F5ECD5;
+      background-color: #fff;
       border-radius: 15px;
       padding: 30px 40px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -35,7 +35,6 @@ body {
       font-size: 1.8rem;
       font-weight: 700;
       margin-bottom: 10px;
-      color: #6a794f;
     }
 
     .login-desc {
@@ -58,10 +57,11 @@ body {
 
     .login-form-group input {
       width: 100%;
-      padding: 8px 12px;
+      padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 0.95rem;
+      box-sizing: border-box
     }
 
     .field-err {
@@ -73,7 +73,7 @@ body {
     .login-button {
       width: 100%;
       padding: 10px;
-      background-color: #84925a;
+      background-color: #626F47;
       color: #fff;
       font-weight: 600;
       font-family: 'Paperlogy';
@@ -124,8 +124,4 @@ body {
       padding: 6px 12px;
       border-radius: 6px;
       transition: background-color 0.2s ease;
-    }
-
-    .back-link:hover {
-      background-color: #8b9b4d;
     }
