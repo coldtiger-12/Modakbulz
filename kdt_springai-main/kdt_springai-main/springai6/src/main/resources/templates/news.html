@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
+<div class="w-full max-w-xl p-6 bg-white rounded-lg shadow-lg">
+    <h1 class="text-4xl font-bold text-center mb-6 text-gray-800">해커뉴스</h1>
+    <div class="flex items-center bg-gray-100 rounded-lg shadow-md p-3">
+        <input id="newsQuery" type="text" placeholder="Search for news..."
+               class="flex-grow bg-transparent text-lg focus:outline-none placeholder-gray-400 text-gray-700 p-2"/>
+        <button id="searchBtn" class="ml-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400">
+            검색
+        </button>
+    </div>
+
+    <div id="loading" class="hidden flex justify-center mt-6">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="newsResult" class="mt-6 space-y-4">
+        <!-- 결과가 여기 표시됩니다. -->
+    </div>
+</div>
+
+<script>
+    document.getElementById("searchBtn").addEventListener("click", function () {
+        const query = document.getElementById("newsQuery").value;
+        const newsResult = document.getElementById("newsResult");
+        const loading = document.getElementById("loading");
+
+        // 검색 결과 영역 및 로딩 애니메이션 초기화
+        newsResult.innerHTML = '';
+        loading.classList.remove("hidden");
+
+        // 비동기 요청 처리
+        fetch('/news', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                request: query
+            })
+        })
+            .then(response => response.text())
+            .then(data => {
+                // 로딩 애니메이션 숨기기
+                loading.classList.add("hidden");
+
+                // 마크다운 텍스트를 HTML로 변환하여 표시
+                newsResult.innerHTML = marked.parse(data);
+            })
+            .catch(error => {
+                loading.classList.add("hidden");
+                newsResult.innerHTML = `<p class="text-red-500">Error loading news: ${error}</p>`;
+            });
+    });
+
+</script>
+</body>
+</html>

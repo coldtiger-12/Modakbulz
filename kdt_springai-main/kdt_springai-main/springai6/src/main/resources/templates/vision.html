@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 업로드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- marked.js를 최신 버전으로 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        pre {
+            white-space: pre-wrap; /* 줄바꿈을 허용 */
+            word-wrap: break-word; /* 긴 단어도 줄바꿈 */
+            overflow-x: auto;      /* 가로 스크롤을 필요 시 추가 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-4">이미지 업로드</h1>
+    <form id="uploadForm" class="flex flex-col space-y-4">
+        <input type="file" id="fileInput" name="file" accept="image/*" required class="border border-gray-300 p-2 rounded-md">
+
+        <!-- 이미지 미리보기 -->
+        <div id="uploadedImage" class="mt-4 hidden">
+            <h2 class="text-xl font-semibold mb-2">이미지:</h2>
+            <div class="p-4 bg-gray-50 border border-gray-300 rounded-md">
+                <img id="imagePreview" alt="업로드된 이미지" class="w-full h-auto">
+            </div>
+        </div>
+
+        <textarea id="messageInput" name="message" class="border border-gray-300 p-2 rounded-md" rows="3" placeholder="이미지 분석해줘"></textarea>
+        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+            ✨ 분석 ✨
+        </button>
+    </form>
+
+    <!-- 로딩 스피너 -->
+    <div id="loadingSpinner" class="mt-6 hidden">
+        <div class="flex items-center justify-center">
+            <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span class="ml-2 text-blue-500">처리 중...</span>
+        </div>
+    </div>
+
+    <!-- 분석 결과 표시 -->
+    <div id="resultSection" class="mt-6 hidden">
+        <h2 class="text-xl font-semibold mb-2">분석 결과:</h2>
+        <div id="resultText" class="p-4 bg-gray-50 border border-gray-300 rounded-md" style="word-wrap: break-word; overflow-wrap: break-word;"></div>
+    </div>
+
+    <!-- 오류 메시지 표시 -->
+    <div id="errorSection" class="mt-6 hidden">
+        <p id="errorMessage" class="p-4 bg-red-100 border border-red-300 text-red-700 rounded-md"></p>
+    </div>
+</div>
+
+<script>
+    // 이미지 미리보기를 위한 FileReader 사용
+    document.getElementById("fileInput").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            document.getElementById("uploadedImage").classList.remove("hidden");
+            document.getElementById("imagePreview").src = e.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 업로드 폼을 비동기로 처리하고 로딩 표시
+    document.getElementById("uploadForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // 로딩 스피너 표시
+        document.getElementById("loadingSpinner").classList.remove("hidden");
+
+        const fileInput = document.getElementById("fileInput");
+        const messageInput = document.getElementById("messageInput");
+        const formData = new FormData();
+
+        formData.append("file", fileInput.files[0]);
+        formData.append("message", messageInput.value);
+
+        fetch("/vision/upload", {
+            method: "POST",
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 로딩 스피너 숨기기
+                document.getElementById("loadingSpinner").classList.add("hidden");
+
+                // 결과가 있으면 분석 결과를 마크다운으로 표시
+                if (data.result) {
+                    document.getElementById("resultSection").classList.remove("hidden");
+                    document.getElementById("resultText").innerHTML = marked.parse(data.result);  // marked.parse로 변경
+                }
+
+                // 오류가 발생한 경우
+                if (data.error) {
+                    document.getElementById("errorSection").classList.remove("hidden");
+                    document.getElementById("errorMessage").textContent = data.error;
+                }
+            })
+            .catch(error => {
+                document.getElementById("loadingSpinner").classList.add("hidden");
+                document.getElementById("errorSection").classList.remove("hidden");
+                document.getElementById("errorMessage").textContent = "파일 업로드 중 오류가 발생했습니다.";
+            });
+    });
+</script>
+</body>
+</html>

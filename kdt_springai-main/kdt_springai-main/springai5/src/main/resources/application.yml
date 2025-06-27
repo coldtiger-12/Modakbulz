@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: springai5
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: huihui_ai/kanana-nano-abliterated
+
+
+
+
+
