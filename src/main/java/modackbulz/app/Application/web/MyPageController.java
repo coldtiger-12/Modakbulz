@@ -15,6 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Optional; // Optional 임포트 추가
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -23,16 +25,24 @@ public class MyPageController {
 
   private final MemberSVC memberSVC;
 
-  // 마이페이지 메인 화면
+  // 마이페이지 메인 화면 (수정됨)
   @GetMapping
-  public String myPage(HttpSession session, Model model) {
+  public String myPage(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     if (loginMember == null) {
       return "redirect:/login";
     }
 
-    Member member = memberSVC.findById(loginMember.getId())
-        .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+    Optional<Member> memberOptional = memberSVC.findById(loginMember.getId());
+
+    // DB에 회원 정보가 없으면 강제 로그아웃 후 로그인 페이지로 이동
+    if (memberOptional.isEmpty()) {
+      session.invalidate(); // 세션 무효화
+      redirectAttributes.addFlashAttribute("message", "세션이 만료되었거나 회원 정보가 존재하지 않습니다. 다시 로그인해주세요.");
+      return "redirect:/login";
+    }
+
+    Member member = memberOptional.get();
 
     EditForm editForm = new EditForm();
     editForm.setId(member.getId());
@@ -46,16 +56,24 @@ public class MyPageController {
     return "member/editForm";
   }
 
-  // 회원정보 수정 폼
+  // 회원정보 수정 폼 (수정됨)
   @GetMapping("/edit")
-  public String editForm(HttpSession session, Model model) {
+  public String editForm(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     if (loginMember == null) {
       return "redirect:/login";
     }
 
-    Member member = memberSVC.findById(loginMember.getId())
-        .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+    Optional<Member> memberOptional = memberSVC.findById(loginMember.getId());
+
+    // DB에 회원 정보가 없으면 강제 로그아웃 후 로그인 페이지로 이동
+    if (memberOptional.isEmpty()) {
+      session.invalidate(); // 세션 무효화
+      redirectAttributes.addFlashAttribute("message", "세션이 만료되었거나 회원 정보가 존재하지 않습니다. 다시 로그인해주세요.");
+      return "redirect:/login";
+    }
+
+    Member member = memberOptional.get();
 
     EditForm editForm = new EditForm();
     editForm.setId(member.getId());

@@ -69,7 +69,7 @@ public class CommunityDAOImpl implements CommunityDAO {
 
   @Override
   public void increaseViewCount(Long id) {
-    String sql = "UPDATE COMMUNITY SET VIEW_C = TO_CHAR(TO_NUMBER(NVL(VIEW_C, '0')) + 1) WHERE CO_ID = :id";
+    String sql = "UPDATE COMMUNITY SET VIEW_C = VIEW_C + 1 WHERE CO_ID = :id";
     template.update(sql, Map.of("id", id));
   }
 

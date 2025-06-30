@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,8 +36,16 @@ public class GoCampingService {
    */
   public Mono<List<GoCampingDto.Item>> getBasedList(int numOfRows) {
     return getCampingData(1, numOfRows)
-        .map(dto -> dto.getResponse().getBody().getItems().getItem());
+        .map(dto -> Optional.ofNullable(dto)
+            .map(GoCampingDto::getResponse)
+            .map(GoCampingDto.Response::getBody)
+            .map(GoCampingDto.Body::getItems)
+            .map(GoCampingDto.Items::getItem)
+            .orElse(Collections.emptyList()))
+        .doOnError(error -> log.error("GoCamping API 'getBasedList' 호출 중 오류 발생", error))
+        .onErrorResume(error -> Mono.just(Collections.emptyList()));
   }
+
 
   /**
    * 캠핑장 목록 페이지 (페이지네이션 적용)

@@ -22,20 +22,20 @@ public class Community {
   private String content;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-  private String viewC;
+  private int viewC;
 
-  // 조회수 getter (null-safe)
-  public int getViewCountAsInt() {
-    try {
-      return Integer.parseInt(Optional.ofNullable(viewC).orElse("0"));
-    } catch (NumberFormatException e) {
-      return 0;
-    }
-  }
-
-  // 조회수 증가
-  public void increaseViewCount() {
-    int newCount = getViewCountAsInt() + 1;
-    this.viewC = String.valueOf(newCount);
-  }
+//  // 조회수 getter (null-safe)
+//  public int getViewCountAsInt() {
+//    try {
+//      return Integer.parseInt(Optional.ofNullable(viewC).orElse("0"));
+//    } catch (NumberFormatException e) {
+//      return 0;
+//    }
+//  }
+//
+//  // 조회수 증가
+//  public void increaseViewCount() {
+//    int newCount = getViewCountAsInt() + 1;
+//    this.viewC = String.valueOf(newCount);
+//  }
 }
