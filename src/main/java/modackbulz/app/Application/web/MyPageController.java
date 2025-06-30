@@ -25,12 +25,25 @@ public class MyPageController {
 
   // 마이페이지 메인 화면
   @GetMapping
-  public String myPage(HttpSession session) {
+  public String myPage(HttpSession session, Model model) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     if (loginMember == null) {
       return "redirect:/login";
     }
-    return "member/mypage";
+
+    Member member = memberSVC.findById(loginMember.getId())
+        .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+
+    EditForm editForm = new EditForm();
+    editForm.setId(member.getId());
+    editForm.setNickname(member.getNickname());
+    editForm.setTel(member.getTel());
+    editForm.setRegion(member.getRegion());
+    editForm.setEmail(member.getEmail());
+
+    model.addAttribute("editForm", editForm);
+    model.addAttribute("editForm_Pwd", new EditForm_Pwd());
+    return "member/editForm";
   }
 
   // 회원정보 수정 폼
@@ -45,12 +58,14 @@ public class MyPageController {
         .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
 
     EditForm editForm = new EditForm();
+    editForm.setId(member.getId());
     editForm.setNickname(member.getNickname());
     editForm.setTel(member.getTel());
     editForm.setRegion(member.getRegion());
     editForm.setEmail(member.getEmail());
 
     model.addAttribute("editForm", editForm);
+    model.addAttribute("editForm_Pwd", new EditForm_Pwd());
     return "member/editForm";
   }
 
@@ -84,17 +99,6 @@ public class MyPageController {
     return "redirect:/mypage?success";
   }
 
-  // 비밀번호 변경 폼
-  @GetMapping("/password")
-  public String changePasswordForm(Model model, HttpSession session) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
-      return "redirect:/login";
-    }
-    model.addAttribute("editForm_Pwd", new EditForm_Pwd());
-    return "member/editForm_pwd";
-  }
-
   // 비밀번호 변경 처리
   @PostMapping("/password")
   public String changePassword(
@@ -122,6 +126,33 @@ public class MyPageController {
       bindingResult.reject("changePwdFail", "비밀번호 변경에 실패했습니다.");
       return "member/editForm_pwd";
     }
+  }
+
+  // 내가 찜한 캠핑장
+  @GetMapping("/likes")
+  public String likeCampPage(){
+    return "member/likeCamp";
+  }
+
+  // 내가 쓴 게시글
+  @GetMapping("/posts")
+  public String myPosts(HttpSession session, Model model) {
+    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+    if (loginMember == null) {
+      return "redirect:/login";
+    }
+    return "member/myPosts";
+  }
+
+  // 문의사항 목록 화면
+  @GetMapping("/inquiry")
+  public String myInquiries(HttpSession session, Model model) {
+    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+    if (loginMember == null) {
+      return "redirect:/login";
+    }
+
+    return "member/inquiry";
   }
 
   // 회원 탈퇴 처리

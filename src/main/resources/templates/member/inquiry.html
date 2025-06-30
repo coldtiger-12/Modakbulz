@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/mypage.css}">
+</head>
+<body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<div class="mypage-container">
+  <!-- 사이드 메뉴 -->
+  <aside class="mypage-sidebar">
+    <ul>
+      <li><a href="/mypage/edit">회원정보 수정</a></li>
+      <li><a href="/mypage/likes">찜한 캠핑장</a></li>
+      <li><a href="/mypage/posts">내가 쓴 게시글</a></li>
+      <li class="now"><a href="/mypage/inquiry">문의사항</a></li>
+    </ul>
+  </aside>
+</div>
+</body>
+</html>
