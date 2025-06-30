@@ -129,20 +129,20 @@ public class MemberDAOImpl implements MemberDAO {
     int affected = template.update(sql, param);
     return affected == 1;
   }
-
   @Override
   public boolean updateMember(Member member) {
     String sql = "UPDATE MEMBER SET " +
         "TEL = :tel, " +
         "NICKNAME = :nickname, " +
-        "REGION = :region " +
+        "REGION = :region, " + // 쉼표 추가
+        "EMAIL = :email " + // 이메일 업데이트 추가
         "WHERE MEMBER_ID = :memberId";
 
     Map<String, Object> param = new HashMap<>();
-    param.put("pwd", member.getPwd());
     param.put("tel", member.getTel());
     param.put("nickname", member.getNickname());
     param.put("region", member.getRegion());
+    param.put("email", member.getEmail()); // 파라미터 추가
     param.put("memberId", member.getMemberId());
 
     int updated = template.update(sql, param);

@@ -6,16 +6,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
 import modackbulz.app.Application.entity.Member;
+import modackbulz.app.Application.global.service.EmailService;
 import modackbulz.app.Application.web.form.login.LoginMember;
 import modackbulz.app.Application.web.form.member.EditForm;
 import modackbulz.app.Application.web.form.member.EditForm_Pwd;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Optional; // Optional 임포트 추가
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @Controller
@@ -24,6 +28,7 @@ import java.util.Optional; // Optional 임포트 추가
 public class MyPageController {
 
   private final MemberSVC memberSVC;
+  private final EmailService emailService; // EmailService 주입
 
   // 마이페이지 메인 화면 (수정됨)
   @GetMapping
@@ -99,6 +104,13 @@ public class MyPageController {
       return "redirect:/login";
     }
 
+    // 이메일 변경 시 인증번호 확인
+    String sessionAuthCode = (String) session.getAttribute("authCode");
+    if (editForm.getAuthCode() != null && !editForm.getAuthCode().equals(sessionAuthCode)) {
+      bindingResult.rejectValue("authCode", "invalid", "인증번호가 일치하지 않습니다.");
+    }
+
+
     if (bindingResult.hasErrors()) {
       return "member/editForm";
     }
@@ -108,12 +120,16 @@ public class MyPageController {
     member.setNickname(editForm.getNickname());
     member.setTel(editForm.getTel());
     member.setRegion(editForm.getRegion());
+    member.setEmail(editForm.getEmail());
 
     boolean updated = memberSVC.updateMember(member);
     if (!updated) {
       bindingResult.reject("updateFail", "회원정보 수정에 실패했습니다.");
       return "member/editForm";
     }
+
+    // 사용한 인증번호 세션에서 제거
+    session.removeAttribute("authCode");
     return "redirect:/mypage?success";
   }
 
@@ -145,6 +161,42 @@ public class MyPageController {
       return "member/editForm_pwd";
     }
   }
+
+  /**
+   * 이메일 인증번호 발송
+   */
+  @PostMapping("/email/verification-requests")
+  public ResponseEntity<String> sendVerificationEmail(@RequestBody Map<String, String> payload, HttpSession session) {
+    String email = payload.get("email");
+    String authCode = createAuthCode();
+
+    try {
+      // 이메일 발송
+      String subject = "모닥불즈 이메일 인증번호 입니다.";
+      String text = "인증번호: " + authCode;
+      emailService.sendEmail(email, subject, text);
+
+      // 인증번호를 세션에 저장
+      session.setAttribute("authCode", authCode);
+      session.setMaxInactiveInterval(5 * 60); // 세션 유효시간 5분
+
+      return ResponseEntity.ok("인증번호가 발송되었습니다.");
+    } catch (Exception e) {
+      log.error("이메일 발송 실패", e);
+      return ResponseEntity.internalServerError().body("인증번호 발송에 실패했습니다.");
+    }
+  }
+
+  /**
+   * 인증번호 생성
+   * @return 6자리 숫자 인증번호
+   */
+  private String createAuthCode() {
+    Random random = new Random();
+    int code = 100000 + random.nextInt(900000);
+    return String.valueOf(code);
+  }
+
 
   // 내가 찜한 캠핑장
   @GetMapping("/likes")

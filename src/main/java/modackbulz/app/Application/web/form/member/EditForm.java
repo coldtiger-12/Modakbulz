@@ -26,4 +26,6 @@ public class EditForm {
   @Email(message = "올바른 이메일 형식이 아닙니다.")
   @Size(max = 30, message = "이메일은 최대 30자까지 입력 가능합니다.")
   private String email;
+
+  private String authCode; // 인증번호 필드 추가
 }
