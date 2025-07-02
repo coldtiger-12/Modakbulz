@@ -55,6 +55,11 @@
           <a th:href="@{/camping/search(theme='아이와함께')}">#아이와함께</a>
           <a th:href="@{/camping/search(theme='애견동반')}">#애견동반</a>
           <a th:href="@{/camping/search(theme='불멍')}">#불멍</a>
+        <div class="tags" th:if="${hashtags != null and not #lists.isEmpty(hashtags)}">
+          <a th:each="tag : ${hashtags}"
+             th:href="@{/camping/search(theme=${tag})}"
+             th:text="'#' + ${tag}"
+             class="tag-link"></a>
         </div>
       </section>
     </div>
