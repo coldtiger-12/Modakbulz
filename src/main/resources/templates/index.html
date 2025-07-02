@@ -47,9 +47,11 @@
           </div>
         </form>
 
-        <div class="tags">
-          <span>#노지</span><span>#근교</span><span>#오토캠핑</span>
-          <span>#조용한</span><span>#아이와함께</span><span>#애견동반</span><span>#불멍</span>
+        <div class="tags" th:if="${hashtags != null and not #lists.isEmpty(hashtags)}">
+          <a th:each="tag : ${hashtags}"
+             th:href="@{/camping/search(theme=${tag})}"
+             th:text="'#' + ${tag}"
+             class="tag-link"></a>
         </div>
       </section>
     </div>

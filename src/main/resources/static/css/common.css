@@ -205,9 +205,10 @@ header {
     flex-wrap: wrap;
     gap: 10px 5px;
 }
-.search-area .tags span {
+.search-area .tags a {
     background-color: #f9f3e7;
     color: #7a8a5f;
+    text-decoration: none;
     padding: 5px 14px;
     border-radius: 20px;
     margin-right: 8px;
@@ -301,7 +302,7 @@ header {
   color: #555;
 }
 
-a {
+.community-list a {
     color: #000;
     text-decoration: none;
 }
