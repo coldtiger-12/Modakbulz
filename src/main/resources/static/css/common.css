@@ -159,6 +159,22 @@ header {
     align-items: stretch;
     gap: 30px;
 }
+.search-area .tags a {
+    background-color: #f9f3e7;
+    color: #7a8a5f;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-right: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.search-area .tags a:hover {
+    background-color: #eaddc0;
+}
 .form-fields {
     flex: 1;
     max-width: 900px;
