@@ -98,26 +98,25 @@ public class GoCampingService {
   public Mono<GoCampingDto.Item> getCampDetail(String contentId) {
     // searchList API를 사용하여 contentId로 특정 캠핑장 정보를 조회합니다.
     return getCampingData("/searchList", contentId, 1, 1)
-        .map(dto -> {
-          // 응답이 유효하고, 아이템 목록이 비어있지 않은지 확인합니다.
-          if (dto.getResponse() != null && dto.getResponse().getBody() != null &&
-              dto.getResponse().getBody().getItems() != null &&
-              !dto.getResponse().getBody().getItems().getItem().isEmpty()) {
-            // 첫 번째 아이템을 반환합니다.
-            return dto.getResponse().getBody().getItems().getItem().get(0);
-          }
-          // 유효한 결과가 없으면 null을 반환하도록 합니다.
-          return null;
+        .flatMap(dto -> {
+          // API 응답 구조를 안전하게 탐색하고, 결과가 없으면 비어있는 Mono를 반환하여 오류를 방지합니다.
+          return Mono.justOrEmpty(Optional.ofNullable(dto)
+              .map(GoCampingDto::getResponse)
+              .map(GoCampingDto.Response::getBody)
+              .map(GoCampingDto.Body::getItems)
+              .map(GoCampingDto.Items::getItem)
+              .filter(list -> !list.isEmpty()) // 리스트가 비어있지 않은지 확인
+              .map(list -> list.get(0)));      // 첫 번째 아이템을 안전하게 가져옴
         })
-        // API 호출 중 어떤 에러가 발생했는지 로그를 남기고, null을 반환하여 앱이 멈추지 않게 합니다.
+        // API 호출 중 어떤 에러가 발생했는지 로그를 남기고, 비어있는 Mono를 반환하여 앱이 멈추지 않게 합니다.
         .onErrorResume(error -> {
           log.error("GoCamping API 상세 정보 호출 중 에러 발생 (contentId: {}): ", contentId, error);
-          return Mono.justOrEmpty(null); // 에러 발생 시 비어있는(null) Mono 객체를 반환
+          return Mono.empty(); // 에러 발생 시 비어있는 Mono 객체를 반환
         });
   }
 
   /**
-   * GoCamping API 호출 공통 메서드 (수정됨)
+   * GoCamping API 호출 공통 메서드
    */
   private Mono<GoCampingDto> getCampingData(String path, String keyword, int numOfRows, int pageNo) {
     log.info("Requesting GoCamping API: path={}, keyword={}, pageNo={}, numOfRows={}", path, keyword, pageNo, numOfRows);
