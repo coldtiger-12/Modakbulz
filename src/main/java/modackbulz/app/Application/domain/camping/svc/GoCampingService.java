@@ -35,7 +35,7 @@ public class GoCampingService {
    * 메인페이지 추천 캠핑장 목록 (기존 메서드)
    */
   public Mono<List<GoCampingDto.Item>> getBasedList(int numOfRows) {
-    return getCampingData(1, numOfRows)
+    return getCampingData("/basedList", "", numOfRows, 1) // path, keyword, numOfRows, pageNo
         .map(dto -> Optional.ofNullable(dto)
             .map(GoCampingDto::getResponse)
             .map(GoCampingDto.Response::getBody)
@@ -46,15 +46,14 @@ public class GoCampingService {
         .onErrorResume(error -> Mono.just(Collections.emptyList()));
   }
 
-
   /**
    * 캠핑장 목록 페이지 (페이지네이션 적용)
    */
   public Mono<PageImpl<GoCampingDto.Item>> getCampListPage(Pageable pageable) {
-    int pageNo = pageable.getPageNumber() + 1; // API는 페이지 번호가 1부터 시작
+    int pageNo = pageable.getPageNumber() + 1;
     int numOfRows = pageable.getPageSize();
 
-    return getCampingData(pageNo, numOfRows)
+    return getCampingData("/basedList", "", numOfRows, pageNo)
         .map(dto -> {
           List<GoCampingDto.Item> items = Collections.emptyList();
           int totalCount = 0;
@@ -71,64 +70,69 @@ public class GoCampingService {
   }
 
   /**
-   * GoCamping API 호출 공통 메서드
-   */
-  private Mono<GoCampingDto> getCampingData(int pageNo, int numOfRows) {
-    log.info("Requesting GoCamping API: pageNo={}, numOfRows={}", pageNo, numOfRows);
-    return webClient.get()
-        .uri(uriBuilder -> uriBuilder
-            .path("/basedList")
-            .queryParam("serviceKey", serviceKey)
-            .queryParam("numOfRows", numOfRows)
-            .queryParam("pageNo", pageNo)
-            .queryParam("MobileOS", "ETC")
-            .queryParam("MobileApp", "Modakbulz")
-            .queryParam("_type", "json")
-            .build())
-        .retrieve()
-        .bodyToMono(GoCampingDto.class);
-  }
-
-  /**
    * 키워드(검색어)로 캠핑장 목록을 검색하는 메서드
-   *
-   * @param keyword 검색어 (캠핑장명, 지역명 등)
-   * @param pageable 페이지 정보 (페이지 번호, 사이즈 등)
-   * @return 검색 결과를 포함한 페이지 객체 (Mono로 비동기 반환)
    */
   public Mono<PageImpl<GoCampingDto.Item>> searchCampList(String keyword, Pageable pageable) {
-    int pageNo = pageable.getPageNumber() + 1; // API의 pageNo는 1부터 시작
-    int numOfRows = pageable.getPageSize();    // 한 페이지에 가져올 항목 수
+    int pageNo = pageable.getPageNumber() + 1;
+    int numOfRows = pageable.getPageSize();
 
-    return webClient.get()
-        .uri(uriBuilder -> uriBuilder
-            .path("/searchList")                         // 고캠핑 API의 검색용 엔드포인트
-            .queryParam("serviceKey", serviceKey)        // 인증키
-            .queryParam("keyword", keyword)              // 검색어
-            .queryParam("numOfRows", numOfRows)          // 페이지당 항목 수
-            .queryParam("pageNo", pageNo)                // 페이지 번호
-            .queryParam("MobileOS", "ETC")               // 고정값
-            .queryParam("MobileApp", "Modakbulz")        // 앱 이름
-            .queryParam("_type", "json")                 // 응답 형식
-            .build())
-        .retrieve()
-        .bodyToMono(GoCampingDto.class)                  // JSON → DTO로 변환
+    return getCampingData("/searchList", keyword, numOfRows, pageNo)
         .map(dto -> {
           List<GoCampingDto.Item> items = Collections.emptyList();
           int totalCount = 0;
-
-          // 응답 객체가 정상적으로 왔는지 확인하고, 데이터 꺼내기
           if (dto.getResponse() != null && dto.getResponse().getBody() != null) {
             if (dto.getResponse().getBody().getItems() != null) {
               items = dto.getResponse().getBody().getItems().getItem();
             }
             totalCount = dto.getResponse().getBody().getTotalCount();
           }
-
-          // PageImpl 객체로 반환
           return new PageImpl<>(items, pageable, totalCount);
         })
         .doOnError(error -> log.error("Error while calling GoCamping search API", error))
-        .onErrorReturn(new PageImpl<>(Collections.emptyList(), pageable, 0)); // 에러 시 빈 결과 반환
+        .onErrorReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
+  }
+
+  /**
+   * contentId로 캠핑장 상세 정보를 조회하는 메서드 (500 에러 해결을 위해 수정된 부분)
+   */
+  public Mono<GoCampingDto.Item> getCampDetail(String contentId) {
+    // searchList API를 사용하여 contentId로 특정 캠핑장 정보를 조회합니다.
+    return getCampingData("/searchList", contentId, 1, 1)
+        .map(dto -> {
+          // 응답이 유효하고, 아이템 목록이 비어있지 않은지 확인합니다.
+          if (dto.getResponse() != null && dto.getResponse().getBody() != null &&
+              dto.getResponse().getBody().getItems() != null &&
+              !dto.getResponse().getBody().getItems().getItem().isEmpty()) {
+            // 첫 번째 아이템을 반환합니다.
+            return dto.getResponse().getBody().getItems().getItem().get(0);
+          }
+          // 유효한 결과가 없으면 null을 반환하도록 합니다.
+          return null;
+        })
+        // API 호출 중 어떤 에러가 발생했는지 로그를 남기고, null을 반환하여 앱이 멈추지 않게 합니다.
+        .onErrorResume(error -> {
+          log.error("GoCamping API 상세 정보 호출 중 에러 발생 (contentId: {}): ", contentId, error);
+          return Mono.justOrEmpty(null); // 에러 발생 시 비어있는(null) Mono 객체를 반환
+        });
+  }
+
+  /**
+   * GoCamping API 호출 공통 메서드 (수정됨)
+   */
+  private Mono<GoCampingDto> getCampingData(String path, String keyword, int numOfRows, int pageNo) {
+    log.info("Requesting GoCamping API: path={}, keyword={}, pageNo={}, numOfRows={}", path, keyword, pageNo, numOfRows);
+    return webClient.get()
+        .uri(uriBuilder -> uriBuilder
+            .path(path)
+            .queryParam("serviceKey", serviceKey)
+            .queryParam("numOfRows", numOfRows)
+            .queryParam("pageNo", pageNo)
+            .queryParam("MobileOS", "ETC")
+            .queryParam("MobileApp", "Modakbulz")
+            .queryParam("_type", "json")
+            .queryParamIfPresent("keyword", Optional.ofNullable(keyword).filter(s -> !s.isBlank()))
+            .build())
+        .retrieve()
+        .bodyToMono(GoCampingDto.class);
   }
 }

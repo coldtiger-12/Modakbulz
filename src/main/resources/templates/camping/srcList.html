@@ -9,16 +9,13 @@
   <link rel="stylesheet" th:href="@{/css/camp.css}">
 </head>
 <body>
-<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
 <div class="camping-list-container">
   <h1>캠핑장 & 글램핑장 검색 목록</h1>
-  <!-- 검색창 -->
   <form th:action="@{/camping/search}" method="get" class="search-form">
     <div class="search-fields">
       <div class="form-row">
@@ -36,31 +33,32 @@
     </div>
     <button type="submit" class="search-btn"></button>
   </form>
-  <!-- 검색 결과 -->
+
   <div class="camping-grid" th:if="${campPage != null && campPage.hasContent()}">
     <div class="camp-card" th:each="camp : ${campPage.content}"
          th:attr="data-content-id=${camp.contentId},
                       data-faclt-nm=${camp.facltNm},
                       data-addr1=${camp.addr1},
                       data-image-url=${camp.firstImageUrl}">
-
-      <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+      <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+        <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+      </a>
 
       <button class="scrap-btn">☆</button>
 
       <div class="camp-card-body">
-        <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+          <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        </a>
         <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
       </div>
     </div>
   </div>
 
-  <!-- 결과 없을 경우-->
   <div th:if="${campPage == null or campPage.empty}">
     <p>검색 결과가 없습니다.</p>
   </div>
 
-  <!-- 페이징 -->
   <div class="pagination" th:if="${campPage != null && campPage.totalPages > 1}">
     <a th:href="@{/camping/search(page=0, keyword=${keyword}, region=${region}, theme=${theme})}"
        th:classappend="${campPage.first} ? 'disabled'">처음</a>
@@ -73,7 +71,7 @@
     <a th:href="@{/camping/search(page=${pageNumber}, keyword=${keyword}, region=${region}, theme=${theme})}"
        th:text="${pageNumber + 1}"
        th:classappend="${pageNumber == campPage.number} ? 'active'"></a>
-  </span>
+    </span>
 
     <a th:if="${campPage.hasNext()}"
        th:href="@{/camping/search(page=${campPage.number + 1}, keyword=${keyword}, region=${region}, theme=${theme})}">다음</a>
@@ -82,14 +80,14 @@
        th:classappend="${campPage.last} ? 'disabled'">끝</a>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
       const scrapButtons = document.querySelectorAll('.scrap-btn');
 
       scrapButtons.forEach(button => {
           button.addEventListener('click', async (event) => {
-              // 로그인 상태 확인 (Thymeleaf의 인라인 스크립팅 활용)
-              const isLoggedIn = '[[${session.loginMember}]]' ? true : false;
+              const isLoggedIn = /*[[${session.loginMember != null}]]*/ false;
               if (!isLoggedIn) {
                   alert('로그인이 필요한 기능입니다.');
                   window.location.href = '/login';
@@ -123,13 +121,12 @@
 
                   const result = await response.json();
 
-                  // 서버 응답(isScrapped)에 따라 버튼 스타일과 아이콘 변경
                   if (result.isScrapped) {
                       event.target.classList.add('scrapped');
-                      event.target.textContent = '★'; // 채워진 별
+                      event.target.textContent = '★';
                   } else {
                       event.target.classList.remove('scrapped');
-                      event.target.textContent = '☆'; // 빈 별
+                      event.target.textContent = '☆';
                   }
 
               } catch (error) {

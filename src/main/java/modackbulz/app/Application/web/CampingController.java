@@ -10,8 +10,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional; // 이 import 문을 꼭 추가해주세요.
 
 @Controller
 @RequiredArgsConstructor
@@ -22,10 +25,9 @@ public class CampingController {
 
   @GetMapping
   public String campList(@PageableDefault(size = 9, sort = "facltNm") Pageable pageable, Model model) {
-    // block()을 사용하여 비동기 결과를 동기적으로 기다립니다.
     Page<GoCampingDto.Item> campPage = goCampingService.getCampListPage(pageable).block();
     model.addAttribute("campPage", campPage);
-    return "camping/list"; // templates/camping/list.html 뷰를 렌더링
+    return "camping/list";
   }
 
   @GetMapping("/search")
@@ -43,17 +45,14 @@ public class CampingController {
     PageImpl<GoCampingDto.Item> campPage;
 
     if (isEmptySearch) {
-      // 조건이 하나도 없으면 전체 목록
       campPage = goCampingService.getCampListPage(pageable).block();
     } else {
-      // 조건을 하나라도 넣으면 검색
       StringBuilder sb = new StringBuilder();
       if (keyword != null && !keyword.isBlank()) sb.append(keyword).append(" ");
       if (region != null && !region.isBlank()) sb.append(region).append(" ");
       if (theme != null && !theme.isBlank()) sb.append(theme);
 
       String finalKeyword = sb.toString().trim();
-
       campPage = goCampingService.searchCampList(finalKeyword, pageable).block();
     }
 
@@ -63,5 +62,23 @@ public class CampingController {
     model.addAttribute("theme", theme);
 
     return "camping/srcList";
+  }
+
+  // 500 에러를 해결하기 위해 수정된 부분입니다.
+  @GetMapping("/{contentId}")
+  public String campDetail(@PathVariable("contentId") String contentId, Model model) {
+    // block()의 결과가 null일 수 있으므로 Optional로 안전하게 감싸줍니다.
+    Optional<GoCampingDto.Item> campOptional = Optional.ofNullable(goCampingService.getCampDetail(contentId).block());
+
+    // Optional 객체에 값이 실제로 들어있는지(null이 아닌지) 확인합니다.
+    if (campOptional.isPresent()) {
+      // 값이 있으면 모델에 담아서 detail.html로 전달합니다.
+      model.addAttribute("camp", campOptional.get());
+    } else {
+      // 값이 없으면(null이면) 모델에 null을 담습니다.
+      // 이렇게 하면 detail.html의 th:if 조건문이 이를 처리하여 500 에러 대신 "정보 없음" 페이지를 보여줍니다.
+      model.addAttribute("camp", null);
+    }
+    return "camping/detail";
   }
 }

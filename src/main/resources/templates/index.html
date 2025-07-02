@@ -66,11 +66,13 @@
       <div class="recommend-scroll">
         <div class="recommend-camps" th:if="${recommendCamps}">
           <div class="camp" th:each="camp : ${recommendCamps}">
-            <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
-              ? camp.firstImageUrl
-              : '/images/임시사진.png'}"
-                 alt="캠핑장 이미지">
-            <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
+            <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+              <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
+        ? camp.firstImageUrl
+        : '/images/임시사진.png'}"
+                   alt="캠핑장 이미지">
+              <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
+            </a>
             <p th:text="${camp.lineIntro}"></p>
           </div>
         </div>

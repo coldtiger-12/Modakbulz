@@ -41,5 +41,7 @@ public class GoCampingDto {
     private String resveUrl; // 예약 페이지
     private String sbrsCl; // 부대시설
     private String themaEnvrnCl; // 테마환경
+    private String mapX; // 경도
+    private String mapY; // 위도
   }
 }

@@ -9,11 +9,9 @@
 </head>
 <body>
 
-<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
 <div class="camping-list-container">
@@ -26,17 +24,22 @@
                       data-addr1=${camp.addr1},
                       data-image-url=${camp.firstImageUrl}">
 
-      <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+      <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+        <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+      </a>
 
       <button class="scrap-btn">☆</button>
 
       <div class="camp-card-body">
-        <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+          <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        </a>
         <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
         <a th:href="${camp.homepage}" target="_blank" class="camp-card-link" th:if="${camp.homepage != null && !camp.homepage.isEmpty()}">홈페이지</a>
       </div>
     </div>
   </div>
+
   <div th:if="${campPage == null || !campPage.hasContent()}">
     <p>등록된 캠핑장 정보가 없습니다.</p>
   </div>
@@ -64,8 +67,7 @@
 
       scrapButtons.forEach(button => {
           button.addEventListener('click', async (event) => {
-              // 로그인 상태 확인 (Thymeleaf의 인라인 스크립팅 활용)
-              const isLoggedIn = '[[${session.loginMember}]]' ? true : false;
+              const isLoggedIn = '[[${session.loginMember != null}]]' ? true : false;
               if (!isLoggedIn) {
                   alert('로그인이 필요한 기능입니다.');
                   window.location.href = '/login';
@@ -87,7 +89,7 @@
                       body: JSON.stringify(scrapData)
                   });
 
-                  if (response.status === 401) { // Unauthorized
+                  if (response.status === 401) {
                       alert('세션이 만료되었거나 로그인이 필요합니다.');
                       window.location.href = '/login';
                       return;
@@ -99,13 +101,12 @@
 
                   const result = await response.json();
 
-                  // 서버 응답(isScrapped)에 따라 버튼 스타일과 아이콘 변경
                   if (result.isScrapped) {
                       event.target.classList.add('scrapped');
-                      event.target.textContent = '★'; // 채워진 별
+                      event.target.textContent = '★';
                   } else {
                       event.target.classList.remove('scrapped');
-                      event.target.textContent = '☆'; // 빈 별
+                      event.target.textContent = '☆';
                   }
 
               } catch (error) {
