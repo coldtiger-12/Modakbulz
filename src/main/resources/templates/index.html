@@ -22,7 +22,7 @@
   <!-- 상단 -->
   <div class="top-area">
 
-    <!-- 검색 + 공지 -->
+    <!-- 검색 + 커뮤니티 -->
     <div class="left-area">
       <section class="search-area">
         <h2>캠핑장 & 글램핑장</h2>
@@ -57,48 +57,6 @@
           <a th:href="@{/camping/search(theme='불멍')}">#불멍</a>
         </div>
       </section>
-      <div class="notice">
-        공지 <span>[신규] 업데이트 안내</span>
-      </div>
-    </div>
-
-    <!-- 추천 캠핑장 -->
-    <section class="recommend box">
-      <h3>
-        추천 캠핑장
-        <a th:href="@{/camping}" class="more">더보기</a>
-      </h3>
-      <div class="recommend-scroll">
-        <div class="recommend-camps" th:if="${recommendCamps}">
-          <div class="camp" th:each="camp : ${recommendCamps}">
-            <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
-              <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
-        ? camp.firstImageUrl
-        : '/images/임시사진.png'}"
-                   alt="캠핑장 이미지">
-              <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
-            </a>
-            <p th:text="${camp.lineIntro}"></p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <!-- 하단 리뷰 & 커뮤니티 -->
-  <div class="bottom-area">
-    <div class="review box">
-      <h3>
-        리뷰
-        <span class="more">더보기</span>
-      </h3>
-      <ul>
-        <li>경주 다녀왔는데 좋았어요</li>
-        <li>너무 더웠어요ㅠㅠ</li>
-        <li>부산 애견동반 추천!</li>
-        <li>여기 좀 아닌듯</li>
-      </ul>
     </div>
 
     <div class="community box">
@@ -106,15 +64,39 @@
         커뮤니티
         <a class="more" href="/posts/community">더보기</a>
       </h3>
-      <ul>
+      <ul class="community-list">
         <li th:each="post : ${recentPosts}">
           <a th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
+          <span class="post-meta">
+            <span class="post-writer" th:text="${post.writer}">작성자</span> |
+            <span class="post-date" th:text="${#temporals.format(post.createdAt, 'MM-dd')}">07-02</span> |
+            <span class="post-views">조회수 <span th:text="${post.viewC}">0</span></span>
+          </span>
         </li>
       </ul>
     </div>
   </div>
 
-</div>
+  <!-- 하단 추천 캠핑장 -->
 
+  <section class="recommend box">
+    <h3>
+      추천 캠핑장
+      <a th:href="@{/camping}" class="more">더보기</a>
+    </h3>
+    <div class="recommend-scroll">
+      <div class="recommend-camps" th:if="${recommendCamps}">
+        <div class="camp" th:each="camp : ${recommendCamps}">
+          <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
+            ? camp.firstImageUrl
+            : '/images/임시사진.png'}"
+               alt="캠핑장 이미지">
+          <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
+          <p th:text="${camp.lineIntro}"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 </body>
 </html>
