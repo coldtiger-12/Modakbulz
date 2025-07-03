@@ -6,221 +6,57 @@
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/camp.css}">
   <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
-  <style>
-    /* 기존 스타일 유지 */
-    body {
-      margin: 0;
-      font-family: 'SCDream', sans-serif;
-      background-color: #fcf3de;
-      color: #333;
-      user-select: none;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 0 20px 40px;
-      box-sizing: border-box;
-    }
-    .business-name {
-      margin-top: 20px;
-      font-weight: 900;
-      font-size: 2rem;
-      background: #c1c1c1;
-      width: fit-content;
-      padding: 5px 15px;
-      border-radius: 4px;
-      user-select: text;
-    }
-    .info-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      user-select: none;
-    }
-    .info-table th, .info-table td {
-      border-bottom: 1px solid black;
-      padding: 8px 12px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .info-table th {
-      border-top: 1px solid black;
-    }
-    .main-grid {
-      display: grid;
-      grid-template-columns: 2fr 3fr;
-      grid-template-rows: auto auto auto;
-      grid-gap: 15px 20px;
-      margin-top: 20px;
-      position: relative; /* 스크랩 버튼을 위해 추가 */
-    }
-    .image-slider {
-      grid-column: 1 / 2;
-      grid-row: 1 / 3;
-      position: relative;
-      background: #999;
-      border-radius: 6px;
-      overflow: hidden;
-      height: 220px;
-    }
-    .image-slider img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      display: block;
-      user-select: none;
-    }
-    .address-box, .keywords, .facility-box, .map-box {
-      background: #c1c1c1;
-      border-radius: 6px;
-      padding: 15px;
-    }
-    .review-section {
-        grid-column: 1 / 3; /* 전체 너비 차지 */
-        margin-top: 20px;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-    }
-    .review-section h3 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
-  </style>
 </head>
 <body>
-
+<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
-<div class="container" th:if="${camp}">
-  <div class="business-name" th:text="${camp.facltNm}">업장이름</div>
+<!-- 메인 페이지 -->
+<div class="detail-container" th:if="${camp}">
+  <div class="detail-header">
+    <h1 th:text="${camp.facltNm}">캠핑장 이름</h1>
+    <p th:text="${camp.lineIntro}">한 줄 소개</p>
+  </div>
 
-  <table class="info-table" aria-label="업장 정보">
-    <thead>
-    <tr>
-      <th>업장 유형</th>
-      <th>전화번호</th>
-      <th>홈페이지</th>
-      <th>예약</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td th:text="${camp.themaEnvrnCl}">캠핑 글램핑 카라반</td>
-      <td th:text="${camp.tel}">010-1234-5678</td>
-      <td><a th:if="${camp.homepage}" th:href="${camp.homepage}" target="_blank">바로가기</a></td>
-      <td><a th:if="${camp.resveUrl}" th:href="${camp.resveUrl}" target="_blank">예약하기</a></td>
-    </tr>
-    </tbody>
-  </table>
+  <img class="detail-main-image"
+       th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}"
+       alt="캠핑장 대표 이미지">
 
-  <div class="main-grid" th:attr="data-content-id=${camp.contentId}, data-faclt-nm=${camp.facltNm}, data-addr1=${camp.addr1}, data-image-url=${camp.firstImageUrl}">
-    <button class="scrap-btn">☆</button>
-
-    <div class="image-slider">
-      <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="업장 사진" id="slider-image" />
+  <div class="info-grid">
+    <div class="info-box">
+      <h3>기본 정보</h3>
+      <ul>
+        <li><strong>주소</strong> <span th:text="${camp.addr1}"></span></li>
+        <li><strong>전화번호</strong> <span th:text="${camp.tel}"></span></li>
+        <li><strong>홈페이지</strong>
+          <a th:if="${camp.homepage != null and !camp.homepage.isEmpty()}" th:href="${camp.homepage}" target="_blank">바로가기</a>
+          <span th:unless="${camp.homepage != null and !camp.homepage.isEmpty()}">정보 없음</span>
+        </li>
+        <li><strong>예약</strong>
+          <a th:if="${camp.resveUrl != null and !camp.resveUrl.isEmpty()}" th:href="${camp.resveUrl}" target="_blank">예약 페이지로 이동</a>
+          <span th:unless="${camp.resveUrl != null and !camp.resveUrl.isEmpty()}">정보 없음</span>
+        </li>
+      </ul>
     </div>
-
-    <div class="facility-box" style="grid-column: 2 / 3; grid-row: 1 / 2;">
-      <strong>부대시설</strong><br/>
-      <span th:text="${camp.sbrsCl}">등록된 편의 시설 정보가 없습니다.</span>
-    </div>
-
-    <div class="address-box" style="grid-column: 2 / 3; grid-row: 2 / 2;">
-      <strong>주소</strong><br />
-      <span th:text="${camp.addr1}">주소 정보 없음</span><br />
-    </div>
-
-    <div class="review-section">
-      <h3>⭐ 평점 및 후기</h3>
-      <div>
-        <p>평균 평점: [미구현]</p>
-        <hr>
-        <h4>후기 작성</h4>
-        <form>
-          <label for="rating">평점:</label>
-          <select id="rating" name="rating">
-            <option value="5">★★★★★</option>
-            <option value="4">★★★★☆</option>
-            <option value="3">★★★☆☆</option>
-            <option value="2">★★☆☆☆</option>
-            <option value="1">★☆☆☆☆</option>
-          </select><br><br>
-          <textarea placeholder="후기를 남겨주세요 (로그인 필요)" rows="4" style="width:100%"></textarea><br>
-          <button type="submit">작성</button>
-        </form>
-        <hr>
-        <p>[작성된 후기 목록이 여기에 표시됩니다.]</p>
-      </div>
+    <div class="info-box">
+      <h3>시설 및 테마</h3>
+      <ul>
+        <li><strong>테마</strong> <span th:text="${camp.themaEnvrnCl}"></span></li>
+        <li><strong>부대시설</strong> <span th:text="${camp.sbrsCl}"></span></li>
+      </ul>
     </div>
   </div>
-  <hr />
 </div>
 
-<div class="container" th:if="${camp == null}">
+<div class="detail-container" th:unless="${camp}">
   <h1>캠핑장 정보를 불러올 수 없습니다.</h1>
-  <p>올바른 경로로 접근해주세요.</p>
+  <p>요청하신 캠핑장을 찾지 못했거나, 정보를 가져오는 데 실패했습니다.</p>
   <a th:href="@{/}">홈으로 돌아가기</a>
 </div>
 
-<script th:inline="javascript">
-  document.addEventListener('DOMContentLoaded', () => {
-      const scrapButton = document.querySelector('.scrap-btn');
-
-      if(scrapButton){
-          scrapButton.addEventListener('click', async (event) => {
-              const isLoggedIn = /*[[${session.loginMember != null}]]*/ false;
-              if (!isLoggedIn) {
-                  alert('로그인이 필요한 기능입니다.');
-                  window.location.href = '/login';
-                  return;
-              }
-
-              const card = event.target.closest('.main-grid');
-              const scrapData = {
-                  contentId: card.dataset.contentId,
-                  facltNm: card.dataset.facltNm,
-                  addr1: card.dataset.addr1,
-                  firstImageUrl: card.dataset.imageUrl
-              };
-
-              try {
-                  const response = await fetch('/api/scraps/toggle', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(scrapData)
-                  });
-
-                  if (response.status === 401) {
-                      alert('세션이 만료되었거나 로그인이 필요합니다.');
-                      window.location.href = '/login';
-                      return;
-                  }
-
-                  if (!response.ok) {
-                      throw new Error('스크랩 처리 중 오류가 발생했습니다.');
-                  }
-
-                  const result = await response.json();
-
-                  if (result.isScrapped) {
-                      event.target.classList.add('scrapped');
-                      event.target.textContent = '★'; // 채워진 별
-                  } else {
-                      event.target.classList.remove('scrapped');
-                      event.target.textContent = '☆'; // 빈 별
-                  }
-
-              } catch (error) {
-                  console.error('Error:', error);
-                  alert(error.message);
-              }
-          });
-      }
-  });
-</script>
 </body>
 </html>

@@ -93,11 +93,11 @@ public class GoCampingService {
   }
 
   /**
-   * contentId로 캠핑장 상세 정보를 조회하는 메서드 (500 에러 해결을 위해 수정된 부분)
+   * contentId로 캠핑장 상세 정보를 조회하는 메서드 (안정성을 위해 imageList API 사용으로 변경)
    */
   public Mono<GoCampingDto.Item> getCampDetail(String contentId) {
-    // searchList API를 사용하여 contentId로 특정 캠핑장 정보를 조회합니다.
-    return getCampingData("/searchList", contentId, 1, 1)
+    // imageList API를 사용하여 contentId로 특정 캠핑장 정보를 조회합니다.
+    return getImageBasedDetail("/imageList", contentId)
         .flatMap(dto -> {
           // API 응답 구조를 안전하게 탐색하고, 결과가 없으면 비어있는 Mono를 반환하여 오류를 방지합니다.
           return Mono.justOrEmpty(Optional.ofNullable(dto)
@@ -130,6 +130,23 @@ public class GoCampingService {
             .queryParam("MobileApp", "Modakbulz")
             .queryParam("_type", "json")
             .queryParamIfPresent("keyword", Optional.ofNullable(keyword).filter(s -> !s.isBlank()))
+            .build())
+        .retrieve()
+        .bodyToMono(GoCampingDto.class);
+  }
+  /**
+   * imageList API 호출을 위한 private 메서드
+   */
+  private Mono<GoCampingDto> getImageBasedDetail(String path, String contentId) {
+    log.info("Requesting GoCamping API (imageList): path={}, contentId={}", path, contentId);
+    return webClient.get()
+        .uri(uriBuilder -> uriBuilder
+            .path(path)
+            .queryParam("serviceKey", serviceKey)
+            .queryParam("MobileOS", "ETC")
+            .queryParam("MobileApp", "Modakbulz")
+            .queryParam("_type", "json")
+            .queryParam("contentId", contentId) // imageList는 keyword 대신 contentId 파라미터를 사용
             .build())
         .retrieve()
         .bodyToMono(GoCampingDto.class);

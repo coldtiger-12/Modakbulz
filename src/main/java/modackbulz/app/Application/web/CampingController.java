@@ -64,21 +64,29 @@ public class CampingController {
     return "camping/srcList";
   }
 
-  // 500 에러를 해결하기 위해 수정된 부분입니다.
+  /**
+   * 캠핑장 상세 정보 페이지
+   * @param contentId 캠핑장 콘텐츠 ID
+   * @param model 뷰에 전달할 모델
+   * @return 상세 정보 페이지 경로
+   */
   @GetMapping("/{contentId}")
   public String campDetail(@PathVariable("contentId") String contentId, Model model) {
-    // block()의 결과가 null일 수 있으므로 Optional로 안전하게 감싸줍니다.
+    // 1. 서비스 로직을 호출하여 캠핑장 상세 정보(Mono)를 받아옵니다.
+    // 2. block()의 결과가 null일 수 있으므로 Optional로 안전하게 감싸줍니다.
     Optional<GoCampingDto.Item> campOptional = Optional.ofNullable(goCampingService.getCampDetail(contentId).block());
 
-    // Optional 객체에 값이 실제로 들어있는지(null이 아닌지) 확인합니다.
+    // 3. Optional 객체에 값이 실제로 있는지(null이 아닌지) 확인합니다.
     if (campOptional.isPresent()) {
-      // 값이 있으면 모델에 담아서 detail.html로 전달합니다.
+      // 값이 있으면 모델에 'camp'라는 이름으로 담아 뷰로 전달합니다.
       model.addAttribute("camp", campOptional.get());
     } else {
       // 값이 없으면(null이면) 모델에 null을 담습니다.
-      // 이렇게 하면 detail.html의 th:if 조건문이 이를 처리하여 500 에러 대신 "정보 없음" 페이지를 보여줍니다.
+      // 이렇게 하면 뷰에서 th:if를 사용해 안전하게 처리할 수 있습니다.
       model.addAttribute("camp", null);
     }
+
+    // 4. 'camping/detail.html' 템플릿을 반환합니다.
     return "camping/detail";
   }
 }

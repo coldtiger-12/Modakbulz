@@ -9,11 +9,14 @@
   <link rel="stylesheet" th:href="@{/css/camp.css}">
 </head>
 <body>
+<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
+<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
+<!-- 메인 페이지 -->
 <div class="camping-list-container">
   <h1>캠핑장 & 글램핑장 검색 목록</h1>
   <form th:action="@{/camping/search}" method="get" class="search-form">
@@ -51,7 +54,7 @@
           <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
         </a>
         <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
-        <!--<p class="camp-card-intro" th:text="${camp.lineIntro}">소개</p>-->
+        <p class="camp-card-intro" th:text="${camp.lineIntro != null and !camp.lineIntro.isEmpty()} ? ${camp.lineIntro} : ${camp.facltNm}">소개</p>
       </div>
     </div>
   </div>

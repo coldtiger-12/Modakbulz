@@ -68,14 +68,24 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: relative; /* 자식 요소의 absolute 포지셔닝을 위해 추가 */
 }
+.camp-card a {
+    text-decoration: none;
+}
+
 .camp-card img {
-    width: 100%; height: 200px; object-fit: cover;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
 }
 .camp-card-body {
     padding: 15px;
 }
 .camp-card-title {
-    font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;
+    color: #000;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 5px;
 }
 .camp-card-text {
     font-size: 0.9rem;
@@ -83,12 +93,19 @@
     margin-bottom: 10px;
 }
 .camp-card-intro {
-    background-color: #666;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    background-color: #6a794f;
     color: #fff;
-    margin: 0px;
-    padding: 1px;
+    font-size: 0.75rem;
+    border-radius: 999px;
+    padding: 6px 12px;
+    margin-top: 8px;
+    /* 말줄임표 핵심 설정 */
+    white-space: nowrap;          /* 한 줄로 고정 */
+    overflow: hidden;             /* 넘치는 내용 숨기기 */
+    text-overflow: ellipsis;      /* 말줄임표 적용 */
+    max-width: 100%;              /* 또는 원하는 너비 지정 */
+    display: inline-block;        /* 또는 inline-block, flex도 가능 */
+    box-sizing: border-box;
 }
 .camp-card-link {
     display: inline-block;
@@ -140,3 +157,57 @@
     color: white;
 }
 
+    /* 상세 페이지 */
+.detail-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.detail-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+.detail-header p {
+    font-size: 1.1rem;
+    color: #777;
+    margin-top: 0;
+}
+.detail-main-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 30px;
+}
+.info-box {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+.info-box h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+.info-box ul {
+    list-style: none;
+    padding: 0;
+}
+.info-box li {
+    margin-bottom: 8px;
+    color: #555;
+}
+.info-box li strong {
+    color: #333;
+    min-width: 80px;
+    display: inline-block;
+}
