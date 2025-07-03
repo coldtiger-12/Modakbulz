@@ -46,15 +46,6 @@
             <button type="submit" class="search-btn"></button>
           </div>
         </form>
-
-        <div class="tags">
-          <a th:href="@{/camping/search(theme='노지')}">#노지</a>
-          <a th:href="@{/camping/search(theme='근교')}">#근교</a>
-          <a th:href="@{/camping/search(theme='오토캠핑')}">#오토캠핑</a>
-          <a th:href="@{/camping/search(theme='조용한')}">#조용한</a>
-          <a th:href="@{/camping/search(theme='아이와함께')}">#아이와함께</a>
-          <a th:href="@{/camping/search(theme='애견동반')}">#애견동반</a>
-          <a th:href="@{/camping/search(theme='불멍')}">#불멍</a>
         <div class="tags" th:if="${hashtags != null and not #lists.isEmpty(hashtags)}">
           <a th:each="tag : ${hashtags}"
              th:href="@{/camping/search(theme=${tag})}"
