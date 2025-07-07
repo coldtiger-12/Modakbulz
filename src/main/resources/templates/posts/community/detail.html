@@ -7,14 +7,11 @@
   <link rel="stylesheet" href="" th:href="@{/css/community.css}">
 </head>
 <body>
-<!-- 탑메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
-<!-- 게시글 상세 내용 -->
 <main class="container">
   <h1>게시글 상세</h1>
   <div class="post-detail">
@@ -30,16 +27,17 @@
   </div>
 
   <div class="button">
-    <form th:action="@{/posts/community}" method="get" style="display: inline;">
-      <button type="submit">목록</button>
-    </form>
-    <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
-      <button type="submit">수정</button>
-    </form>
-    <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
-          onsubmit="return confirm('정말 삭제하시겠습니까?');">
-      <button type="submit">삭제</button>
-    </form>
+    <button type="button" onclick="location.href='/posts/community'">목록</button>
+
+    <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.id == post.memberId)}">
+      <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
+        <button type="submit">수정</button>
+      </form>
+      <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
+            onsubmit="return confirm('정말 삭제하시겠습니까?');">
+        <button type="submit">삭제</button>
+      </form>
+    </th:block>
   </div>
 </main>
 </body>

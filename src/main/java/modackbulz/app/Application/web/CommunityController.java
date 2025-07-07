@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/posts/community")
@@ -83,7 +84,7 @@ public class CommunityController {
     return "posts/community/detail";
   }
 
-  // 게시글 수정
+  // 게시글 수정 폼 (✨ 수정됨)
   @GetMapping("/{id}/edit")
   public String editForm(@PathVariable("id") Long id,
                          HttpSession session,
@@ -91,17 +92,26 @@ public class CommunityController {
                          RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
 
+    // 1. 로그인 확인
     if (loginMember == null) {
-      redirectAttributes.addFlashAttribute("msg", "회원만 수정할 수 있습니다.");
-      return "redirect:/posts/community";
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
+      return "redirect:/login";
     }
+
     Community post = communityService.getPostById(id).orElse(null);
+
+    // 2. 게시글 존재 여부 확인
     if (post == null) {
       redirectAttributes.addFlashAttribute("msg", "해당 게시글을 찾을 수 없습니다.");
       return "redirect:/posts/community";
     }
-    if (!post.getWriter().equals(loginMember.getNickname())) {
-      redirectAttributes.addFlashAttribute("msg", "작성자만 수정할 수 있습니다.");
+
+    // 3. 권한 확인 (관리자 또는 작성자)
+    boolean isAdmin = "A".equals(loginMember.getGubun());
+    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+
+    if (!isAdmin && !isOwner) {
+      redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
       return "redirect:/posts/community/" + id;
     }
 
@@ -112,11 +122,36 @@ public class CommunityController {
   }
 
 
-  // 게시글 수정 처리
+  // 게시글 수정 처리 (✨ 수정됨)
   @PostMapping("/{id}/edit")
   public String updatePost(@PathVariable("id") Long id,
                            @Valid @ModelAttribute("communityForm") EditForm form,
-                           BindingResult bindingResult) {
+                           BindingResult bindingResult,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes) {
+
+    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+    Community post = communityService.getPostById(id).orElse(null);
+
+    // 1. 로그인 확인
+    if (loginMember == null) {
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
+      return "redirect:/login";
+    }
+    // 2. 게시글 존재 여부 확인
+    if (post == null) {
+      redirectAttributes.addFlashAttribute("msg", "해당 게시글을 찾을 수 없습니다.");
+      return "redirect:/posts/community";
+    }
+    // 3. 권한 확인
+    boolean isAdmin = "A".equals(loginMember.getGubun());
+    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+
+    if (!isAdmin && !isOwner) {
+      redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
+      return "redirect:/posts/community/" + id;
+    }
+
     if (bindingResult.hasErrors()) {
       return "posts/community/editForm";
     }
@@ -130,18 +165,33 @@ public class CommunityController {
   }
 
 
-  // 게시글 삭제 처리
+  // 게시글 삭제 처리 (✨ 수정됨)
   @PostMapping("/{id}/delete")
   public String deletePost(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     Community post = communityService.getPostById(id).orElse(null);
 
-    if (post == null || loginMember == null || !loginMember.getId().equals(post.getMemberId())) {
+    // 1. 로그인 확인
+    if (loginMember == null) {
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
+      return "redirect:/login";
+    }
+    // 2. 게시글 존재 여부 확인
+    if (post == null) {
+      redirectAttributes.addFlashAttribute("msg", "삭제할 게시글을 찾을 수 없습니다.");
+      return "redirect:/posts/community";
+    }
+    // 3. 권한 확인 (관리자 또는 작성자)
+    boolean isAdmin = "A".equals(loginMember.getGubun());
+    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+
+    if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "삭제 권한이 없습니다.");
       return "redirect:/posts/community";
     }
 
     communityService.deletePost(id);
+    redirectAttributes.addFlashAttribute("msg", id + "번 게시글이 삭제되었습니다.");
     return "redirect:/posts/community";
   }
 }
