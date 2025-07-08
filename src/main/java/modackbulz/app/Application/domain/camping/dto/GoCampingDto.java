@@ -43,5 +43,13 @@ public class GoCampingDto {
     private String themaEnvrnCl; // 테마환경
     private String mapX; // 경도
     private String mapY; // 위도
+    private String featureNm; // 특징
+    private String induty; // 업종 (일반야영장, 자동차야영장 등)
+    private String lctCl; // 입지구분 (해변, 섬, 산, 숲, 도심 등)
+    private String operPdCl; // 운영기간 (봄, 여름, 가을, 겨울)
+    private String gnrlSiteCo; // 주요시설 일반야영장 사이트 수
+    private String autoSiteCo; // 주요시설 자동차야영장 사이트 수
+    private String glampSiteCo; // 주요시설 글램핑 사이트 수
+    private String caravSiteCo; // 주요시설 카라반 사이트 수
   }
 }

@@ -21,7 +21,6 @@ body, input, select, button, textarea {
     width: 200px;
     background-color: #fff;
     border-right: 1px solid #ccc;
-    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -39,47 +38,49 @@ body, input, select, button, textarea {
 }
 
 .mypage-sidebar li {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: background-color 0.2s ease;
+  width: 100%;
+  margin: 6px 10px;
+  overflow: hidden;
 }
 
-.mypage-sidebar a{
-    display: block;
-    text-decoration: none;
-    padding: 12px 16px;
-    font-weight: 600;
-    transition: color 0.3s ease;
+.mypage-sidebar a {
+  display: block;
+  padding: 12px 16px;
+  font-weight: 600;
+  text-decoration: none;
+  background-color: transparent;
+  color: inherit;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.mypage-sidebar li:hover {
-    background-color: #6a794f;
-}
-.mypage-sidebar li:hover a{
-    color: #fff;
+.mypage-sidebar a:hover {
+  background-color: #6a794f; /* 배경색이 margin까지 확장됨 */
+  color: #fff;
+
 }
 
 .now {
-    background-color: #6a794f;
-    border-radius: 0 10px 10px 0;
-    position: relative;
+  background-color: #6a794f;
+  border-radius: 8px;
+  position: relative;
 }
+
 .now::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 5px;
-    background-color: #A4B465;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background-color: #A4B465;
 }
+
 .now a {
-    color: #fff;
-    font-weight: 700;
-    text-shadow: 0 0 1px rgba(0,0,0,0.2);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 1px rgba(0,0,0,0.2);
 }
+
 /* 메인 콘텐츠 */
 .mypage-main {
     flex: 1;

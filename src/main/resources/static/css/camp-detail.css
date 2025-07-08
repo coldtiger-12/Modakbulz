@@ -1,0 +1,167 @@
+/* --- 상세 페이지 전체 레이아웃을 감싸는 컨테이너 --- */
+.camp-detail-container {
+    max-width: 1000px;
+    margin: 30px auto; /* 페이지 중앙 정렬 */
+    padding: 30px 40px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* 부드러운 그림자 효과 */
+}
+
+/* --- 각 정보 섹션(소개, 시설, 갤러리 등)의 공통 스타일 --- */
+.camp-detail-container section {
+    margin-bottom: 40px; /* 섹션 간의 수직 간격 */
+}
+
+/* 섹션 제목(h2) 공통 스타일 */
+.camp-detail-container h2 {
+    font-size: 1.5rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0e6d2; /* 제목 아래 구분선 */
+    margin-bottom: 20px;
+}
+
+/* [1. 캠핑장 이름 및 기본 정보] */
+.detail-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.detail-header h1 {
+    font-size: 2.5rem; /* 페이지에서 가장 큰 제목 */
+    color: #6a794f; /* 프로젝트 메인 컬러 */
+    margin-bottom: 5px;
+}
+
+.detail-header p {
+    font-size: 1.1rem;
+    color: #888; /* 회색으로 부가 정보 표시 */
+    margin-top: 0;
+}
+
+/* [2. 대표 이미지 및 핵심 정보] */
+.detail-main-info {
+    display: flex; /* 내부 요소(이미지, 정보)를 가로로 배치 */
+    gap: 30px; /* 이미지와 정보 사이의 간격 */
+    align-items: flex-start; /* 세로 정렬 기준을 위쪽으로 */
+}
+
+/* 대표 이미지 영역 */
+.main-image-wrapper {
+    flex: 1; /* 정보 영역과 1:1 비율로 공간 차지 */
+}
+
+.main-image-wrapper img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover; /* 이미지 비율을 유지하며 영역에 꽉 차게 표시 */
+    border-radius: 15px;
+}
+
+/* 핵심 정보(소개, 주소 등) 영역 */
+.core-info-wrapper {
+    flex: 1; /* 이미지 영역과 1:1 비율 */
+    display: flex;
+    flex-direction: column; /* 내부 요소들을 세로로 정렬 */
+}
+
+.core-info-wrapper .intro-text {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.6; /* 줄 간격을 넓혀 가독성 향상 */
+}
+
+.core-info-wrapper .feature-text {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+/* 주소, 연락처 등을 담는 리스트 */
+.info-list {
+    list-style: none; /* 기본 점 제거 */
+    padding: 0;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.info-list li {
+    display: flex; /* '주소'와 '주소 내용'을 가로로 배치 */
+    margin-bottom: 12px;
+}
+
+.info-list li strong {
+    flex-shrink: 0; /* 공간이 부족해도 줄어들지 않음 */
+    width: 80px; /* 제목 너비 고정으로 깔끔한 정렬 */
+    color: #333;
+}
+
+.info-list li span {
+    color: #666;
+}
+
+.info-list li a {
+    color: #6a794f;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.info-list li a:hover {
+    text-decoration: underline; /* 마우스 올렸을 때 밑줄 표시 */
+}
+
+/* [3. 부대시설 및 테마 환경] */
+.detail-extra-info {
+    display: grid; /* 그리드 레이아웃 사용 */
+    /* 화면 크기에 맞춰 자동으로 컬럼 개수 조절 (반응형) */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-box {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.info-box h3 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #6a794f;
+}
+
+.info-box p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* [4. 사진 슬라이드] */
+.slider-wrapper {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto; /* 이미지가 많아져서 넘칠 경우 가로 스크롤 생성 */
+    padding-bottom: 15px; /* 스크롤바와 이미지 사이 간격 */
+}
+
+.slide-item img {
+    width: 280px; /* 슬라이드 이미지 너비 고정 */
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* [5. 지도] */
+#map-placeholder {
+    width: 100%;
+    height: 350px;
+    background-color: #e9e9e9; /* 지도 API 로딩 전까지 보일 배경색 */
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 1.2rem;
+}

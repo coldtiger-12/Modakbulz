@@ -1,6 +1,7 @@
 package modackbulz.app.Application.domain.camping.svc;
 
 import lombok.extern.slf4j.Slf4j;
+import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageImpl;
@@ -20,9 +21,16 @@ public class GoCampingService {
 
   private final WebClient webClient;
   private final String serviceKey;
+  private final CampingDAO campingDAO; // DAO 필드
 
-  public GoCampingService(@Value("${gocamping.api.service-key}") String serviceKey) {
+  /**
+   * [수정됨] 생성자에서 CampingDAO를 주입받아 초기화합니다.
+   * @param serviceKey application.yml에 설정된 서비스 키
+   * @param campingDAO Spring이 자동으로 주입해주는 DAO 객체
+   */
+  public GoCampingService(@Value("${gocamping.api.service-key}") String serviceKey, CampingDAO campingDAO) {
     this.serviceKey = serviceKey;
+    this.campingDAO = campingDAO; // 주입받은 campingDAO를 필드에 할당
     DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://apis.data.go.kr/B551011/GoCamping");
     factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
     this.webClient = WebClient.builder()
@@ -60,6 +68,10 @@ public class GoCampingService {
           if (dto.getResponse() != null && dto.getResponse().getBody() != null) {
             if (dto.getResponse().getBody().getItems() != null) {
               items = dto.getResponse().getBody().getItems().getItem();
+              if (items != null) {
+                // API에서 가져온 데이터를 DB에 저장/업데이트합니다.
+                items.forEach(campingDAO::saveOrUpdate);
+              }
             }
             totalCount = dto.getResponse().getBody().getTotalCount();
           }
@@ -83,6 +95,10 @@ public class GoCampingService {
           if (dto.getResponse() != null && dto.getResponse().getBody() != null) {
             if (dto.getResponse().getBody().getItems() != null) {
               items = dto.getResponse().getBody().getItems().getItem();
+              if (items != null) {
+                // API에서 가져온 데이터를 DB에 저장/업데이트합니다.
+                items.forEach(campingDAO::saveOrUpdate);
+              }
             }
             totalCount = dto.getResponse().getBody().getTotalCount();
           }
@@ -93,25 +109,22 @@ public class GoCampingService {
   }
 
   /**
-   * contentId로 캠핑장 상세 정보를 조회하는 메서드 (안정성을 위해 imageList API 사용으로 변경)
+   * contentId로 캠핑장 상세 정보를 조회하는 메서드
    */
   public Mono<GoCampingDto.Item> getCampDetail(String contentId) {
-    // imageList API를 사용하여 contentId로 특정 캠핑장 정보를 조회합니다.
-    return getImageBasedDetail("/imageList", contentId)
+    return getCampingData("/searchList", contentId, 1, 1)
         .flatMap(dto -> {
-          // API 응답 구조를 안전하게 탐색하고, 결과가 없으면 비어있는 Mono를 반환하여 오류를 방지합니다.
           return Mono.justOrEmpty(Optional.ofNullable(dto)
               .map(GoCampingDto::getResponse)
               .map(GoCampingDto.Response::getBody)
               .map(GoCampingDto.Body::getItems)
               .map(GoCampingDto.Items::getItem)
-              .filter(list -> !list.isEmpty()) // 리스트가 비어있지 않은지 확인
-              .map(list -> list.get(0)));      // 첫 번째 아이템을 안전하게 가져옴
+              .filter(list -> !list.isEmpty())
+              .map(list -> list.get(0)));
         })
-        // API 호출 중 어떤 에러가 발생했는지 로그를 남기고, 비어있는 Mono를 반환하여 앱이 멈추지 않게 합니다.
         .onErrorResume(error -> {
           log.error("GoCamping API 상세 정보 호출 중 에러 발생 (contentId: {}): ", contentId, error);
-          return Mono.empty(); // 에러 발생 시 비어있는 Mono 객체를 반환
+          return Mono.empty();
         });
   }
 
@@ -134,21 +147,5 @@ public class GoCampingService {
         .retrieve()
         .bodyToMono(GoCampingDto.class);
   }
-  /**
-   * imageList API 호출을 위한 private 메서드
-   */
-  private Mono<GoCampingDto> getImageBasedDetail(String path, String contentId) {
-    log.info("Requesting GoCamping API (imageList): path={}, contentId={}", path, contentId);
-    return webClient.get()
-        .uri(uriBuilder -> uriBuilder
-            .path(path)
-            .queryParam("serviceKey", serviceKey)
-            .queryParam("MobileOS", "ETC")
-            .queryParam("MobileApp", "Modakbulz")
-            .queryParam("_type", "json")
-            .queryParam("contentId", contentId) // imageList는 keyword 대신 contentId 파라미터를 사용
-            .build())
-        .retrieve()
-        .bodyToMono(GoCampingDto.class);
-  }
+
 }
