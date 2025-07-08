@@ -55,6 +55,11 @@ public class GoCampingDto {
     private Integer glampSiteCo; // 주요시설 글램핑 사이트 수
     private Integer caravSiteCo; // 주요시설 카라반 사이트 수
 
+    // [추가] DB의 'intro' 컬럼 값을 'lineIntro' 필드에 매핑하기 위한 Setter
+    public void setIntro(String intro) {
+      this.lineIntro = intro;
+    }
+    
     // API가 보내주는 String 값을 숫자 타입으로 변환하기 위한 Setter들
     public void setContentId(String contentId) {
       this.contentId = safeParseLong(contentId);
