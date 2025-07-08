@@ -1,19 +1,20 @@
 CREATE TABLE FAQ_COMMENT (
 F_COM_ID     NUMBER(10) PRIMARY KEY, 
 FAQ_ID       NUMBER(10) NOT NULL
-                REFERENCES FAQ_COMMENT(faq_id)
-                ON DELETE CASCADE,                    
+                REFERENCES FAQ(faq_id)
+                ON DELETE CASCADE,
 MEMBER_ID    NUMBER(10) NOT NULL
                 REFERENCES MEMBER(member_id)
-                ON DELETE CASCADE,                      
-WRITER       VARCHAR2(20) NOT NULL,                    
-CONTENT      CLOB NOT NULL,                            
-CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,   
-UPDATED_AT   TIMESTAMP,                                  
+                ON DELETE CASCADE,
+WRITER       VARCHAR2(20) NOT NULL,
+CONTENT      CLOB NOT NULL,
+CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+UPDATED_AT   TIMESTAMP,
 PRC_COM_ID    NUMBER(10)
-                       REFERENCES FAQ_COMMENT(f_com_id)
-                       ON DELETE CASCADE                                 
+              REFERENCES FAQ_COMMENT(f_com_id)
+              ON DELETE CASCADE
 );
+
 CREATE SEQUENCE faq_comment_seq
 START WITH 1
 INCREMENT BY 1
