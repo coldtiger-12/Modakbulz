@@ -85,11 +85,7 @@
 .core-info-wrapper .intro-text {
     font-size: 1.15rem;
     color: #555;
-    line-height: 1.7;
-    background-color: #fff; /* 소개글 배경만 하얗게 하여 강조 */
     padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #eee;
     margin-top: 0; /* h2와의 간격은 section의 margin-bottom으로 처리 */
 }
 
