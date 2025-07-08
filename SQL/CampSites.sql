@@ -1,0 +1,30 @@
+CREATE TABLE CAMPSITES (
+    CONTENT_ID   NUMBER(10) PRIMARY KEY
+                REFERENCES CAMPING_INFO(CONTENTID)
+                ON DELETE CASCADE,
+
+    SC_C        NUMBER DEFAULT 0 NOT NULL,
+    VIEW_C      NUMBER DEFAULT 0 NOT NULL,
+
+    SCORE       NUMBER DEFAULT 0 NOT NULL
+                CHECK (SCORE BETWEEN 1 AND 5)
+);
+
+// 리뷰 테이블에 새로운 평점 등록되면 반영해 평균 계산하는 트리거
+CREATE OR REPLACE TRIGGER trg_update_campsite_score
+AFTER INSERT OR UPDATE OR DELETE ON REVIEW
+FOR EACH ROW
+DECLARE
+    v_avg_score NUMBER;
+BEGIN
+    -- 평균 평점 재계산
+    SELECT ROUND(AVG(SCORE), 1)  -- 소수점 1자리까지 평균
+    INTO v_avg_score
+    FROM REVIEW
+    WHERE CONTENTID = :NEW.CONTENTID;
+
+    -- CAMPSITES 테이블의 SCORE 필드 업데이트
+    UPDATE CAMPSITES
+    SET SCORE = NVL(v_avg_score, 0)
+    WHERE CONTENTID = :NEW.CONTENTID;
+END;
