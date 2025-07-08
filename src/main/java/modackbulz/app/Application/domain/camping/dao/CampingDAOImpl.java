@@ -34,14 +34,14 @@ public class CampingDAOImpl implements CampingDAO {
             ON (T.contentId = S.contentId)
             WHEN MATCHED THEN
                 UPDATE SET facltNm = :facltNm, addr1 = :addr1, firstImageUrl = :firstImageUrl,
-                           intro = :lineIntro, tel = :tel, homepage = :homepage,
+                           lineIntro = :lineIntro, intro = :intro, tel = :tel, homepage = :homepage,
                            sbrsCl = :sbrsCl, themaEnvrnCl = :themaEnvrnCl,
                            featureNm = :featureNm, induty = :induty,
                            lctCl = :lctCl, operPdCl = :operPdCl, gnrlSiteCo = :gnrlSiteCo,
                            autoSiteCo = :autoSiteCo, glampSiteCo = :glampSiteCo, caravSiteCo = :caravSiteCo
             WHEN NOT MATCHED THEN
-                INSERT (contentId, facltNm, addr1, firstImageUrl, intro, tel, homepage, sbrsCl, themaEnvrnCl, featureNm, induty, lctCl, operPdCl, gnrlSiteCo, autoSiteCo, glampSiteCo, caravSiteCo)
-                VALUES (:contentId, :facltNm, :addr1, :firstImageUrl, :lineIntro, :tel, :homepage, :sbrsCl, :themaEnvrnCl, :featureNm, :induty, :lctCl, :operPdCl, :gnrlSiteCo, :autoSiteCo, :glampSiteCo, :caravSiteCo)
+                INSERT (contentId, facltNm, addr1, firstImageUrl, lineIntro, intro, tel, homepage, sbrsCl, themaEnvrnCl, featureNm, induty, lctCl, operPdCl, gnrlSiteCo, autoSiteCo, glampSiteCo, caravSiteCo)
+                VALUES (:contentId, :facltNm, :addr1, :firstImageUrl, :lineIntro, :intro, :tel, :homepage, :sbrsCl, :themaEnvrnCl, :featureNm, :induty, :lctCl, :operPdCl, :gnrlSiteCo, :autoSiteCo, :glampSiteCo, :caravSiteCo)
         """;
     template.update(sql, new BeanPropertySqlParameterSource(item));
   }

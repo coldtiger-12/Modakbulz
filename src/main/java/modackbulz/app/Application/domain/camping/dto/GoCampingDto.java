@@ -37,6 +37,7 @@ public class GoCampingDto {
     private Long contentId;
     private String facltNm; // 야영장명
     private String lineIntro; // 한줄소개
+    private String intro;   //캠핑장소개
     private String addr1; // 주소
     private String firstImageUrl; // 대표 이미지
     private String tel; // 전화번호
@@ -54,11 +55,6 @@ public class GoCampingDto {
     private Integer autoSiteCo; // 주요시설 자동차야영장 사이트 수
     private Integer glampSiteCo; // 주요시설 글램핑 사이트 수
     private Integer caravSiteCo; // 주요시설 카라반 사이트 수
-
-    // [추가] DB의 'intro' 컬럼 값을 'lineIntro' 필드에 매핑하기 위한 Setter
-    public void setIntro(String intro) {
-      this.lineIntro = intro;
-    }
     
     // API가 보내주는 String 값을 숫자 타입으로 변환하기 위한 Setter들
     public void setContentId(String contentId) {

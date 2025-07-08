@@ -6,6 +6,7 @@ CREATE TABLE CAMPING_INFO (
     pageNo             NUMBER(5),
     totalCount         NUMBER(10),
     facltNm            VARCHAR2(100),
+    lineIntro          VARCHAR2(100),
     intro              CLOB, 
     insrncAt           CHAR(1) CHECK (insrncAt IN ('Y', 'N')), 
     manageSttus        VARCHAR2(20), 
