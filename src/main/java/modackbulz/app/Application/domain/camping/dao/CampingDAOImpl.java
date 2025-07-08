@@ -22,31 +22,33 @@ public class CampingDAOImpl implements CampingDAO {
   private final NamedParameterJdbcTemplate template;
 
   /**
-   * [수정됨] VALUES 절의 중복된 contentId를 제거하여 INSERT가 정상적으로 동작하도록 수정
+   * [수정됨] DB 스키마에 맞게 SQL 쿼리 수정
+   * - lineIntro -> intro 컬럼으로 매핑
+   * - DB에 없는 resveUrl, mapX, mapY 컬럼 제거
    */
   @Override
   public void saveOrUpdate(GoCampingDto.Item item) {
     String sql = """
-            MERGE INTO CAMPING_TABLE T
+            MERGE INTO CAMPING_INFO T
             USING (SELECT :contentId AS contentId FROM DUAL) S
             ON (T.contentId = S.contentId)
             WHEN MATCHED THEN
                 UPDATE SET facltNm = :facltNm, addr1 = :addr1, firstImageUrl = :firstImageUrl,
-                           lineIntro = :lineIntro, tel = :tel, homepage = :homepage,
-                           resveUrl = :resveUrl, sbrsCl = :sbrsCl, themaEnvrnCl = :themaEnvrnCl,
-                           mapX = :mapX, mapY = :mapY, featureNm = :featureNm, induty = :induty,
+                           intro = :lineIntro, tel = :tel, homepage = :homepage,
+                           sbrsCl = :sbrsCl, themaEnvrnCl = :themaEnvrnCl,
+                           featureNm = :featureNm, induty = :induty,
                            lctCl = :lctCl, operPdCl = :operPdCl, gnrlSiteCo = :gnrlSiteCo,
                            autoSiteCo = :autoSiteCo, glampSiteCo = :glampSiteCo, caravSiteCo = :caravSiteCo
             WHEN NOT MATCHED THEN
-                INSERT (contentId, facltNm, addr1, firstImageUrl, lineIntro, tel, homepage, resveUrl, sbrsCl, themaEnvrnCl, mapX, mapY, featureNm, induty, lctCl, operPdCl, gnrlSiteCo, autoSiteCo, glampSiteCo, caravSiteCo)
-                VALUES (:contentId, :facltNm, :addr1, :firstImageUrl, :lineIntro, :tel, :homepage, :resveUrl, :sbrsCl, :themaEnvrnCl, :mapX, :mapY, :featureNm, :induty, :lctCl, :operPdCl, :gnrlSiteCo, :autoSiteCo, :glampSiteCo, :caravSiteCo)
+                INSERT (contentId, facltNm, addr1, firstImageUrl, intro, tel, homepage, sbrsCl, themaEnvrnCl, featureNm, induty, lctCl, operPdCl, gnrlSiteCo, autoSiteCo, glampSiteCo, caravSiteCo)
+                VALUES (:contentId, :facltNm, :addr1, :firstImageUrl, :lineIntro, :tel, :homepage, :sbrsCl, :themaEnvrnCl, :featureNm, :induty, :lctCl, :operPdCl, :gnrlSiteCo, :autoSiteCo, :glampSiteCo, :caravSiteCo)
         """;
     template.update(sql, new BeanPropertySqlParameterSource(item));
   }
 
   @Override
-  public Optional<GoCampingDto.Item> findByContentId(String contentId) {
-    String sql = "SELECT * FROM CAMPING_TABLE WHERE contentId = :contentId";
+  public Optional<GoCampingDto.Item> findByContentId(Long contentId) {
+    String sql = "SELECT * FROM CAMPING_INFO WHERE contentId = :contentId";
     try {
       GoCampingDto.Item item = template.queryForObject(sql, Map.of("contentId", contentId), new BeanPropertyRowMapper<>(GoCampingDto.Item.class));
       return Optional.ofNullable(item);
@@ -55,20 +57,17 @@ public class CampingDAOImpl implements CampingDAO {
     }
   }
 
-  /**
-   * [추가됨] 전체 목록 페이징 조회 구현
-   */
   @Override
   public Page<GoCampingDto.Item> findAll(Pageable pageable) {
     // 1. 전체 데이터 개수 조회
-    String countSql = "SELECT count(*) FROM CAMPING_TABLE";
+    String countSql = "SELECT count(*) FROM CAMPING_INFO";
     int total = template.getJdbcTemplate().queryForObject(countSql, Integer.class);
 
     // 2. 페이징된 데이터 목록 조회
     String sql = """
             SELECT * FROM (
                 SELECT ROWNUM AS rnum, c.* FROM (
-                    SELECT * FROM CAMPING_TABLE ORDER BY facltNm ASC
+                    SELECT * FROM CAMPING_INFO ORDER BY facltNm ASC
                 ) c
             ) WHERE rnum BETWEEN :startRow AND :endRow
         """;
@@ -82,13 +81,10 @@ public class CampingDAOImpl implements CampingDAO {
     return new PageImpl<>(content, pageable, total);
   }
 
-  /**
-   * [추가됨] 검색 목록 페이징 조회 구현
-   */
   @Override
   public Page<GoCampingDto.Item> search(String keyword, Pageable pageable) {
     // 1. 검색 조건에 맞는 데이터 개수 조회
-    String countSql = "SELECT count(*) FROM CAMPING_TABLE WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword";
+    String countSql = "SELECT count(*) FROM CAMPING_INFO WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword";
     MapSqlParameterSource countParams = new MapSqlParameterSource("keyword", "%" + keyword + "%");
     int total = template.queryForObject(countSql, countParams, Integer.class);
 
@@ -96,7 +92,7 @@ public class CampingDAOImpl implements CampingDAO {
     String sql = """
             SELECT * FROM (
                 SELECT ROWNUM AS rnum, c.* FROM (
-                    SELECT * FROM CAMPING_TABLE
+                    SELECT * FROM CAMPING_INFO
                     WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword
                     ORDER BY facltNm ASC
                 ) c

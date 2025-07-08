@@ -15,7 +15,7 @@ import java.util.Optional;
 @Builder
 public class Community {
   private Long coId;
-  private String fileNo;
+  private Long fileNo;
   private String memberId;
   private String title;
   private String writer;

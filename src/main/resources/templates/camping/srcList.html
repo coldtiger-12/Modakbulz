@@ -100,7 +100,7 @@
 
               const card = event.target.closest('.camp-card');
               const scrapData = {
-                  contentId: card.dataset.contentId,
+                  contentId:  parseInt(card.dataset.contentId, 10),
                   facltNm: card.dataset.facltNm,
                   addr1: card.dataset.addr1,
                   firstImageUrl: card.dataset.imageUrl

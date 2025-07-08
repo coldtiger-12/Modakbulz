@@ -9,11 +9,11 @@ public interface CampScrapDAO {
   CampScrap add(CampScrap campScrap);
 
   // 스크랩 삭제
-  int delete(Long memberId, String contentId);
+  int delete(Long memberId, Long contentId);
 
   // 특정 회원의 스크랩 목록 조회
   List<CampScrap> findByMemberId(Long memberId);
 
   // 특정 회원이 특정 캠핑장을 스크랩했는지 확인
-  Optional<CampScrap> findByMemberIdAndContentId(Long memberId, String contentId);
+  Optional<CampScrap> findByMemberIdAndContentId(Long memberId, Long contentId);
 }

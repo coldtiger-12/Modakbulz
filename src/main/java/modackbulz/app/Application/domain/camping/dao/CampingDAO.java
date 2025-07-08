@@ -18,7 +18,7 @@ public interface CampingDAO {
    * @param contentId 캠핑장 콘텐츠 ID
    * @return Optional<GoCampingDto.Item>
    */
-  Optional<GoCampingDto.Item> findByContentId(String contentId);
+  Optional<GoCampingDto.Item> findByContentId(Long contentId);
 
   /**
    * [추가됨] DB에 저장된 모든 캠핑장 목록을 페이징하여 조회합니다.

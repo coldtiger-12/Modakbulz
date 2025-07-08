@@ -30,7 +30,7 @@ public class CampScrapServiceImpl implements CampScrapService {
   }
 
   @Override
-  public boolean isScrapped(Long memberId, String contentId) {
+  public boolean isScrapped(Long memberId, Long contentId) {
     return campScrapDAO.findByMemberIdAndContentId(memberId, contentId).isPresent();
   }
 }

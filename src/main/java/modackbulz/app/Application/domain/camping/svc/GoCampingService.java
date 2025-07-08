@@ -111,8 +111,8 @@ public class GoCampingService {
   /**
    * contentId로 캠핑장 상세 정보를 조회하는 메서드
    */
-  public Mono<GoCampingDto.Item> getCampDetail(String contentId) {
-    return getCampingData("/searchList", contentId, 1, 1)
+  public Mono<GoCampingDto.Item> getCampDetail(Long contentId) {
+    return getCampingData("/searchList", String.valueOf(contentId), 1, 1)
         .flatMap(dto -> {
           return Mono.justOrEmpty(Optional.ofNullable(dto)
               .map(GoCampingDto::getResponse)

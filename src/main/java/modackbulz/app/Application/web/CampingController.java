@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Optional; // 이 import 문을 꼭 추가해주세요.
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ import java.util.Optional; // 이 import 문을 꼭 추가해주세요.
 public class CampingController {
 
   private final GoCampingService goCampingService;
-  private final CampingDAO campingDAO; // CampingDAO 주입
+  private final CampingDAO campingDAO;
 
   /**
    * 전체 캠핑장 목록 (수정됨)
@@ -32,10 +32,11 @@ public class CampingController {
    */
   @GetMapping
   public String campList(@PageableDefault(size = 9, sort = "facltNm") Pageable pageable, Model model) {
-    // 1. API를 호출하여 DB를 최신 상태로 업데이트합니다.
-    goCampingService.getCampListPage(pageable).block();
-    // 2. DB에서 페이징된 전체 목록을 조회하여 화면에 전달합니다.
-    Page<GoCampingDto.Item> campPage = campingDAO.findAll(pageable);
+    // 1. 서비스를 호출하고, 서비스가 반환한 Page 객체를 직접 사용합니다.
+    // getCampListPage 메서드는 API 호출, DB 저장, Page 객체 생성을 모두 책임집니다.
+    Page<GoCampingDto.Item> campPage = goCampingService.getCampListPage(pageable).block();
+
+    // 2. 서비스로부터 받은 Page 객체를 모델에 추가합니다. (DB 재조회 로직 삭제)
     model.addAttribute("campPage", campPage);
     return "camping/list";
   }
@@ -81,7 +82,7 @@ public class CampingController {
    * 캠핑장 상세 정보 (DB 우선 조회)
    */
   @GetMapping("/{contentId}")
-  public String campDetail(@PathVariable("contentId") String contentId, Model model) {
+  public String campDetail(@PathVariable("contentId") Long contentId, Model model) {
     // DB에서 먼저 조회를 시도합니다.
     Optional<GoCampingDto.Item> campOptional = campingDAO.findByContentId(contentId);
 

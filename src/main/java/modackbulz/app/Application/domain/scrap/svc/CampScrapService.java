@@ -11,5 +11,5 @@ public interface CampScrapService {
   List<CampScrap> getMyScraps(Long memberId);
 
   // 스크랩 상태 확인
-  boolean isScrapped(Long memberId, String contentId);
+  boolean isScrapped(Long memberId, Long contentId);
 }

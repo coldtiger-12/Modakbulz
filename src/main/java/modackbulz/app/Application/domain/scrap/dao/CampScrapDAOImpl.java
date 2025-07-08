@@ -29,7 +29,7 @@ public class CampScrapDAOImpl implements CampScrapDAO {
   }
 
   @Override
-  public int delete(Long memberId, String contentId) {
+  public int delete(Long memberId, Long contentId) {
     String sql = "DELETE FROM CAMP_SCRAP WHERE MEMBER_ID = :memberId AND CONTENT_ID = :contentId";
     Map<String, Object> param = Map.of("memberId", memberId, "contentId", contentId);
     return template.update(sql, param);
@@ -43,7 +43,7 @@ public class CampScrapDAOImpl implements CampScrapDAO {
   }
 
   @Override
-  public Optional<CampScrap> findByMemberIdAndContentId(Long memberId, String contentId) {
+  public Optional<CampScrap> findByMemberIdAndContentId(Long memberId, Long contentId) {
     String sql = "SELECT * FROM CAMP_SCRAP WHERE MEMBER_ID = :memberId AND CONTENT_ID = :contentId";
     Map<String, Object> param = Map.of("memberId", memberId, "contentId", contentId);
     try {

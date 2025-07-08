@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class CampScrap {
   private Long scrapId;
   private Long memberId;
-  private String contentId;
+  private Long contentId;
   private String facltNm;
   private String firstImageUrl;
   private String addr1;
