@@ -32,11 +32,13 @@ public class CampingController {
    */
   @GetMapping
   public String campList(@PageableDefault(size = 9, sort = "facltNm") Pageable pageable, Model model) {
-    // 1. 서비스를 호출하고, 서비스가 반환한 Page 객체를 직접 사용합니다.
-    // getCampListPage 메서드는 API 호출, DB 저장, Page 객체 생성을 모두 책임집니다.
-    Page<GoCampingDto.Item> campPage = goCampingService.getCampListPage(pageable).block();
+    // 1. GoCamping API를 호출하여 DB의 캠핑장 정보를 최신 상태로 업데이트합니다.
+    goCampingService.getCampListPage(pageable).block();
 
-    // 2. 서비스로부터 받은 Page 객체를 모델에 추가합니다. (DB 재조회 로직 삭제)
+    // 2. DB에서 페이징 처리된 전체 캠핑장 목록을 조회합니다.
+    Page<GoCampingDto.Item> campPage = campingDAO.findAll(pageable);
+
+    // 3. 조회된 캠핑장 목록을 모델에 담아 뷰로 전달합니다.
     model.addAttribute("campPage", campPage);
     return "camping/list";
   }
