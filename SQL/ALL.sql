@@ -1,5 +1,10 @@
 -- 모닥불스 DB 설계 --
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
+
+-- 회원 정보 DB 삭제(기존)
+DROP TABLE MEMBER;
+
+-- 회원 정보 DB 생성
 CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
@@ -51,9 +56,14 @@ BEGIN
 END;	
 
 SELECT * FROM MEMBER;
-DROP TABLE MEMBER;
+
 -------------------------------------------------------------------------------------------
 -- 2. 캠핑장 정보 저장 DB ---------------------------------------------------------------------
+
+-- 캠핑장 정보 저장 테이블 삭제(기존)
+DROP TABLE CAMPING_INFO;
+
+-- 캠핑장 정보 저장 테이블 생성
 CREATE TABLE CAMPING_INFO (
     contentId          NUMBER(10) PRIMARY KEY,
     resultCode         VARCHAR2(10),
@@ -103,6 +113,11 @@ CREATE TABLE CAMPING_INFO (
 SELECT * FROM CAMPING_INFO;
 -------------------------------------------------------------------------------------------
 -- 3. 캠핑장 정보 DB -------------------------------------------------------------------------
+
+-- 캠핑장 정보 테이블 삭제(기존)
+DROP TABLE CAMPSITES;
+
+-- 캠핑장 정보 테이블 생성
 CREATE TABLE CAMPSITES (
     CONTENT_ID   NUMBER(10) PRIMARY KEY
                 REFERENCES CAMPING_INFO(CONTENTID)
@@ -142,6 +157,11 @@ END;
 SELECT * FROM CAMPSITES;
 -------------------------------------------------------------------------------------------
 -- 4. 리뷰 게시판 정보 DB ---------------------------------------------------------------------
+
+-- 리뷰 테이블 삭제(기존)
+DROP TABLE REVIEW;
+
+-- 리뷰 테이블 생성
 CREATE TABLE REVIEW (
     REV_ID       NUMBER(10) PRIMARY KEY, 
     CONTENT_ID   NUMBER(10) NOT NULL 
@@ -173,6 +193,11 @@ END;
 
 -------------------------------------------------------------------------------------------
 -- 5. 자유 게시판 정보 DB ---------------------------------------------------------------------
+
+-- 자유 게시판 정보 DB 삭제(기존)
+DROP TABLE COMMUNITY;
+
+-- 자유 게시판 정보 DB 생성
 CREATE TABLE COMMUNITY (
     CO_ID        NUMBER(10) PRIMARY KEY, 
     MEMBER_ID    NUMBER(10) NOT NULL 
@@ -183,7 +208,7 @@ CREATE TABLE COMMUNITY (
     CONTENT      CLOB NOT NULL,           
     CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL, 
     UPDATED_AT   TIMESTAMP, 
-    VIEW_C       NUMBER(10) DEFAULT 0 NOT NULL,
+    VIEW_C       NUMBER(10) DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE member_co_id_seq
@@ -200,6 +225,11 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 6. 자유 게시판 댓글 정보 DB -----------------------------------------------------------------
+
+-- 자유 게시판 댓글 정보 DB 삭제(기존)
+DROP TABLE CO_COMMENT;
+
+-- 자유 게시판 댓글 정보 DB 생성
 CREATE TABLE CO_COMMENT (
 C_COM_ID     NUMBER(10) PRIMARY KEY, 
 CO_ID       NUMBER(10) NOT NULL
@@ -230,6 +260,11 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 7. 문의사항 게시판 정보 DB ------------------------------------------------------------------
+
+-- 문의사항 게시판 정보 DB 삭제(기존)
+DROP TABLE FAQ;
+
+-- 문의사항 게시판 정보 DB 생성
 CREATE TABLE FAQ (
     FAQ_ID    NUMBER(10) PRIMARY KEY,
     MEMBER_ID   NUMBER(10) NOT NULL
@@ -247,6 +282,11 @@ NOCACHE
 NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 8. 문의사항 게시판 댓글 정보 DB --------------------------------------------------------------
+
+-- 문의사항 게시판 댓글 정보 DB 삭제(기존)
+DROP TABLE FAQ_COMMENT;
+
+-- 문의사항 게시판 댓글 정보 DB 생성
 CREATE TABLE FAQ_COMMENT (
 F_COM_ID     NUMBER(10) PRIMARY KEY, 
 FAQ_ID       NUMBER(10) NOT NULL
@@ -277,6 +317,11 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 9. 스크랩 정보 DB -------------------------------------------------------------------------
+
+-- 스크랩 정보 DB 삭제(기존)
+DROP TABLE SCRAP;
+
+-- 스크랩 정보 DB 생성
 CREATE TABLE SCRAP (
     SCRAP_ID    NUMBER(10) PRIMARY KEY,
     MEMBER_ID   NUMBER(10) NOT NULL
@@ -295,6 +340,11 @@ NOCACHE
 NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 10. 파일 관리 정보 DB ---------------------------------------------------------------------
+
+-- 파일 관리 정보 DB 삭제(기존)
+DROP TABLE FILES;
+
+-- 파일 관리 정보 DB 생성
 CREATE TABLE FILES (
     FILE_ID      NUMBER(10) PRIMARY KEY,
     -- 각 파일을 고유하게 식별하기 위한 ID

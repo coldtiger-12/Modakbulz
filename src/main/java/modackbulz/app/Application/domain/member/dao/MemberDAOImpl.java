@@ -124,11 +124,12 @@ public class MemberDAOImpl implements MemberDAO {
 
   @Override
   public boolean deleteMember(Long memberId) {
-    String sql = "UPDATE MEMBER SET IS_DEL = 'Y', DEL_DATE = SYSTIMESTAMP WHERE MEMBER_ID = :memberId ";
+    String sql = "UPDATE MEMBER SET IS_DEL = 'Y', DEL_DATE = SYSTIMESTAMP + INTERVAL '7' DAY WHERE MEMBER_ID = :memberId ";
     MapSqlParameterSource param = new MapSqlParameterSource().addValue("memberId", memberId);
     int affected = template.update(sql, param);
     return affected == 1;
   }
+
   @Override
   public boolean updateMember(Member member) {
     String sql = "UPDATE MEMBER SET " +
