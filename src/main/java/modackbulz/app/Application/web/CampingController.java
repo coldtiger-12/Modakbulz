@@ -5,6 +5,7 @@ import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -33,17 +34,12 @@ public class CampingController {
   public String campList(@PageableDefault(size = 9, sort = "facltNm") Pageable pageable, Model model) {
     // 1. 서비스를 호출하고, 서비스가 반환한 Page 객체를 직접 사용합니다.
     // getCampListPage 메서드는 API 호출, DB 저장, Page 객체 생성을 모두 책임집니다.
-    goCampingService.getCampListPage(pageable).block();
-
-    // 2. DB에서 페이징 처리된 전체 캠핑장 목록을 조회합니다.
-    Page<GoCampingDto.Item> campPage = campingDAO.findAll(pageable);
+    Page<GoCampingDto.Item> campPage = goCampingService.getCampListPage(pageable).block();
 
     // 2. 서비스로부터 받은 Page 객체를 모델에 추가합니다. (DB 재조회 로직 삭제)
     model.addAttribute("campPage", campPage);
     return "camping/list";
   }
-
-
 
   /**
    * 캠핑장 검색 (수정됨)
