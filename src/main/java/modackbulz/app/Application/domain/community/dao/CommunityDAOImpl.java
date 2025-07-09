@@ -64,7 +64,7 @@ public class CommunityDAOImpl implements CommunityDAO {
 
   @Override
   public List<Community> findByMemberId(Long memberId) {
-    String sql = "SELECT * FROM COMMUNITYERE MEMBER_ID = :memberId";
+    String sql = "SELECT * FROM COMMUNITY WHERE MEMBER_ID = :memberId";
     return template.query(sql, Map.of("memberId", memberId), BeanPropertyRowMapper.newInstance(Community.class));
   }
 
