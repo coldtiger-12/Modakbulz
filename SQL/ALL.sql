@@ -62,6 +62,7 @@ CREATE TABLE CAMPING_INFO (
     pageNo             NUMBER(5),
     totalCount         NUMBER(10),
     facltNm            VARCHAR2(100),
+    lineIntro            VARCHAR2(300),
     intro              CLOB, 
     insrncAt           CHAR(1) CHECK (insrncAt IN ('Y', 'N')), 
     manageSttus        VARCHAR2(20), 
@@ -98,6 +99,7 @@ CREATE TABLE CAMPING_INFO (
     createdtime        TIMESTAMP DEFAULT SYSTIMESTAMP,
     modifiedtime       TIMESTAMP DEFAULT SYSTIMESTAMP
 );
+
 SELECT * FROM CAMPING_INFO;
 -------------------------------------------------------------------------------------------
 -- 3. 캠핑장 정보 DB -------------------------------------------------------------------------
