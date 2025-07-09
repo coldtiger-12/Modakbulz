@@ -40,7 +40,7 @@ public class CommunitySVCImpl implements CommunitySVC {
   }
 
   @Override
-  public List<Community> getPostsByMemberId(String memberId) {
+  public List<Community> getPostsByMemberId(Long memberId) {
     return communityDao.findByMemberId(memberId);
   }
 

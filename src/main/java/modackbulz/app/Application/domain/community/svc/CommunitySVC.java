@@ -23,7 +23,7 @@ public interface CommunitySVC {
   void deletePost(Long id);
 
   // 특정 회원의 게시글만 조회
-  List<Community> getPostsByMemberId(String memberId);
+  List<Community> getPostsByMemberId(Long memberId);
 
   // 조회수 증가
   void increaseViewCount(Long id);

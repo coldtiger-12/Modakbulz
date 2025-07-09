@@ -1,11 +1,10 @@
 package modackbulz.app.Application.web;
 
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import modackbulz.app.Application.entity.Community;
-import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.domain.community.svc.CommunitySVC;
+import modackbulz.app.Application.entity.Community;
 import modackbulz.app.Application.web.form.community.EditForm;
 import modackbulz.app.Application.web.form.community.SaveForm;
 import modackbulz.app.Application.web.form.login.LoginMember;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/posts/community")
@@ -64,7 +62,7 @@ public class CommunityController {
 
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     if (loginMember != null) {
-      community.setMemberId(loginMember.getId());
+      community.setMemberId(loginMember.getMemberId());
       community.setWriter(loginMember.getNickname());
     }
 
@@ -108,7 +106,7 @@ public class CommunityController {
 
     // 3. 권한 확인 (관리자 또는 작성자)
     boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -145,7 +143,7 @@ public class CommunityController {
     }
     // 3. 권한 확인
     boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -183,7 +181,7 @@ public class CommunityController {
     }
     // 3. 권한 확인 (관리자 또는 작성자)
     boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getId());
+    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "삭제 권한이 없습니다.");

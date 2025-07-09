@@ -25,9 +25,9 @@ public class MemberDAOImpl implements MemberDAO {
   public Member insertMember(Member member) {
     StringBuffer sql = new StringBuffer();
     sql.append(" INSERT INTO MEMBER (");
-    sql.append("   MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
+    sql.append("   MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION ");
     sql.append(" ) VALUES (");
-    sql.append("   member_member_id_seq.NEXTVAL, :gubun, :id, :pwd, :email, :tel, :nickname, :gender, :region, :isDel, :delDate) ");
+    sql.append("   member_member_id_seq.NEXTVAL, :gubun, :id, :pwd, :email, :tel, :nickname, :gender, :region ) ");
 
     SqlParameterSource param = new BeanPropertySqlParameterSource(member);
     KeyHolder keyHolder = new GeneratedKeyHolder();

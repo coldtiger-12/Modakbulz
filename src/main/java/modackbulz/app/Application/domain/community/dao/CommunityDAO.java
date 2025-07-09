@@ -23,7 +23,7 @@ public interface CommunityDAO {
   void delete(Long id);
 
   // 회원 ID 기준 게시글 목록 조회
-  List<Community> findByMemberId(String memberId);
+  List<Community> findByMemberId(Long memberId);
 
   // 게시글 조회수 증가 (VIEW_C + 1)
   void increaseViewCount(Long id);

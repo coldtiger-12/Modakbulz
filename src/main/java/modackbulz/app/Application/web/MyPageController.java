@@ -188,6 +188,23 @@ public class MyPageController {
   }
 
   /**
+   * 이메일 인증 번호 확인
+   * @param authcode
+   * @param session
+   * @return
+   */
+  @PostMapping("verify-email")
+  @ResponseBody
+  public ResponseEntity<Map<String, Boolean>> verifyEmailCode(
+      @RequestParam String authcode, HttpSession session
+  ) {
+    String sessionAuthCode = (String) session.getAttribute("authCode");
+    boolean isVerified = sessionAuthCode != null && sessionAuthCode.equals(authcode);
+    session.setAttribute("isEmailVerified", isVerified);
+    return ResponseEntity.ok(Map.of("verified", isVerified));
+  }
+
+  /**
    * 인증번호 생성
    * @return 6자리 숫자 인증번호
    */
