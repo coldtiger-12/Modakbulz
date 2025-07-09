@@ -29,18 +29,18 @@ public class HomeController {
     // 메인에 표시할 캠핑장 개수를 8개로 지정합니다.
     List<GoCampingDto.Item> campList = goCampingService.getBasedList(8).block();
 
-    // 해시태그 생성
-    if (campList != null && !campList.isEmpty()) {
-      Set<String> hashtags = new HashSet<>();
-
-      for (GoCampingDto.Item camp : campList) {
-        //테마환경(themaEnvrnCl)필드에서 태그 추출
-        if (camp.getThemaEnvrnCl() != null && !camp.getThemaEnvrnCl().isBlank()) {
-          hashtags.addAll(Arrays.asList(camp.getThemaEnvrnCl().split(",")));
-        }
-      }
-      model.addAttribute("hashtags",hashtags.stream().limit(7).collect(Collectors.toList()));
-    }
+//    // 해시태그 생성
+//    if (campList != null && !campList.isEmpty()) {
+//      Set<String> hashtags = new HashSet<>();
+//
+//      for (GoCampingDto.Item camp : campList) {
+//        //테마환경(themaEnvrnCl)필드에서 태그 추출
+//        if (camp.getThemaEnvrnCl() != null && !camp.getThemaEnvrnCl().isBlank()) {
+//          hashtags.addAll(Arrays.asList(camp.getThemaEnvrnCl().split(",")));
+//        }
+//      }
+//      model.addAttribute("hashtags",hashtags.stream().limit(7).collect(Collectors.toList()));
+//    }
 
     // 변환된 리스트를 모델에 추가합니다.
     model.addAttribute("recommendCamps", campList);

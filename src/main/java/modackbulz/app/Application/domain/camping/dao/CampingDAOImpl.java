@@ -21,11 +21,6 @@ import java.util.Optional;
 public class CampingDAOImpl implements CampingDAO {
   private final NamedParameterJdbcTemplate template;
 
-  /**
-   * [수정됨] DB 스키마에 맞게 SQL 쿼리 수정
-   * - lineIntro -> intro 컬럼으로 매핑
-   * - DB에 없는 resveUrl, mapX, mapY 컬럼 제거
-   */
   @Override
   public void saveOrUpdate(GoCampingDto.Item item) {
     String sql = """
@@ -59,15 +54,14 @@ public class CampingDAOImpl implements CampingDAO {
 
   @Override
   public Page<GoCampingDto.Item> findAll(Pageable pageable) {
-    // 1. 전체 데이터 개수 조회
     String countSql = "SELECT count(*) FROM CAMPING_INFO";
     int total = template.getJdbcTemplate().queryForObject(countSql, Integer.class);
 
-    // 2. 페이징된 데이터 목록 조회
     String sql = """
             SELECT * FROM (
                 SELECT ROWNUM AS rnum, c.* FROM (
-                    SELECT * FROM CAMPING_INFO ORDER BY facltNm ASC
+                    SELECT * FROM CAMPING_INFO 
+                    ORDER BY CASE WHEN firstImageUrl IS NOT NULL THEN 0 ELSE 1 END, contentId DESC
                 ) c
             ) WHERE rnum BETWEEN :startRow AND :endRow
         """;
@@ -83,18 +77,16 @@ public class CampingDAOImpl implements CampingDAO {
 
   @Override
   public Page<GoCampingDto.Item> search(String keyword, Pageable pageable) {
-    // 1. 검색 조건에 맞는 데이터 개수 조회
     String countSql = "SELECT count(*) FROM CAMPING_INFO WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword";
     MapSqlParameterSource countParams = new MapSqlParameterSource("keyword", "%" + keyword + "%");
     int total = template.queryForObject(countSql, countParams, Integer.class);
 
-    // 2. 페이징된 검색 데이터 목록 조회
     String sql = """
             SELECT * FROM (
                 SELECT ROWNUM AS rnum, c.* FROM (
                     SELECT * FROM CAMPING_INFO
                     WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword
-                    ORDER BY facltNm ASC
+                    ORDER BY CASE WHEN firstImageUrl IS NOT NULL THEN 0 ELSE 1 END, contentId DESC
                 ) c
             ) WHERE rnum BETWEEN :startRow AND :endRow
         """;
