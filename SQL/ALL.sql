@@ -1,5 +1,10 @@
 -- 모닥불스 DB 설계 --
--- 1. 회원 정보 DB -------------------------------------------------------------------------- 
+-- 1. 회원 정보 DB --------------------------------------------------------------------------
+
+-- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
+DROP TABLE MEMBER CASCADE CONSTRAINTS;
+
+-- 회원 정보 DB 생성
 CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
@@ -11,7 +16,7 @@ CREATE TABLE MEMBER (
 			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
 			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
 ),
-    EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL, 
+    EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL,
                     '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
     TEL         VARCHAR2(11) NOT NULL UNIQUE,
     NICKNAME    VARCHAR2(20) NOT NULL UNIQUE,
@@ -44,16 +49,21 @@ BEGIN
         COMMIT;
       END;',
     start_date      => SYSTIMESTAMP,
-    repeat_interval => 'FREQ=DAILY; BYHOUR=2; BYMINUTE=0; BYSECOND=0',  
+    repeat_interval => 'FREQ=DAILY; BYHOUR=2; BYMINUTE=0; BYSECOND=0',
     enabled         => TRUE,
     comments        => '삭제 예정일이 지난 회원 자동 삭제'
   );
-END;	
+END;
 
 SELECT * FROM MEMBER;
-DROP TABLE MEMBER;
+
 -------------------------------------------------------------------------------------------
 -- 2. 캠핑장 정보 저장 DB ---------------------------------------------------------------------
+
+-- 캠핑장 정보 저장 테이블 삭제(기존)
+DROP TABLE CAMPING_INFO;
+
+-- 캠핑장 정보 저장 테이블 생성
 CREATE TABLE CAMPING_INFO (
     contentId          NUMBER(10) PRIMARY KEY,
     resultCode         VARCHAR2(10),
@@ -63,47 +73,51 @@ CREATE TABLE CAMPING_INFO (
     totalCount         NUMBER(10),
     facltNm            VARCHAR2(100),
     lineIntro            VARCHAR2(300),
-    intro              CLOB, 
-    insrncAt           CHAR(1) CHECK (insrncAt IN ('Y', 'N')), 
-    manageSttus        VARCHAR2(20), 
-    hvofBgnde          DATE, 
-    hvofEnddle         DATE, 
-    featureNm          VARCHAR2(2000), 
-    induty             VARCHAR2(100) NOT NULL DEFAULT '일반야영장', 
+    intro              CLOB,
+    insrncAt           CHAR(1) CHECK (insrncAt IN ('Y', 'N')),
+    manageSttus        VARCHAR2(20),
+    hvofBgnde          DATE,
+    hvofEnddle         DATE,
+    featureNm          VARCHAR2(2000),
+    induty             VARCHAR2(100),
     lctCl              VARCHAR2(100),
-    doNm               VARCHAR2(50), 
-    sigunguNm          VARCHAR2(50), 
-    zipcode            VARCHAR2(10), 
-    addr1              VARCHAR2(255), 
-    addr2              VARCHAR2(255), 
-    direction          VARCHAR2(2000), 
-    tel                VARCHAR2(20), 
-    homepage           VARCHAR2(2000), 
-    gnrlSiteCo         NUMBER(5) DEFAULT 0, 
-    autoSiteCo         NUMBER(5) DEFAULT 0, 
-    glampSiteCo        NUMBER(5) DEFAULT 0, 
-    caravSiteCo        NUMBER(5) DEFAULT 0, 
-    indvdlCaravSiteCo  NUMBER(5) DEFAULT 0, 
+    doNm               VARCHAR2(50),
+    sigunguNm          VARCHAR2(50),
+    zipcode            VARCHAR2(10),
+    addr1              VARCHAR2(255),
+    addr2              VARCHAR2(255),
+    direction          VARCHAR2(2000),
+    tel                VARCHAR2(20),
+    homepage           VARCHAR2(2000),
+    gnrlSiteCo         NUMBER(5) DEFAULT 0,
+    autoSiteCo         NUMBER(5) DEFAULT 0,
+    glampSiteCo        NUMBER(5) DEFAULT 0,
+    caravSiteCo        NUMBER(5) DEFAULT 0,
+    indvdlCaravSiteCo  NUMBER(5) DEFAULT 0,
     sitedStnc          NUMBER(10,2),
     glampInnerFclty    VARCHAR2(1000),
-    caravInnerFclty    VARCHAR2(1000), 
+    caravInnerFclty    VARCHAR2(1000),
     operPdCl           VARCHAR2(100),
-    operDeCl           VARCHAR2(100), 
-    trlerAcmpnyAt      CHAR(1) CHECK (trlerAcmpnyAt IN ('Y', 'N')), 
-    caravAcmpnyAt      CHAR(1) CHECK (caravAcmpnyAt IN ('Y', 'N')), 
-    sbrsCl             VARCHAR2(1000), 
+    operDeCl           VARCHAR2(100),
+    trlerAcmpnyAt      CHAR(1) CHECK (trlerAcmpnyAt IN ('Y', 'N')),
+    caravAcmpnyAt      CHAR(1) CHECK (caravAcmpnyAt IN ('Y', 'N')),
+    sbrsCl             VARCHAR2(1000),
     themaEnvrnCl       VARCHAR2(255),
     eqpmnLendCl        VARCHAR2(255),
-    animalCmgCl        VARCHAR2(255), 
-    firstImageUrl      VARCHAR2(2000), 
+    animalCmgCl        VARCHAR2(255),
+    firstImageUrl      VARCHAR2(2000),
     createdtime        TIMESTAMP DEFAULT SYSTIMESTAMP,
     modifiedtime       TIMESTAMP DEFAULT SYSTIMESTAMP
 );
 
-
 SELECT * FROM CAMPING_INFO;
 -------------------------------------------------------------------------------------------
 -- 3. 캠핑장 정보 DB -------------------------------------------------------------------------
+
+-- 캠핑장 정보 테이블 삭제(기존)
+DROP TABLE CAMPSITES;
+
+-- 캠핑장 정보 테이블 생성
 CREATE TABLE CAMPSITES (
     CONTENT_ID   NUMBER(10) PRIMARY KEY
                 REFERENCES CAMPING_INFO(CONTENTID)
@@ -143,18 +157,23 @@ END;
 SELECT * FROM CAMPSITES;
 -------------------------------------------------------------------------------------------
 -- 4. 리뷰 게시판 정보 DB ---------------------------------------------------------------------
+
+-- 리뷰 테이블 삭제(기존)
+DROP TABLE REVIEW;
+
+-- 리뷰 테이블 생성
 CREATE TABLE REVIEW (
-    REV_ID       NUMBER(10) PRIMARY KEY, 
-    CONTENT_ID   NUMBER(10) NOT NULL 
-                 REFERENCES CAMPSITES(CONTENT_ID) 
+    REV_ID       NUMBER(10) PRIMARY KEY,
+    CONTENT_ID   NUMBER(10) NOT NULL
+                 REFERENCES CAMPSITES(CONTENT_ID)
                  ON DELETE CASCADE,
-    MEMBER_ID    NUMBER(10) NOT NULL 
-                 REFERENCES MEMBER(MEMBER_ID) 
+    MEMBER_ID    NUMBER(10) NOT NULL
+                 REFERENCES MEMBER(MEMBER_ID)
                  ON DELETE CASCADE,
-    WRITER       VARCHAR2(20) NOT NULL,  
-    CONTENT      CLOB NOT NULL,    
+    WRITER       VARCHAR2(20) NOT NULL,
+    CONTENT      CLOB NOT NULL,
     CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
-    UPDATED_AT   TIMESTAMP, 
+    UPDATED_AT   TIMESTAMP,
     SCORE        NUMBER(10) DEFAULT 0 NOT NULL
                  CHECK (SCORE BETWEEN 1 AND 5)
 );
@@ -174,17 +193,22 @@ END;
 
 -------------------------------------------------------------------------------------------
 -- 5. 자유 게시판 정보 DB ---------------------------------------------------------------------
+
+-- 자유 게시판 정보 DB 삭제(기존)
+DROP TABLE COMMUNITY;
+
+-- 자유 게시판 정보 DB 생성
 CREATE TABLE COMMUNITY (
-    CO_ID        NUMBER(10) PRIMARY KEY, 
-    MEMBER_ID    NUMBER(10) NOT NULL 
+    CO_ID        NUMBER(10) PRIMARY KEY,
+    MEMBER_ID    NUMBER(10) NOT NULL
                           REFERENCES MEMBER(member_id)
                           ON DELETE CASCADE,
-    TITLE        VARCHAR2(50) NOT NULL,   
-    WRITER       VARCHAR2(20) NOT NULL,   
-    CONTENT      CLOB NOT NULL,           
-    CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL, 
-    UPDATED_AT   TIMESTAMP, 
-    VIEW_C       NUMBER(10) DEFAULT 0 NOT NULL,
+    TITLE        VARCHAR2(50) NOT NULL,
+    WRITER       VARCHAR2(20) NOT NULL,
+    CONTENT      CLOB NOT NULL,
+    CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+    UPDATED_AT   TIMESTAMP,
+    VIEW_C       NUMBER(10) DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE member_co_id_seq
@@ -201,21 +225,26 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 6. 자유 게시판 댓글 정보 DB -----------------------------------------------------------------
+
+-- 자유 게시판 댓글 정보 DB 삭제(기존)
+DROP TABLE CO_COMMENT;
+
+-- 자유 게시판 댓글 정보 DB 생성
 CREATE TABLE CO_COMMENT (
-C_COM_ID     NUMBER(10) PRIMARY KEY, 
+C_COM_ID     NUMBER(10) PRIMARY KEY,
 CO_ID       NUMBER(10) NOT NULL
                 REFERENCES COMMUNITY(co_id)
-                ON DELETE CASCADE,                    
+                ON DELETE CASCADE,
 MEMBER_ID    NUMBER(10) NOT NULL
                 REFERENCES MEMBER(member_id)
-                ON DELETE CASCADE,                      
-WRITER       VARCHAR2(20) NOT NULL,                    
-CONTENT      CLOB NOT NULL,                            
-CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,   
-UPDATED_AT   TIMESTAMP,                                  
+                ON DELETE CASCADE,
+WRITER       VARCHAR2(20) NOT NULL,
+CONTENT      CLOB NOT NULL,
+CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+UPDATED_AT   TIMESTAMP,
 PRC_COM_ID    NUMBER(10)
                        REFERENCES CO_COMMENT(c_com_id)
-                       ON DELETE CASCADE                                 
+                       ON DELETE CASCADE
 );
 CREATE SEQUENCE co_comment_seq
 START WITH 1
@@ -231,6 +260,11 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 7. 문의사항 게시판 정보 DB ------------------------------------------------------------------
+
+-- 문의사항 게시판 정보 DB 삭제(기존)
+DROP TABLE FAQ;
+
+-- 문의사항 게시판 정보 DB 생성
 CREATE TABLE FAQ (
     FAQ_ID    NUMBER(10) PRIMARY KEY,
     MEMBER_ID   NUMBER(10) NOT NULL
@@ -248,21 +282,26 @@ NOCACHE
 NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 8. 문의사항 게시판 댓글 정보 DB --------------------------------------------------------------
+
+-- 문의사항 게시판 댓글 정보 DB 삭제(기존)
+DROP TABLE FAQ_COMMENT;
+
+-- 문의사항 게시판 댓글 정보 DB 생성
 CREATE TABLE FAQ_COMMENT (
-F_COM_ID     NUMBER(10) PRIMARY KEY, 
+F_COM_ID     NUMBER(10) PRIMARY KEY,
 FAQ_ID       NUMBER(10) NOT NULL
                 REFERENCES FAQ(faq_id)
-                ON DELETE CASCADE,                    
+                ON DELETE CASCADE,
 MEMBER_ID    NUMBER(10) NOT NULL
                 REFERENCES MEMBER(member_id)
-                ON DELETE CASCADE,                      
-WRITER       VARCHAR2(20) NOT NULL,                    
-CONTENT      CLOB NOT NULL,                            
-CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,   
-UPDATED_AT   TIMESTAMP,                                  
+                ON DELETE CASCADE,
+WRITER       VARCHAR2(20) NOT NULL,
+CONTENT      CLOB NOT NULL,
+CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+UPDATED_AT   TIMESTAMP,
 PRC_COM_ID    NUMBER(10)
                        REFERENCES FAQ_COMMENT(f_com_id)
-                       ON DELETE CASCADE                                 
+                       ON DELETE CASCADE
 );
 CREATE SEQUENCE faq_comment_seq
 START WITH 1
@@ -278,6 +317,11 @@ BEGIN
 END;
 -------------------------------------------------------------------------------------------
 -- 9. 스크랩 정보 DB -------------------------------------------------------------------------
+
+-- 스크랩 정보 DB 삭제(기존)
+DROP TABLE SCRAP;
+
+-- 스크랩 정보 DB 생성
 CREATE TABLE SCRAP (
     SCRAP_ID    NUMBER(10) PRIMARY KEY,
     MEMBER_ID   NUMBER(10) NOT NULL
@@ -296,6 +340,11 @@ NOCACHE
 NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 10. 파일 관리 정보 DB ---------------------------------------------------------------------
+
+-- 파일 관리 정보 DB 삭제(기존)
+DROP TABLE FILES;
+
+-- 파일 관리 정보 DB 생성
 CREATE TABLE FILES (
     FILE_ID      NUMBER(10) PRIMARY KEY,
     -- 각 파일을 고유하게 식별하기 위한 ID
