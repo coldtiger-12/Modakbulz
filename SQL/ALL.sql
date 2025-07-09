@@ -1,8 +1,8 @@
 -- 모닥불스 DB 설계 --
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
 
--- 회원 정보 DB 삭제(기존)
-DROP TABLE MEMBER;
+-- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
+DROP TABLE MEMBER CASCADE CONSTRAINTS;
 
 -- 회원 정보 DB 생성
 CREATE TABLE MEMBER (

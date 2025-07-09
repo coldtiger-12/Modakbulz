@@ -54,7 +54,7 @@ public class MemberController {
     member.setPwd(joinForm.getPwd());    // 암호화 없이 그대로 저장
     member.setIsDel(null);
     member.setDelDate(null);
-    member.setGubun("C");
+    member.setGubun("U");
 
     try {
       memberSVC.insertMember(member);
