@@ -6,8 +6,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521/xe
-    username: ${DB_USERNAME:c##camp} # 환경 변수 사용, 없을 경우 기본값
-    password: ${DB_PASSWORD:camp1234}
+    username: ${DB_USERNAME} # 환경 변수 사용, 없을 경우 기본값
+    password: ${DB_PASSWORD}
   #ai
   ai:
     openai:
@@ -15,8 +15,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:your-gmail-address@gmail.com}
-    password: ${MAIL_PASSWORD:your-gmail-app-password} # Gmail 앱 비밀번호
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Gmail 앱 비밀번호
     properties:
       mail:
         smtp:
@@ -26,7 +26,7 @@ spring:
 #gocamping
 gocamping:
   api:
-    service-key: XgxDN4M9MKooR%2B5XPukrDf62%2BWTiA7kDwHygs5zhGSou4qAxEeNdJ1w6EzIlDJpIAJiGd7fMqO76ESZ%2FZvEmlw%3D%3D
+    service-key: ${GOCAMPING_API_KEY}
 
 # 웹서버 포트
 server:
