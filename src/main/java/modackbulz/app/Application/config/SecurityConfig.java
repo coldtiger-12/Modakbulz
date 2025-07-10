@@ -1,4 +1,4 @@
-package modackbulz.app.Application.global.security;
+package modackbulz.app.Application.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +42,8 @@ public class SecurityConfig {
         .formLogin(form -> form
             .loginPage("/login") // 커스텀 로그인 페이지 경로 (LoginController의 GET 메서드)
             .loginProcessingUrl("/login") // 로그인 처리 경로 (LoginController의 POST 메서드)
+            .usernameParameter("id")  // 아이디는 'id'라는 이름으로 받을 것
+            .passwordParameter("pwd") // 비밀번호는 'pwd'라는 이름으로 받을 것
             .defaultSuccessUrl("/", true) // 로그인 성공 시 이동할 경로
             .permitAll() // 로그인 페이지는 모두 접근 가능
         )
