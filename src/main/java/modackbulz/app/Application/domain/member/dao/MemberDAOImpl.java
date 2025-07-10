@@ -99,7 +99,7 @@ public class MemberDAOImpl implements MemberDAO {
     sql.append(" SELECT ");
     sql.append(" MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
     sql.append(" FROM MEMBER ");
-    sql.append(" WHERE ID = :id AND PWD = :pwd AND IS_DEL IS NULL ");
+    sql.append(" WHERE ID = :id AND PWD = :pwd AND IS_DEL = 'N' ");
 
     Map<String, String> param = Map.of("id", id, "pwd", pwd);
 
