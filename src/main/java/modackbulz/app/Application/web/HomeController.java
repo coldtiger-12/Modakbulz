@@ -1,10 +1,12 @@
 package modackbulz.app.Application.web;
 
 import lombok.RequiredArgsConstructor;
-import modackbulz.app.Application.domain.camping.svc.GoCampingService;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
+import modackbulz.app.Application.domain.camping.svc.GoCampingService;
 import modackbulz.app.Application.domain.community.dao.CommunityDAO;
 import modackbulz.app.Application.entity.Community;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,17 @@ public class HomeController {
   private final CommunityDAO communityDAO;
 
   @GetMapping("/")
-  public String home(Model model) {
+  public String home(
+      // Spring Security를 통해 현재 로그인한 사용자 정보를 받아옵니다.
+      // 비로그인 상태일 경우 이 값은 null이 됩니다.
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      Model model
+  ){
+    if (userDetails != null){
+      // 로그인한 상태이면, 모델에 사용자 정보를 추가합니다.
+      // 이렇게 하면 HTML에서 사용자 닉네임 등을 사용할 수 있습니다.
+      model.addAttribute("user", userDetails);
+    }
     // goCampingService.getBasedList()가 반환하는 Mono<List<...>>를
     // .block()을 호출하여 List<...>로 변환합니다.
     // 메인에 표시할 캠핑장 개수를 8개로 지정합니다.

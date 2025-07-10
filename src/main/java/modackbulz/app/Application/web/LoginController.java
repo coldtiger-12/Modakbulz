@@ -30,7 +30,6 @@ public class LoginController {
     return "login/loginForm";
   }
 
-
   // 로그아웃 처리 (Get 방식 사용 로그인 세션 제거후 url 홈 리다이렉트)
   @GetMapping("/logout")
   public String logout(HttpServletRequest request) {

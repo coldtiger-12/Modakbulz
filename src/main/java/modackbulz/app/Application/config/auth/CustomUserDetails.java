@@ -21,6 +21,16 @@ public class CustomUserDetails implements UserDetails {
     this.member = member;
   }
 
+  // 사용자 닉네임을 반환합니다
+  public String getNickname() {
+    return member.getNickname();
+  }
+
+  // 사용자의 회원등급을 반환합니다.
+  public String getGubun() {
+    return member.getGubun();
+  }
+
   // 1. 사용자의 '권한' 목록을 반환합니다.
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

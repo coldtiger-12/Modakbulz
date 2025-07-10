@@ -1,39 +1,27 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
 </head>
 <body>
 
-<th:block th:fragment="beforeLoginTop">
-  <div class="topmenu" th:if="${session.loginMember == null}">
-    <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{/member/join}">회원가입</a></p>
+<th:block th:fragment="topmenu-section">
+  <div sec:authorize="isAnonymous()">
+    <div class="topmenu">
+      <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{/member/join}">회원가입</a></p>
+    </div>
   </div>
-</th:block>
-
-<th:block th:fragment="afterLoginTop">
-<<<<<<< HEAD
-  <div class="topmenu" th:if="${session.loginMember != null}">
-    <p>
-      <span th:text="${session.loginMember.nickname} + '님, 환영합니다!'"></span>
-      <span>||</span>
-      <a th:if="${session.loginMember.gubun == 'U'}" th:href="@{/mypage}" id="mypage">마이페이지</a>
-
-      <a th:if="${session.loginMember.gubun == 'A'}" th:href="@{/admin}" id="admin">관리자 대시보드</a>
-      <span>||</span>
-      <a th:href="@{/logout}" id="logout">로그아웃</a>
-    </p>
-=======
-  <div class.topmenu th:if="${session.loginMember != null}">
-  <p>
-    <span th:text="${session.loginMember.nickname} + '님, 환영합니다!'"></span>
-    <span>||</span>
-    <a th:if="${session.loginMember.gubun == 'U'}" th:href="@{/mypage}" id="mypage">마이페이지</a>
-    <a th:if="${session.loginMember.gubun == 'A'}" th:href="@{/admin}" id="admin">관리자 대시보드</a>
-    <span>||</span>
-    <a th:href="@{/logout}" id="logout">로그아웃</a>
-  </p>
->>>>>>> f18d45a82b6ee5dfab04b50988bc26b6d8fd86b9
+  <div sec:authorize="isAuthenticated()">
+    <div class="topmenu">
+      <p>
+        <span th:text="${#authentication.principal.nickname} + '님, 환영합니다!'"></span>
+        <span>||</span>
+        <a th:if="${#authentication.principal.gubun == 'U'}" th:href="@{/mypage}">마이페이지</a>
+        <a th:if="${#authentication.principal.gubun == 'A'}" th:href="@{/admin}">관리자 대시보드</a>
+        <span>||</span>
+        <a th:href="@{/logout}">로그아웃</a>
+      </p>
+    </div>
   </div>
 </th:block>
 
