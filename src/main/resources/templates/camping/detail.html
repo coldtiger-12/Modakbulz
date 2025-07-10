@@ -110,6 +110,31 @@
     </div>
   </section>
 
+  <section class="detail-reviews">
+    <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
+
+    <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
+      <div class="review-card" th:each="review : ${reviews}">
+        <div class="review-header">
+          <span class="review-stars">
+            <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+              <span th:if="${i <= review.score}">★</span><span th:unless="${i <= review.score}">☆</span>
+            </th:block>
+          </span>
+          <span class="review-writer" th:text="${review.writer}">작성자</span>
+        </div>
+        <p class="review-content" th:text="${review.content}">
+          리뷰 내용이 여기에 두 줄까지 표시됩니다. 내용이 길면 말줄임표로 처리됩니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="no-reviews-message" th:if="${#lists.isEmpty(reviews)}">
+      <p>📝 아직 작성된 리뷰가 없어요.</p>
+      <p>이 캠핑장의 첫 번째 리뷰를 남겨주세요!</p>
+    </div>
+  </section>
+
   <!-- 지도 표시 영역 -->
   <section class="detail-map">
     <h2>캠핑장 위치</h2>

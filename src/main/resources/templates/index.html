@@ -46,11 +46,19 @@
             <button type="submit" class="search-btn"></button>
           </div>
         </form>
-        <div class="tags" th:if="${hashtags != null and not #lists.isEmpty(hashtags)}">
-          <a th:each="tag : ${hashtags}"
-             th:href="@{/camping/search(theme=${tag})}"
-             th:text="'#' + ${tag}"
-             class="tag-link"></a>
+        <div class="tags">
+          <a th:href="@{/camping/search(theme='여름물놀이')}" class="tag-link">#여름물놀이</a>
+          <a th:href="@{/camping/search(theme='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
+          <a th:href="@{/camping/search(theme='걷기길')}" class="tag-link">#걷기길</a>
+          <a th:href="@{/camping/search(theme='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
+          <a th:href="@{/camping/search(theme='낚시')}" class="tag-link">#낚시</a>
+          <a th:href="@{/camping/search(theme='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
+          <a th:href="@{/camping/search(theme='일몰명소')}" class="tag-link">#일몰명소</a>
+          <a th:href="@{/camping/search(theme='수상레저')}" class="tag-link">#수상레저</a>
+          <a th:href="@{/camping/search(theme='액티비티')}" class="tag-link">#액티비티</a>
+          <a th:href="@{/camping/search(theme='일출명소')}" class="tag-link">#일출명소</a>
+          <a th:href="@{/camping/search(theme='스키')}" class="tag-link">#스키</a>
+          <a th:href="@{/camping/search(theme='항공레저')}" class="tag-link">#항공레저</a>
         </div>
       </section>
     </div>

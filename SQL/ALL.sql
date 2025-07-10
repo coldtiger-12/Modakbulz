@@ -394,3 +394,11 @@ CREATE SEQUENCE FILES_SEQ
     NOCACHE
     NOCYCLE;
 -------------------------------------------------------------------------------------------
+-- 11. 지도 정보 DB------------------------------------------------------------------------------
+CREATE TABLE CAMP_LOCATION (
+    location_id   NUMBER(10) PRIMARY KEY,
+    contentId     NUMBER(10) NOT NULL REFERENCES CAMPING_INFO(contentId) ON DELETE CASCADE,
+    mapY          VARCHAR2(30),
+    mapX          VARCHAR2(30),
+    address       VARCHAR2(255)
+);

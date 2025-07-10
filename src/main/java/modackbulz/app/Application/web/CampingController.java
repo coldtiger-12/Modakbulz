@@ -7,6 +7,9 @@ import modackbulz.app.Application.domain.camping.svc.GoCampingService;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import modackbulz.app.Application.domain.review.svc.ReviewSVC;
+import modackbulz.app.Application.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +32,7 @@ public class CampingController {
 
   private final GoCampingService goCampingService;
   private final CampingDAO campingDAO;
+  private final ReviewSVC reviewSVC;
 
   /**
    * 전체 캠핑장 목록 (수정됨: DB 우선 조회)
@@ -88,6 +92,10 @@ public class CampingController {
 
     // 캠핑장 정보를 모델에 추가
     model.addAttribute("camp", camp);
+
+    // 해당 캠핑장의 리뷰 목록을 조회하여 모델에 추가
+    List<Review> reviews = reviewSVC.findByContentId(contentId);
+    model.addAttribute("reviews", reviews);
 
     // 캠핑장 이미지 목록을 API에서 조회하여 모델에 추가
     if (camp != null) {

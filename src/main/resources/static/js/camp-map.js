@@ -21,8 +21,8 @@ window.addEventListener('DOMContentLoaded', function () {
     return (
       '<div style="background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.13); padding:20px 22px; min-width:220px; max-width:340px; font-size:15px; font-family: \"Noto Sans KR\", sans-serif; line-height:1.8; border:1.5px solid #e0e0e0;">' +
         '<div style="font-weight:700; font-size:18px; color:#222; margin-bottom:10px; letter-spacing:-1px;">' + (campName || '캠핑장') + '</div>' +
-        (address ? '<div style="color:#666; margin-bottom:7px; font-size:14px;"><span style=\"font-size:16px; color:#ff9800; margin-right:4px;\">📍</span>' + address + '</div>' : '') +
-        (campTel ? '<div style="color:#ff9800; font-weight:600; font-size:15px;"><span style=\"font-size:16px; color:#ff9800; margin-right:4px;\">☎️</span>' + campTel + '</div>' : '') +
+        (address ? '<div style="color:#666; margin-bottom:7px; font-size:14px;"><span style="font-size:16px; color:#ff9800; margin-right:4px;">📍</span>' + address + '</div>' : '') +
+        '<div style="color:#ff9800; font-weight:600; font-size:15px;"><span style="font-size:16px; color:#ff9800; margin-right:4px;">☎️</span>' + ((campTel && campTel !== 'null' && campTel.trim() !== '') ? campTel : '없음') + '</div>' +
       '</div>'
     );
   }
