@@ -33,6 +33,7 @@ public class SecurityConfig {
                 "/api/scraps/**" // API 경로도 허용 필요
             ).permitAll()
             .requestMatchers("/admin/**").hasRole("A")
+            .requestMatchers("/api/scraps/**").authenticated() // 👈 [수정] 로그인한 사용자만 접근 가능
             .anyRequest().authenticated()
         )
 
