@@ -7,7 +7,7 @@ CREATE TABLE CAMPSITES (
     VIEW_C      NUMBER DEFAULT 0 NOT NULL,
 
     SCORE       NUMBER DEFAULT 0 NOT NULL
-                CHECK (SCORE BETWEEN 1 AND 5)
+                CHECK (SCORE BETWEEN 0 AND 5)
 );
 
 // 리뷰 테이블에 새로운 평점 등록되면 반영해 평균 계산하는 트리거
