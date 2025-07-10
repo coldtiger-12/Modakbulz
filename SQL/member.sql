@@ -2,9 +2,7 @@ CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
     ID          VARCHAR2(10) NOT NULL UNIQUE CHECK (REGEXP_LIKE(ID, '^[A-Za-z0-9]+$')),
-    PWD VARCHAR2(15) NOT NULL CHECK (
-    LENGTH(PWD) >= 8 AND
-    REGEXP_LIKE(PWD, '^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,}$')),
+    PWD VARCHAR2(100) NOT NULL,
     EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL, 
                     '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
     TEL         VARCHAR2(11) NOT NULL UNIQUE,
