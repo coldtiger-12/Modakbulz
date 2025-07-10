@@ -47,20 +47,22 @@ public class LoginController {
   ) {
     log.info("loginForm={}", loginForm);
 
-    // 바인딩 오류 체크
+    // 1. 유효성 검사 오류가 있으면 로그인 폼으로 돌아감
     if (bindingResult.hasErrors()) {
       return "login/loginForm";
     }
 
-    Optional<Member> optionalMember = memberDAO.login(loginForm.getId(), loginForm.getPwd());
+    // 2. ID로 회원 정보를 먼저 조회 (login DAO 대신 findById 사용)
+    Optional<Member> optionalMember = memberDAO.findById(loginForm.getId());
 
-    // 사용자 존재 및 비밀번호 일치 확인
-    if (optionalMember.isEmpty() || !passwordEncoder.matches(loginForm.getPwd(),optionalMember.get().getPwd())) {
+    // 3. 회원 존재 여부 및 비밀번호 일치 확인
+    // passwordEncoder.matches(입력된 비밀번호, DB의 암호화된 비밀번호)
+    if (optionalMember.isEmpty() || !passwordEncoder.matches(loginForm.getPwd(), optionalMember.get().getPwd())) {
       bindingResult.reject("loginFail", "아이디 또는 비밀번호가 일치하지 않습니다.");
       return "login/loginForm";
     }
 
-    // 로그인 성공
+    // 4. 로그인 성공 처리
     Member member = optionalMember.get();
     HttpSession session = request.getSession(true);
     session.setAttribute("loginMember", new LoginMember(
@@ -71,7 +73,7 @@ public class LoginController {
         member.getGubun()
     ));
 
-    return "redirect:/";
+    return "redirect:/"; // 홈페이지로 리다이렉트
   }
 
 
