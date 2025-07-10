@@ -7,6 +7,7 @@ import modackbulz.app.Application.domain.member.svc.MemberSVC;
 import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.web.form.member.JoinForm;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/member")
 public class MemberController {
   private final MemberSVC memberSVC;
+  private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
 
   // 회원가입 폼
   @GetMapping("/join")
@@ -51,8 +53,8 @@ public class MemberController {
     BeanUtils.copyProperties(joinForm, member);
 
     // 4. 기본값 설정
-    member.setPwd(joinForm.getPwd());    // 암호화 없이 그대로 저장
-    member.setIsDel(null);
+    member.setPwd(passwordEncoder.encode(joinForm.getPwd()));    // 암호화 로직
+    member.setIsDel("N");
     member.setDelDate(null);
     member.setGubun("U");
 

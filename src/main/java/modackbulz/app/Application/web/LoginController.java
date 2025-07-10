@@ -9,6 +9,7 @@ import modackbulz.app.Application.domain.member.dao.MemberDAO;
 import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.web.form.login.LoginForm;
 import modackbulz.app.Application.web.form.login.LoginMember;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class LoginController {
 
   private final MemberDAO memberDAO;
+  private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
 
   // 로그인 화면
   @GetMapping("/login")
@@ -52,7 +54,8 @@ public class LoginController {
 
     Optional<Member> optionalMember = memberDAO.login(loginForm.getId(), loginForm.getPwd());
 
-    if (optionalMember.isEmpty()) {
+    // 사용자 존재 및 비밀번호 일치 확인
+    if (optionalMember.isEmpty() || !passwordEncoder.matches(loginForm.getPwd(),optionalMember.get().getPwd())) {
       bindingResult.reject("loginFail", "아이디 또는 비밀번호가 일치하지 않습니다.");
       return "login/loginForm";
     }

@@ -6,8 +6,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521/xe
-    username: c##camp
-    password: camp1234
+    username: ${DB_USERNAME:c##camp} # 환경 변수 사용, 없을 경우 기본값
+    password: ${DB_PASSWORD:camp1234}
   #ai
   ai:
     openai:
@@ -15,8 +15,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: your-gmail-address@gmail.com
-    password: your-gmail-app-password # Gmail 앱 비밀번호
+    username: ${MAIL_USERNAME:your-gmail-address@gmail.com}
+    password: ${MAIL_PASSWORD:your-gmail-app-password} # Gmail 앱 비밀번호
     properties:
       mail:
         smtp:

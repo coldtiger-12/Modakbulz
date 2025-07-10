@@ -56,10 +56,13 @@
           <option value="울산">울산</option>
         </select>
       </div>
+    </form>
+
+    <form th:object="${editForm}" th:action="@{/mypage/verify-email}" method="post">
       <div class="form-group">
         <label>이메일</label>
         <div style="display: flex; gap: 10px;">
-          <input type="email" th:field="*{email}" id="email">
+          <input type="email" th:field="${editForm.email}" id="email">
           <button type="button" class="btn-send-auth" onclick="sendAuthEmail()">인증번호 발송</button>
         </div>
       </div>
@@ -69,14 +72,14 @@
         <div class="field-err" th:if="${#fields.hasErrors('authCode')}" th:errors="*{authCode}"></div>
       </div>
       <div class="button-group">
-        <button type="submit" class="btn-submit">수정 완료</button>
+        <button type="submit" class="btn-submit" onclick="verifyAuthCode()">인증 확인</button>
       </div>
     </form>
 
     <hr style="margin: 30px 0;">
 
     <h2>비밀번호 변경</h2>
-    <form th:object="${editForm_Pwd}" th:action="@{/mypage/password}" method="post">
+    <form id="passwordForm" class="hidden" th:object="${editForm_Pwd}" th:action="@{/mypage/password}" method="post">
       <div class="form-group">
         <label>새 비밀번호</label>
         <input type="password" th:field="*{pwd}" placeholder="새 비밀번호를 입력하세요">
@@ -129,6 +132,30 @@
           alert('오류가 발생했습니다.');
       });
   }
+
+  function verifyAuthCode(){
+    const authCode = document.querySelector('[name="authCode"]').value;
+    fetch('/mypage/verify-email',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+      body: new URLSearchParams({ authcode: authCode }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.verified){
+        alert('이메일 인증이 완료 되었습니다.')
+        document.getElementById('passwordForm').classList.remove('hidden');
+      }else{
+        alert('인증번호가 올바르지 않습니다.')
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('오류가 발생했습니다.')
+    })
+  }
+
+
 </script>
 </body>
 </html>

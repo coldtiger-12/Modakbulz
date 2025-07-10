@@ -75,12 +75,12 @@ public class MemberDAOImpl implements MemberDAO {
   }
 
   @Override
-  public Optional<Member> findById(String id) {
+  public Optional<Member> findById(String id) { // login 메서드 대신 이 메서드를 사용
     StringBuffer sql = new StringBuffer();
     sql.append(" SELECT ");
-    sql.append(" GUBUN, ID, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
+    sql.append(" MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
     sql.append(" FROM MEMBER ");
-    sql.append(" WHERE ID = :id ");
+    sql.append(" WHERE ID = :id AND IS_DEL = 'N' ");
 
     Map<String, String> param = Map.of("id", id);
 

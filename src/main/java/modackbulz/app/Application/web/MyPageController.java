@@ -11,6 +11,7 @@ import modackbulz.app.Application.web.form.login.LoginMember;
 import modackbulz.app.Application.web.form.member.EditForm;
 import modackbulz.app.Application.web.form.member.EditForm_Pwd;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,6 +30,10 @@ public class MyPageController {
 
   private final MemberSVC memberSVC;
   private final EmailService emailService; // EmailService 주입
+  private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
+
+  private final String AUTH_CODE_SESSION_ATTR = "authCode";
+  private final String EMAIL_VERIFIED_SESSION_ATTR = "isEmailVerified";
 
   // 마이페이지 메인 화면 (수정됨)
   @GetMapping
@@ -150,7 +155,7 @@ public class MyPageController {
       return "member/editForm_pwd";
     }
 
-    boolean changed = memberSVC.changePassword(loginMember.getMemberId(), editForm_Pwd.getPwd());
+    boolean changed = memberSVC.changePassword(loginMember.getMemberId(), passwordEncoder.encode(editForm_Pwd.getPwd()));
 
     if(changed) {
       redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다.");
@@ -198,7 +203,9 @@ public class MyPageController {
   public ResponseEntity<Map<String, Boolean>> verifyEmailCode(
       @RequestParam String authcode, HttpSession session
   ) {
-    String sessionAuthCode = (String) session.getAttribute("authCode");
+
+    // 세션에 접근할 때 상수를 사용
+    String sessionAuthCode = (String) session.getAttribute(AUTH_CODE_SESSION_ATTR);
     boolean isVerified = sessionAuthCode != null && sessionAuthCode.equals(authcode);
     session.setAttribute("isEmailVerified", isVerified);
     return ResponseEntity.ok(Map.of("verified", isVerified));

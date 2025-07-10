@@ -83,6 +83,8 @@ public class CampingDAOImpl implements CampingDAO {
 
   @Override
   public Page<GoCampingDto.Item> search(String keyword, Pageable pageable) {
+    String searchKeyword = "%" + keyword + "%";
+
     // 1. 검색 조건에 맞는 데이터 개수 조회
     String countSql = "SELECT count(*) FROM CAMPING_INFO WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword";
     MapSqlParameterSource countParams = new MapSqlParameterSource("keyword", "%" + keyword + "%");
@@ -100,7 +102,7 @@ public class CampingDAOImpl implements CampingDAO {
         """;
 
     MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("keyword", "%" + keyword + "%");
+    params.addValue("keyword", searchKeyword);
     params.addValue("startRow", pageable.getOffset() + 1);
     params.addValue("endRow", pageable.getOffset() + pageable.getPageSize());
 
