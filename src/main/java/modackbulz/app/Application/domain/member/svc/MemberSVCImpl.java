@@ -36,11 +36,6 @@ public class MemberSVCImpl implements MemberSVC {
   }
 
   @Override
-  public Optional<Member> login(String id, String pwd) {
-    return memberDAO.login(id, pwd);
-  }
-
-  @Override
   public boolean changePassword(Long memberId, String newPwd) {
     return memberDAO.changePassword(memberId, newPwd);
   }

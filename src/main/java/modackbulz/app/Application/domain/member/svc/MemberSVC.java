@@ -14,11 +14,8 @@ public interface MemberSVC {
   // 회원 조회(멤버 아이디)
   Optional<Member> findByMemeberId(Long memberId);
 
-  // 회원 조회(이메일)
+  // 회원 조회(아이디)
   Optional<Member> findById(String id);
-
-  // 로그인 (이메일 + 비밀번호)
-  Optional<Member> login(String id, String pwd);
 
   // 비밀번호 변경
   boolean changePassword(Long memberId, String newPwd);

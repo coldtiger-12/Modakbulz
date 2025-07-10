@@ -1,7 +1,23 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
+  <style>
+    /* 로그아웃 버튼을 링크처럼 보이게 하는 스타일 */
+    .logout-form {
+      display: inline;
+    }
+    .logout-button {
+      background: none;
+      border: none;
+      padding: 0;
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+    }
+  </style>
 </head>
 <body>
 
@@ -19,7 +35,9 @@
         <a th:if="${#authentication.principal.gubun == 'U'}" th:href="@{/mypage}">마이페이지</a>
         <a th:if="${#authentication.principal.gubun == 'A'}" th:href="@{/admin}">관리자 대시보드</a>
         <span>||</span>
-        <a th:href="@{/logout}">로그아웃</a>
+      <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit" class="logout-button">로그아웃</button>
+      </form>
       </p>
     </div>
   </div>

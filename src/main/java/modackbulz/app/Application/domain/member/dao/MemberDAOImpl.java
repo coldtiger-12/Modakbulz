@@ -35,7 +35,6 @@ public class MemberDAOImpl implements MemberDAO {
     int rows = template.update(sql.toString(), param, keyHolder, new String[]{"MEMBER_ID"});
     long memberId = ((Number) keyHolder.getKeys().get("MEMBER_ID")).longValue();
 
-
     return findByMemeberId(memberId).orElseThrow(() -> new RuntimeException("회원 등록 실패"));
   }
 
@@ -50,7 +49,7 @@ public class MemberDAOImpl implements MemberDAO {
   @Override
   public Optional<Member> findByMemeberId(Long memberId) {
     if (memberId == null) {
-      return Optional.empty(); // 혹은 IllegalArgumentException 던져도 됨
+      return Optional.empty();
     }
 
     StringBuffer sql = new StringBuffer();
@@ -75,7 +74,7 @@ public class MemberDAOImpl implements MemberDAO {
   }
 
   @Override
-  public Optional<Member> findById(String id) { // login 메서드 대신 이 메서드를 사용
+  public Optional<Member> findById(String id) {
     StringBuffer sql = new StringBuffer();
     sql.append(" SELECT ");
     sql.append(" MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
@@ -83,25 +82,6 @@ public class MemberDAOImpl implements MemberDAO {
     sql.append(" WHERE ID = :id AND IS_DEL = 'N' ");
 
     Map<String, String> param = Map.of("id", id);
-
-    try {
-      Member member = template.queryForObject(sql.toString(), param,
-          BeanPropertyRowMapper.newInstance(Member.class));
-      return Optional.of(member);
-    } catch (EmptyResultDataAccessException e) {
-      return Optional.empty();
-    }
-  }
-
-  @Override
-  public Optional<Member> login(String id, String pwd) {
-    StringBuffer sql = new StringBuffer();
-    sql.append(" SELECT ");
-    sql.append(" MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE ");
-    sql.append(" FROM MEMBER ");
-    sql.append(" WHERE ID = :id AND PWD = :pwd AND IS_DEL = 'N'");
-
-    Map<String, String> param = Map.of("id", id, "pwd", pwd);
 
     try {
       Member member = template.queryForObject(sql.toString(), param,
@@ -135,15 +115,15 @@ public class MemberDAOImpl implements MemberDAO {
     String sql = "UPDATE MEMBER SET " +
         "TEL = :tel, " +
         "NICKNAME = :nickname, " +
-        "REGION = :region, " + // 쉼표 추가
-        "EMAIL = :email " + // 이메일 업데이트 추가
+        "REGION = :region, " +
+        "EMAIL = :email " +
         "WHERE MEMBER_ID = :memberId";
 
     Map<String, Object> param = new HashMap<>();
     param.put("tel", member.getTel());
     param.put("nickname", member.getNickname());
     param.put("region", member.getRegion());
-    param.put("email", member.getEmail()); // 파라미터 추가
+    param.put("email", member.getEmail());
     param.put("memberId", member.getMemberId());
 
     int updated = template.update(sql, param);

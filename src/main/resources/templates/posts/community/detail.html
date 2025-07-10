@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>게시글 상세</title>
@@ -7,9 +7,7 @@
   <link rel="stylesheet" href="" th:href="@{/css/community.css}">
 </head>
 <body>
-<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
-<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
-
+<div th:replace="~{fragments/topmenu :: topmenu-section}"></div>
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
 <main class="container">
@@ -29,14 +27,17 @@
   <div class="button">
     <button type="button" onclick="location.href='/posts/community'">목록</button>
 
-    <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.id == post.memberId)}">
-      <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
-        <button type="submit">수정</button>
-      </form>
-      <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
-            onsubmit="return confirm('정말 삭제하시겠습니까?');">
-        <button type="submit">삭제</button>
-      </form>
+    <th:block sec:authorize="isAuthenticated()"
+              th:with="currentUser=${#authentication.principal}">
+      <th:block th:if="${currentUser.gubun == 'A' or post.memberId == currentUser.memberId}">
+        <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
+          <button type="submit">수정</button>
+        </form>
+        <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+          <button type="submit">삭제</button>
+        </form>
+      </th:block>
     </th:block>
   </div>
 </main>

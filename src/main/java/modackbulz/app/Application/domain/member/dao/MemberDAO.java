@@ -24,7 +24,6 @@ public interface MemberDAO {
    * @param memberId
    * @return 회원정보
    */
-
   Optional<Member> findByMemeberId(Long memberId);
 
   /**
@@ -32,16 +31,7 @@ public interface MemberDAO {
    * @param id
    * @return 회원 정보
    */
-
   Optional<Member> findById(String id);
-
-  /**
-   * 로그인 (아이디 + 비밀번호)
-   * @param id
-   * @param pwd
-   * @return Optional<Member>
-   */
-  Optional<Member> login(String id, String pwd);
 
   /**
    * 비밀번호 변경
@@ -64,5 +54,4 @@ public interface MemberDAO {
    * @return 수정 성공 여부
    */
   boolean updateMember(Member member);
-
 }

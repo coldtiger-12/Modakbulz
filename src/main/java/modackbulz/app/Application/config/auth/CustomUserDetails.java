@@ -21,6 +21,11 @@ public class CustomUserDetails implements UserDetails {
     this.member = member;
   }
 
+  // memberId를 쉽게 가져올 수 있도록 메서드 추가
+  public Long getMemberId() {
+    return member.getMemberId();
+  }
+
   // 사용자 닉네임을 반환합니다
   public String getNickname() {
     return member.getNickname();

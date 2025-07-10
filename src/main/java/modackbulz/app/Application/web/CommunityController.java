@@ -3,12 +3,13 @@ package modackbulz.app.Application.web;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.community.svc.CommunitySVC;
 import modackbulz.app.Application.entity.Community;
 import modackbulz.app.Application.web.form.community.EditForm;
 import modackbulz.app.Application.web.form.community.SaveForm;
-import modackbulz.app.Application.web.form.login.LoginMember;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,16 +35,14 @@ public class CommunityController {
 
   // 게시글 등록
   @GetMapping("/new")
-  public String saveForm(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    if (loginMember == null) {
+  public String saveForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, RedirectAttributes redirectAttributes) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "회원만 글 작성 가능합니다.");
       return "redirect:/posts/community";
     }
 
     SaveForm form = new SaveForm();
-    form.setWriter(loginMember.getNickname());
+    form.setWriter(userDetails.getNickname());
     model.addAttribute("communityForm", form);
     return "posts/community/saveForm";
   }
@@ -52,7 +51,13 @@ public class CommunityController {
   @PostMapping("/save")
   public String savePost(@Valid @ModelAttribute("communityForm") SaveForm form,
                          BindingResult bindingResult,
-                         HttpSession session) {
+                         @AuthenticationPrincipal CustomUserDetails userDetails,
+                         RedirectAttributes redirectAttributes) {
+
+    if (userDetails == null) {
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
+      return "redirect:/login";
+    }
     if (bindingResult.hasErrors()) {
       return "posts/community/saveForm";
     }
@@ -60,11 +65,9 @@ public class CommunityController {
     Community community = new Community();
     BeanUtils.copyProperties(form, community);
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember != null) {
-      community.setMemberId(loginMember.getMemberId());
-      community.setWriter(loginMember.getNickname());
-    }
+    // userDetails에서 직접 memberId와 nickname 설정
+    community.setMemberId(userDetails.getMemberId());
+    community.setWriter(userDetails.getNickname());
 
     communityService.createPost(community);
     return "redirect:/posts/community";
@@ -82,31 +85,26 @@ public class CommunityController {
     return "posts/community/detail";
   }
 
-  // 게시글 수정 폼 (✨ 수정됨)
+  // 게시글 수정 폼
   @GetMapping("/{id}/edit")
   public String editForm(@PathVariable("id") Long id,
-                         HttpSession session,
+                         @AuthenticationPrincipal CustomUserDetails userDetails,
                          Model model,
                          RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    // 1. 로그인 확인
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
 
     Community post = communityService.getPostById(id).orElse(null);
 
-    // 2. 게시글 존재 여부 확인
     if (post == null) {
       redirectAttributes.addFlashAttribute("msg", "해당 게시글을 찾을 수 없습니다.");
       return "redirect:/posts/community";
     }
 
-    // 3. 권한 확인 (관리자 또는 작성자)
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -120,30 +118,27 @@ public class CommunityController {
   }
 
 
-  // 게시글 수정 처리 (✨ 수정됨)
+  // 게시글 수정 처리
   @PostMapping("/{id}/edit")
   public String updatePost(@PathVariable("id") Long id,
                            @Valid @ModelAttribute("communityForm") EditForm form,
                            BindingResult bindingResult,
-                           HttpSession session,
+                           @AuthenticationPrincipal CustomUserDetails userDetails,
                            RedirectAttributes redirectAttributes) {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    Community post = communityService.getPostById(id).orElse(null);
-
-    // 1. 로그인 확인
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
-    // 2. 게시글 존재 여부 확인
+
+    Community post = communityService.getPostById(id).orElse(null);
     if (post == null) {
       redirectAttributes.addFlashAttribute("msg", "해당 게시글을 찾을 수 없습니다.");
       return "redirect:/posts/community";
     }
-    // 3. 권한 확인
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -163,25 +158,22 @@ public class CommunityController {
   }
 
 
-  // 게시글 삭제 처리 (✨ 수정됨)
+  // 게시글 삭제 처리
   @PostMapping("/{id}/delete")
-  public String deletePost(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    Community post = communityService.getPostById(id).orElse(null);
-
-    // 1. 로그인 확인
-    if (loginMember == null) {
+  public String deletePost(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes redirectAttributes) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
-    // 2. 게시글 존재 여부 확인
+
+    Community post = communityService.getPostById(id).orElse(null);
     if (post == null) {
       redirectAttributes.addFlashAttribute("msg", "삭제할 게시글을 찾을 수 없습니다.");
       return "redirect:/posts/community";
     }
-    // 3. 권한 확인 (관리자 또는 작성자)
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "삭제 권한이 없습니다.");
