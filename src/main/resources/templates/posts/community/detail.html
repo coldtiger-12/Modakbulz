@@ -29,7 +29,7 @@
   <div class="button">
     <button type="button" onclick="location.href='/posts/community'">목록</button>
 
-    <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.id == post.memberId)}">
+    <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == post.memberId)}">
       <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
         <button type="submit">수정</button>
       </form>
