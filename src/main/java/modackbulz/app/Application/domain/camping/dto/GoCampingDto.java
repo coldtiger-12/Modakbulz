@@ -55,7 +55,8 @@ public class GoCampingDto {
     private Integer autoSiteCo; // 주요시설 자동차야영장 사이트 수
     private Integer glampSiteCo; // 주요시설 글램핑 사이트 수
     private Integer caravSiteCo; // 주요시설 카라반 사이트 수
-    
+    private List<String> campImages; // 갤러리 이미지 리스트
+
     // API가 보내주는 String 값을 숫자 타입으로 변환하기 위한 Setter들
     public void setContentId(String contentId) {
       this.contentId = safeParseLong(contentId);

@@ -34,7 +34,9 @@
   <section class="detail-main-info">
     <!-- 대표 이미지 표시 -->
     <div class="main-image-wrapper">
-      <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}"
+      <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()
+        ? camp.firstImageUrl
+        : (campImages != null and #lists.size(campImages) > 0 ? campImages[0] : '/images/임시사진.png')}"
            alt="캠핑장 대표 이미지">
     </div>
 
@@ -46,7 +48,7 @@
 
       <!-- 캠핑장 상세 정보 리스트 -->
       <ul class="info-list">
-        <li><strong>주소</strong><span th:text="${camp.addr1}">주소 정보</span></li>
+        <li><strong>주소</strong><span id="camp-address" th:text="${camp.addr1}">주소 정보</span></li>
         <li><strong>연락처</strong><span th:text="${camp.tel}">연락처 정보</span></li>
         <li><strong>운영 기간</strong><span th:text="${camp.operPdCl}">운영 기간 정보</span></li>
         <li>
@@ -81,13 +83,30 @@
 
   <!-- 갤러리 영역 (이미지 슬라이더 형식) -->
   <section class="detail-slider">
-    <h2>갤러리</h2>
-    <div class="slider-wrapper">
-      <div class="slide-item">
-        <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="갤러리 이미지 1">
+    <h2>
+      갤러리
+      <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
+        (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #arrays.length(campImages)}"></span>장)
+      </span>
+    </h2>
+    
+    <!-- 이미지가 있는 경우 -->
+    <div class="slider-wrapper" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
+      <!-- 대표 이미지가 있으면 먼저 표시 -->
+<!--      <div class="slide-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">-->
+<!--        <img th:src="${camp.firstImageUrl}" alt="캠핑장 대표 이미지">-->
+<!--      </div>-->
+      
+      <!-- API에서 가져온 추가 이미지들 표시 -->
+      <div class="slide-item" th:each="imageUrl : ${campImages}" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
+        <img th:src="${imageUrl}" th:alt="'캠핑장 이미지 ' + ${#arrays.length(campImages)}">
       </div>
-      <div class="slide-item"><img src="/images/임시사진.png" alt="갤러리 이미지 2"></div>
-      <div class="slide-item"><img src="/images/임시사진.png" alt="갤러리 이미지 3"></div>
+    </div>
+    
+    <!-- 이미지가 없는 경우 안내 메시지 -->
+    <div class="no-images-message" th:if="${(camp.firstImageUrl == null or camp.firstImageUrl.isEmpty()) and (campImages == null or #arrays.length(campImages) == 0)}">
+      <p>📷 이미지 준비 중입니다.</p>
+      <p>캠핑장의 아름다운 모습을 곧 만나보실 수 있습니다.</p>
     </div>
   </section>
 
@@ -105,6 +124,18 @@
   <p>요청하신 캠핑장을 찾지 못했거나, 정보를 가져오는 데 실패했습니다.</p>
   <a th:href="@{/}">홈으로 돌아가기</a>
 </div>
+
+<!-- 카카오맵 API 및 지도 표시용 JS 추가 -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
+<script th:inline="javascript">
+  var campName = '[[${camp.facltNm}]]';
+  var address = '[[${camp.addr1}]]';
+  var campTel = '[[${camp.tel}]]';
+  // 위도/경도 변수 추가
+  var mapY = /*[[${camp.mapY}]]*/ null;
+  var mapX = /*[[${camp.mapX}]]*/ null;
+</script>
+<script src="/js/camp-map.js"></script>
 
 </body>
 </html>

@@ -204,4 +204,39 @@
     color: #888;
     font-size: 1.2rem;
     border: 1px solid #ddd;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 지도 로딩 상태 스타일 */
+#map-placeholder.loading {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+/* 지도 에러 상태 스타일 */
+#map-placeholder.error {
+    background-color: #fff5f5;
+    color: #e53e3e;
+    border-color: #fed7d7;
+}
+
+/* 지도/로드뷰/스카이뷰 버튼 컨테이너 스타일 */
+.detail-map > div[style*='absolute'] button {
+    margin-left: 0;
+}
+.detail-map > div[style*='absolute'] {
+    display: flex !important;
+    gap: 8px;
+}
+.detail-map button:hover {
+    opacity: 0.85;
+    transition: all 0.2s;
+}
+
+/* 선택된 버튼(active) 강조 */
+.map-mode-btn.active {
+    box-shadow: 0 0 0 2px #ffc250;
+    filter: brightness(1.08);
+    outline: none;
 }
