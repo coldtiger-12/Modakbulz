@@ -39,9 +39,9 @@ public class CommunityDAOImpl implements CommunityDAO {
 
   @Override
   public Community save(Community community) {
-    // [수정] VIEW_C에 하드코딩된 문자 '0' 대신, 파라미터(:viewC)를 사용하도록 변경
-    String sql = "INSERT INTO COMMUNITY (CO_ID, FILE_NO, MEMBER_ID, TITLE, WRITER, CONTENT, CREATED_AT, VIEW_C) " +
-        "VALUES (community_co_id_seq.NEXTVAL, :fileNo, :memberId, :title, :writer, :content, SYSTIMESTAMP, :viewC)";
+    // 시퀀스 이름을 member_co_id_seq로 수정
+    String sql = "INSERT INTO COMMUNITY (CO_ID, MEMBER_ID, TITLE, WRITER, CONTENT, CREATED_AT, VIEW_C) " +
+        "VALUES (member_co_id_seq.NEXTVAL, :memberId, :title, :writer, :content, SYSTIMESTAMP, :viewC)";
     SqlParameterSource param = new BeanPropertySqlParameterSource(community);
     template.update(sql, param);
     return community;
