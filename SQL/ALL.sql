@@ -100,7 +100,7 @@ CREATE TABLE CAMPING_INFO (
     hvofBgnde          DATE,
     hvofEnddle         DATE,
     featureNm          VARCHAR2(2000),
-    induty             VARCHAR2(100),
+    induty             VARCHAR2(200),
     lctCl              VARCHAR2(100),
     doNm               VARCHAR2(50),
     sigunguNm          VARCHAR2(50),

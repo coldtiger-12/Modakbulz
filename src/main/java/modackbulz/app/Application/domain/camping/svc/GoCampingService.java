@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import reactor.core.publisher.Mono;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Flux;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,17 +32,25 @@ public class GoCampingService {
   private boolean isInitialized = false; // 초기화 여부를 추적하는 플래그
 
   /**
-   * [수정됨] 생성자에서 CampingDAO를 주입받아 초기화합니다.
+   * [수정됨] 생성자에서 CampingDAO를 주입받아 초기화하고, WebClient의 버퍼 크기를 늘립니다.
    * @param serviceKey application.yml에 설정된 서비스 키
    * @param campingDAO Spring이 자동으로 주입해주는 DAO 객체
    */
   public GoCampingService(@Value("${gocamping.api.service-key}") String serviceKey, CampingDAO campingDAO) {
     this.serviceKey = serviceKey;
-    this.campingDAO = campingDAO; // 주입받은 campingDAO를 필드에 할당
+    this.campingDAO = campingDAO;
+
     DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://apis.data.go.kr/B551011/GoCamping");
     factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
+
+    // WebClient가 더 큰 응답을 처리할 수 있도록 버퍼 크기 설정
+    ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+        .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)) // 10MB로 증설
+        .build();
+
     this.webClient = WebClient.builder()
         .uriBuilderFactory(factory)
+        .exchangeStrategies(exchangeStrategies) // 수정된 전략 적용
         .baseUrl("http://apis.data.go.kr/B551011/GoCamping")
         .build();
   }
@@ -279,4 +290,70 @@ public class GoCampingService {
         .bodyToMono(CampingImageDto.class);
   }
 
+  /**
+   * [추가] GoCamping API의 모든 캠핑장 정보를 DB에 동기화하는 메서드
+   * @return 저장된 총 캠핑장 개수
+   */
+  public Mono<Integer> syncAllCampingDataFromApi() {
+    log.info("========== 전체 캠핑장 정보 동기화 시작 ==========");
+    // 1. 첫 페이지를 호출하여 전체 데이터 개수(totalCount)를 가져옵니다.
+    return getCampingData("/basedList", "", 1, 1)
+        .flatMap(initialDto -> {
+          int totalCount = initialDto.getResponse().getBody().getTotalCount();
+          if (totalCount == 0) {
+            log.warn("API에서 가져올 데이터가 없습니다. 동기화를 종료합니다.");
+            return Mono.just(0);
+          }
+
+          // 2. 필요한 총 페이지 수를 계산합니다. (한 페이지에 100개씩 가져온다고 가정)
+          int numOfRows = 100;
+          int totalPages = (int) Math.ceil((double) totalCount / numOfRows);
+          log.info("총 데이터: {}건, 페이지당 {}건, 총 페이지: {}", totalCount, numOfRows, totalPages);
+
+          AtomicInteger savedCount = new AtomicInteger(0);
+
+          // 3. 모든 페이지에 대해 API를 비동기적으로 호출합니다.
+          return Flux.range(1, totalPages) // 1페이지부터 totalPages까지 반복
+              .delayElements(java.time.Duration.ofMillis(100)) // API 과부하 방지를 위한 딜레이 (50ms -> 100ms)
+              .doOnNext(pageNo -> log.info("페이지 {}/{} 처리 시작...", pageNo, totalPages))
+              .flatMap(pageNo -> getCampingData("/basedList", "", numOfRows, pageNo)
+                  .map(dto -> {
+                    List<GoCampingDto.Item> items = Optional.ofNullable(dto.getResponse())
+                        .map(GoCampingDto.Response::getBody)
+                        .map(GoCampingDto.Body::getItems)
+                        .map(GoCampingDto.Items::getItem)
+                        .orElse(Collections.emptyList());
+                    if (items.isEmpty()) {
+                      log.warn("페이지 {}에서 유효한 아이템을 찾을 수 없습니다.", pageNo);
+                    } else {
+                      log.info("페이지 {}에서 {}개의 아이템을 가져왔습니다. DB 저장 시작...", pageNo, items.size());
+                    }
+                    return items;
+                  })
+                  .doOnError(e -> log.error("페이지 {} API 호출 실패", pageNo, e))
+                  .onErrorResume(e -> Mono.just(Collections.emptyList())) // 오류 발생 시 해당 페이지만 건너뛰기
+              )
+              .flatMap(Flux::fromIterable) // List<Item> -> Flux<Item>
+              .doOnNext(item -> {
+                campingDAO.saveOrUpdate(item);
+                savedCount.incrementAndGet();
+              })
+              .count() // 처리된 총 아이템 개수 세기
+              .map(count -> savedCount.get());
+        })
+        .doOnSuccess(count -> log.info("========== 전체 캠핑장 정보 동기화 완료! 총 {}건 저장 ==========", count))
+        .doOnError(error -> log.error("========== 동기화 작업 중 심각한 오류 발생 ==========", error));
+  }
+
+  /**
+   * [추가] 매일 새벽 4시에 전체 캠핑장 정보를 동기화하는 스케줄러
+   */
+  @Scheduled(cron = "0 0 4 * * *") // 매일 새벽 4시에 실행
+  public void scheduleSync() {
+    log.info("캠핑장 정보 자동 동기화 스케줄을 시작합니다.");
+    syncAllCampingDataFromApi().subscribe(
+        count -> log.info("스케줄된 동기화 작업 완료. 총 {}건 처리.", count),
+        error -> log.error("스케줄된 동기화 작업 중 오류 발생", error)
+    );
+  }
 }
