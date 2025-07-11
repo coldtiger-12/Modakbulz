@@ -35,7 +35,9 @@
           <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
         </a>
         <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
-        <a th:href="${camp.homepage}" target="_blank" class="camp-card-link" th:if="${camp.homepage != null && !camp.homepage.isEmpty()}">홈페이지</a>
+        <a th:href="${#strings.startsWith(#strings.trim(camp.homepage), 'http') ? #strings.trim(camp.homepage) : '//' + #strings.trim(camp.homepage)}"
+           target="_blank" class="camp-card-link"
+           th:if="${camp.homepage != null && !camp.homepage.isEmpty()}">홈페이지</a>
       </div>
     </div>
   </div>

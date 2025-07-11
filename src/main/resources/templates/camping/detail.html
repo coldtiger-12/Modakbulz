@@ -53,7 +53,9 @@
         <li><strong>운영 기간</strong><span th:text="${camp.operPdCl}">운영 기간 정보</span></li>
         <li>
           <strong>홈페이지</strong>
-          <a th:if="${camp.homepage != null and !camp.homepage.isEmpty()}" th:href="${camp.homepage}" target="_blank">바로가기</a>
+          <a th:if="${camp.homepage != null and !camp.homepage.isEmpty()}"
+             th:href="${#strings.startsWith(#strings.trim(camp.homepage), 'http') ? #strings.trim(camp.homepage) : '//' + #strings.trim(camp.homepage)}"
+             target="_blank">바로가기</a>
           <span th:unless="${camp.homepage != null and !camp.homepage.isEmpty()}">정보 없음</span>
         </li>
         <li>
