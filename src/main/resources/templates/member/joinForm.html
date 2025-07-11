@@ -12,7 +12,7 @@
 <div class="join-container">
   <img src="/images/모닥불즈로고.png" alt="로고" class="login-logo">
   <h3 class="join-title">회 원 가 입</h3>
-  <form th:action="@{/member/join}" th:method="post" th:object="${joinForm}">
+  <form th:action="@{/member/join}" th:method="post" th:object="${joinForm}" onsubmit="return validatePassword()">
     <!-- 글로벌 에러 메시지 -->
     <div th:if="${#fields.hasGlobalErrors()}">
       <p class="global-err" th:each="err:${#fields.globalErrors()}" th:text="${err}"></p>
@@ -40,8 +40,14 @@
     <div class="join-form-group">
       <label th:for="pwdChk"> 비밀번호확인 : </label>
       <input type="password" th:field="*{pwdChk}">
+      <!-- 서버 측 에러메세지-->
       <div class="field-err" th:each="err : ${#fields.errors('pwdChk')}">
         <span th:text="${err}"></span>
+
+      </div>
+      <!-- 클라이언트 측(JS) 에러메세지-->
+      <div class="field-err">
+        <span id="pwdChk-error"></span>
       </div>
     </div>
 
@@ -72,6 +78,9 @@
         <option value="부산" th:selected="${joinForm.region == '부산'}">부산</option>
         <option value="대구" th:selected="${joinForm.region == '대구'}">대구</option>
         <option value="울산" th:selected="${joinForm.region == '울산'}">울산</option>
+        <option value="인천" th:selected="${joinForm.region == '인천'}">인천</option>
+        <option value="광주" th:selected="${joinForm.region == '광주'}">광주</option>
+        <option value="대전" th:selected="${joinForm.region == '대전'}">대전</option>
       </select>
     </div>
 
@@ -98,5 +107,22 @@
     </div>
   </form>
 </div>
+<script>
+  function validatePassword() {
+    const pwd = document.querySelector('[name="pwd"]').value;
+    const pwdChk = document.querySelector('[name="pwdChk"]').value;
+    const errorSpan = document.getElementById("pwdChk-error");
+
+    // 기존 메세지 지우기
+    errorSpan.textContent = "";
+
+    if(pwd !== pwdChk) {
+      errorSpan.textContent = "비밀번호가 일치하지 않습니다.";
+      document.querySelector('[name="pwdChk"]').focus();
+      return false;
+    }
+    return true;
+  }
+</script>
 </body>
 </html>

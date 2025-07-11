@@ -14,17 +14,64 @@ window.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
-  console.log('위도/경도 확인:', { mapY, mapX, address });
+  // ====== 커스텀 오버레이용 CSS 동적 삽입 ======
+  (function injectCustomOverlayCSS() {
+    var style = document.createElement('style');
+    style.innerHTML = `
+      .overlay_info {border-radius: 6px; margin-bottom: 12px; float:left;position: relative; border: 1px solid #ccc; border-bottom: 2px solid #ddd;background-color:#fff; z-index: 10;}
+      .overlay_info:nth-of-type(n) {border:0; box-shadow: 0px 1px 2px #888;}
+      .overlay_info a {display: block; background: #d95050 url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png) no-repeat right 14px center; text-decoration: none; color: #fff; padding:12px 36px 12px 14px; font-size: 14px; border-radius: 6px 6px 0 0}
+      .overlay_info a strong {background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/place_icon.png) no-repeat; padding-left: 27px;}
+      .overlay_info .desc {padding:14px;position: relative; min-width: 190px; height: 56px}
+      .overlay_info img {vertical-align: top; width:60px; height:40px; object-fit:cover; border-radius:4px;}
+      .overlay_info .address {font-size: 12px; color: #333; position: absolute; left: 80px; right: 14px; top: 24px; white-space: normal}
+      .overlay_info:after {content:'';position: absolute; margin-left: -11px; left: 50%; bottom: -12px; width: 22px; height: 12px; background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png) no-repeat 0 bottom;}
+    `;
+    document.head.appendChild(style);
+  })();
 
-  // 인포윈도우 내용 생성 함수 (고캠핑 스타일 유사)
-  function getInfoWindowContent() {
+  // ====== 커스텀 오버레이 HTML 생성 함수 ======
+  function getCustomOverlayContent() {
+    // campName, address, campImgUrl 변수가 window에 있다고 가정
+    var name = window.campName || '캠핑장';
+    var addr = window.address || '';
+    var img = window.campImgUrl || 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/place_thumb.png';
+    var link = window.campLink || '#';
     return (
-      '<div style="background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.13); padding:20px 22px; min-width:220px; max-width:340px; font-size:15px; font-family: \"Noto Sans KR\", sans-serif; line-height:1.8; border:1.5px solid #e0e0e0;">' +
-        '<div style="font-weight:700; font-size:18px; color:#222; margin-bottom:10px; letter-spacing:-1px;">' + (campName || '캠핑장') + '</div>' +
-        (address ? '<div style="color:#666; margin-bottom:7px; font-size:14px;"><span style="font-size:16px; color:#ff9800; margin-right:4px;">📍</span>' + address + '</div>' : '') +
-        '<div style="color:#ff9800; font-weight:600; font-size:15px;"><span style="font-size:16px; color:#ff9800; margin-right:4px;">☎️</span>' + ((campTel && campTel !== 'null' && campTel.trim() !== '') ? campTel : '없음') + '</div>' +
+      '<div class="overlay_info">' +
+      '  <a href="' + link + '" target="_blank"><strong>' + name + '</strong></a>' +
+      '  <div class="desc">' +
+      '    <img src="' + img + '" alt="">' +
+      '    <span class="address">' + addr + '</span>' +
+      '  </div>' +
       '</div>'
     );
+  }
+
+  // ====== 마커 클릭 시 커스텀 오버레이 표시 ======
+  function addMarkerWithCustomOverlay(map, coords) {
+    var marker = new kakao.maps.Marker({
+      map: map,
+      position: coords
+    });
+    var customOverlay = new kakao.maps.CustomOverlay({
+      position: coords,
+      content: getCustomOverlayContent(),
+      xAnchor: 0.5,
+      yAnchor: 1.35 // 마커 위에 자연스럽게 위치
+    });
+    var isOpen = false;
+    kakao.maps.event.addListener(marker, 'click', function() {
+      if (isOpen) {
+        customOverlay.setMap(null);
+        isOpen = false;
+      } else {
+        customOverlay.setMap(map);
+        isOpen = true;
+      }
+    });
+    // 3가지 모드 컨트롤 추가
+    addRoadviewControl(coords, map);
   }
 
   // 로드뷰 컨트롤 추가 함수
@@ -89,6 +136,7 @@ window.addEventListener('DOMContentLoaded', function () {
     buttonContainer.appendChild(skyBtn);
 
     var roadview = null;
+    var roadviewOverlay = null; // 로드뷰용 커스텀 오버레이
     var currentMode = 'map'; // map, roadview, skyview
 
     function setActive(btn) {
@@ -103,6 +151,8 @@ window.addEventListener('DOMContentLoaded', function () {
       roadviewContainer.style.display = 'none';
       map.setMapTypeId(kakao.maps.MapTypeId.ROADMAP);
       currentMode = 'map';
+      // 로드뷰 오버레이 제거
+      if (roadviewOverlay) roadviewOverlay.setMap(null);
     };
 
     roadBtn.onclick = function() {
@@ -118,6 +168,21 @@ window.addEventListener('DOMContentLoaded', function () {
           roadviewContainer.style.display = 'block';
           mapContainer.style.display = 'none';
           currentMode = 'roadview';
+          // 로드뷰 오버레이 생성 및 표시
+          if (roadviewOverlay) roadviewOverlay.setMap(null);
+          roadviewOverlay = new kakao.maps.CustomOverlay({
+            position: coords,
+            content: getCustomOverlayContent(),
+            xAnchor: 0.5,
+            yAnchor: 1.35 // 마커 위에 자연스럽게 위치
+          });
+          roadviewOverlay.setMap(roadview);
+          // 로드뷰 중심에 오버레이가 오도록 시점 조정
+          kakao.maps.event.addListener(roadview, 'init', function() {
+            var projection = roadview.getProjection();
+            var viewpoint = projection.viewpointFromCoords(roadviewOverlay.getPosition(), roadviewOverlay.getAltitude ? roadviewOverlay.getAltitude() : 0);
+            roadview.setViewpoint(viewpoint);
+          });
         } else {
           alert('해당 위치에는 로드뷰가 없습니다.');
         }
@@ -131,29 +196,9 @@ window.addEventListener('DOMContentLoaded', function () {
       roadviewContainer.style.display = 'none';
       map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
       currentMode = 'skyview';
+      // 로드뷰 오버레이 제거
+      if (roadviewOverlay) roadviewOverlay.setMap(null);
     };
-  }
-
-  function addMarkerWithToggle(map, coords) {
-    var marker = new kakao.maps.Marker({
-      map: map,
-      position: coords
-    });
-    var infowindow = new kakao.maps.InfoWindow({
-      content: getInfoWindowContent()
-    });
-    var isOpen = false;
-    kakao.maps.event.addListener(marker, 'click', function() {
-      if (isOpen) {
-        infowindow.close();
-        isOpen = false;
-      } else {
-        infowindow.open(map, marker);
-        isOpen = true;
-      }
-    });
-    // 3가지 모드 컨트롤 추가
-    addRoadviewControl(coords, map);
   }
 
   // 1. 위도/경도 값이 있으면 바로 지도 표시
@@ -162,9 +207,9 @@ window.addEventListener('DOMContentLoaded', function () {
     var coords = new kakao.maps.LatLng(mapY, mapX);
     var map = new kakao.maps.Map(mapContainer, {
       center: coords,
-      level: 3
+      level: 4 // 기존 3에서 4로 한 단계 뒤로
     });
-    addMarkerWithToggle(map, coords);
+    addMarkerWithCustomOverlay(map, coords);
     setTimeout(function() {
       map.relayout();
       map.setCenter(coords);
@@ -192,9 +237,9 @@ window.addEventListener('DOMContentLoaded', function () {
       var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
       var map = new kakao.maps.Map(mapContainer, {
         center: coords,
-        level: 3
+        level: 4 // 기존 3에서 4로 한 단계 뒤로
       });
-      addMarkerWithToggle(map, coords);
+      addMarkerWithCustomOverlay(map, coords);
       setTimeout(function() {
         map.relayout();
         map.setCenter(coords);

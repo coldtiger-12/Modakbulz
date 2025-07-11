@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
+import modackbulz.app.Application.domain.community.svc.CommunitySVC;
 import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.global.service.EmailService;
 import modackbulz.app.Application.web.form.login.LoginMember;
@@ -29,6 +30,7 @@ public class MyPageController {
 
   private final MemberSVC memberSVC;
   private final EmailService emailService; // EmailService 주입
+  private final CommunitySVC communitySVC;
 
   // 마이페이지 메인 화면 (수정됨)
   @GetMapping
@@ -215,7 +217,7 @@ public class MyPageController {
   }
 
 
-  // 내가 찜한 캠핑장
+  // 내가 스크랩한 캠핑장
   @GetMapping("/likes")
   public String likeCampPage(){
     return "member/likeCamp";
@@ -225,9 +227,12 @@ public class MyPageController {
   @GetMapping("/posts")
   public String myPosts(HttpSession session, Model model) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (loginMember == null || loginMember.getMemberId() == null) {
       return "redirect:/login";
     }
+    // 내가 쓴 게시글 조회
+    var myPosts = communitySVC.getPostsByMemberId(loginMember.getMemberId());
+    model.addAttribute("myPosts", myPosts);
     return "member/myPosts";
   }
 

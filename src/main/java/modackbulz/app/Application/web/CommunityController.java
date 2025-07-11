@@ -52,7 +52,17 @@ public class CommunityController {
   @PostMapping("/save")
   public String savePost(@Valid @ModelAttribute("communityForm") SaveForm form,
                          BindingResult bindingResult,
-                         HttpSession session) {
+                         HttpSession session,
+                         RedirectAttributes redirectAttributes) { // RedirectAttributes 추가
+
+    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+
+    // 1. 로그인 여부 우선 확인
+    if (loginMember == null) {
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
+      return "redirect:/login";
+    }
+
     if (bindingResult.hasErrors()) {
       return "posts/community/saveForm";
     }
@@ -60,11 +70,10 @@ public class CommunityController {
     Community community = new Community();
     BeanUtils.copyProperties(form, community);
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember != null) {
-      community.setMemberId(loginMember.getMemberId());
-      community.setWriter(loginMember.getNickname());
-    }
+    // 2. 로그인 정보로 작성자 정보 설정
+    community.setMemberId(loginMember.getMemberId());
+    community.setWriter(loginMember.getNickname());
+
 
     communityService.createPost(community);
     return "redirect:/posts/community";

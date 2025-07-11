@@ -50,15 +50,22 @@ public class LoginController {
       return "login/loginForm";
     }
 
-    Optional<Member> optionalMember = memberDAO.login(loginForm.getId(), loginForm.getPwd());
-
+    //아이디 먼저 조회
+    Optional<Member> optionalMember = memberDAO.findById(loginForm.getId());
     if (optionalMember.isEmpty()) {
-      bindingResult.reject("loginFail", "아이디 또는 비밀번호가 일치하지 않습니다.");
+      bindingResult.rejectValue("id","notExist","존재하지 않는 ID입니다.");
+      return "login/loginForm";
+    }
+
+    Member member = optionalMember.get();
+
+    // 비밀번호 일치 확인
+    if(!member.getPwd().equals(loginForm.getPwd())) {
+      bindingResult.rejectValue("pwd", "notMatch", "비밀번호가 일치하지 않습니다.");
       return "login/loginForm";
     }
 
     // 로그인 성공
-    Member member = optionalMember.get();
     HttpSession session = request.getSession(true);
     session.setAttribute("loginMember", new LoginMember(
         member.getMemberId(),
