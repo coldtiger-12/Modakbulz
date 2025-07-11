@@ -9,10 +9,19 @@
 </head>
 
 <body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<!-- 로그인 영역 -->
 <div class="join-container">
   <img src="/images/모닥불즈로고.png" alt="로고" class="login-logo">
   <h3 class="join-title">회 원 가 입</h3>
   <form th:action="@{/member/join}" th:method="post" th:object="${joinForm}" onsubmit="return validatePassword()">
+    <input type="hidden" name="gubun" th:value="${gubun}" />
     <!-- 글로벌 에러 메시지 -->
     <div th:if="${#fields.hasGlobalErrors()}">
       <p class="global-err" th:each="err:${#fields.globalErrors()}" th:text="${err}"></p>

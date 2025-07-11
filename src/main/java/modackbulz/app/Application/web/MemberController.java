@@ -19,6 +19,28 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
   private final MemberSVC memberSVC;
 
+  // 회원가입 유형 선택 페이지
+  @GetMapping("/join-type")
+  public String joinType() {
+    return "member/joinType";
+  }
+
+  // 사용자 회원가입 폼
+  @GetMapping("/join-user")
+  public String userJoinForm(Model model) {
+    model.addAttribute("joinForm", new JoinForm());
+    model.addAttribute("gubun","U");
+    return "member/joinForm";
+  }
+
+  // 관리자 회원가입 폼
+  @GetMapping("/join-admin")
+  public String adminJoinForm(Model model) {
+    model.addAttribute("joinForm", new JoinForm());
+    model.addAttribute("gubun","A");
+    return "member/joinForm";
+  }
+
   // 회원가입 폼
   @GetMapping("/join")
   public String joinForm(Model model) {
@@ -31,12 +53,14 @@ public class MemberController {
   public String join(
       @Valid @ModelAttribute JoinForm joinForm,
       BindingResult bindingResult,
-      Model model
+      Model model,
+      @RequestParam("gubun") String gubun
   ) {
     log.info("회원가입 요청: {}", joinForm);
 
     // 1. 유효성 검사 실패 시 다시 폼으로
     if (bindingResult.hasErrors()) {
+      model.addAttribute("gubun", gubun);
       return "member/joinForm";
     }
 
@@ -54,13 +78,14 @@ public class MemberController {
     member.setPwd(joinForm.getPwd());    // 암호화 없이 그대로 저장
     member.setIsDel(null);
     member.setDelDate(null);
-    member.setGubun("U");
+    member.setGubun(gubun); // 관리자 or 사용자
 
     try {
       memberSVC.insertMember(member);
     } catch (Exception e) {
       log.error("회원가입 실패", e);
       bindingResult.reject("joinFail", "회원가입 처리 중 오류가 발생했습니다.");
+      model.addAttribute("gubun",gubun);
       return "member/joinForm";
     }
 
