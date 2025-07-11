@@ -23,6 +23,19 @@ spring:
           auth: true
           starttls:
             enable: true
+# [추가] Bucket4j Rate Limiting 설정
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: buckets
+      url: /mypage/email/verification-requests # 👈 요청을 제한할 URL
+      rate-limits:
+        - bandwidths:
+            - capacity: 3         # 👈 10분 동안 최대 3번의 요청만 허용
+              time: 10
+              unit: minutes
+              refill-speed: greedy
+
 #gocamping
 gocamping:
   api:

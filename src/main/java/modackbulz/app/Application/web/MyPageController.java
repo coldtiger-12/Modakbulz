@@ -1,6 +1,9 @@
 package modackbulz.app.Application.web;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
@@ -18,10 +21,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpSession;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @Controller
@@ -33,29 +36,34 @@ public class MyPageController {
   private final EmailService emailService;
   private final PasswordEncoder passwordEncoder;
 
+  @Data
+  @AllArgsConstructor
+  private static class VerificationCode {
+    private String code;
+    private LocalDateTime createdAt;
+
+    public boolean isValid(String inputCode) {
+      return this.code.equals(inputCode) && createdAt.plusMinutes(5).isAfter(LocalDateTime.now());
+    }
+  }
+
+
   // 회원정보 수정 폼
   @GetMapping({"", "/edit"})
   public String editForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, RedirectAttributes redirectAttributes) {
-    if (userDetails == null) {
-      return "redirect:/login";
-    }
-
+    if (userDetails == null) return "redirect:/login";
     Optional<Member> memberOptional = memberSVC.findById(userDetails.getUsername());
-
     if (memberOptional.isEmpty()) {
       redirectAttributes.addFlashAttribute("message", "회원 정보가 존재하지 않습니다. 다시 로그인해주세요.");
       return "redirect:/login";
     }
-
     Member member = memberOptional.get();
-
     EditForm editForm = new EditForm();
     editForm.setId(member.getId());
     editForm.setNickname(member.getNickname());
     editForm.setTel(member.getTel());
     editForm.setRegion(member.getRegion());
     editForm.setEmail(member.getEmail());
-
     model.addAttribute("editForm", editForm);
     model.addAttribute("editForm_Pwd", new EditForm_Pwd());
     return "member/editForm";
@@ -70,22 +78,18 @@ public class MyPageController {
   ) {
     if (userDetails == null) return "redirect:/login";
     if (bindingResult.hasErrors()) return "member/editForm";
-
     Optional<Member> memberOptional = memberSVC.findById(userDetails.getUsername());
     if(memberOptional.isEmpty()) return "redirect:/login";
-
     Member memberToUpdate = memberOptional.get();
     memberToUpdate.setNickname(editForm.getNickname());
     memberToUpdate.setTel(editForm.getTel());
     memberToUpdate.setRegion(editForm.getRegion());
     memberToUpdate.setEmail(editForm.getEmail());
-
     boolean updated = memberSVC.updateMember(memberToUpdate);
     if (!updated) {
       bindingResult.reject("updateFail", "회원정보 수정에 실패했습니다.");
       return "member/editForm";
     }
-
     return "redirect:/mypage?success";
   }
 
@@ -95,10 +99,18 @@ public class MyPageController {
       @Valid @ModelAttribute("editForm_Pwd") EditForm_Pwd editForm_Pwd,
       BindingResult bindingResult,
       @AuthenticationPrincipal CustomUserDetails userDetails,
-      RedirectAttributes redirectAttributes) {
+      RedirectAttributes redirectAttributes,
+      HttpSession session
+  ) {
+    // 👇 [핵심] 서버 측에서 이메일 인증 완료 여부를 직접 확인
+    Boolean isVerified = (Boolean) session.getAttribute("emailVerified");
+    if (isVerified == null || !isVerified) {
+      bindingResult.reject("unauthorizedChange", "이메일 인증이 완료되지 않았습니다. 인증을 먼저 진행해주세요.");
+      return "member/editForm";
+    }
 
     if (userDetails == null) return "redirect:/login";
-    if (bindingResult.hasErrors()) return "member/editForm_pwd";
+    if (bindingResult.hasErrors()) return "member/editForm";
 
     Optional<Member> memberOptional = memberSVC.findById(userDetails.getUsername());
     if(memberOptional.isEmpty()) return "redirect:/login";
@@ -106,14 +118,56 @@ public class MyPageController {
     Member member = memberOptional.get();
     boolean changed = memberSVC.changePassword(member.getMemberId(), passwordEncoder.encode(editForm_Pwd.getPwd()));
 
+    // [추가] 사용한 인증 상태는 세션에서 제거하여 재사용 방지
+    session.removeAttribute("emailVerified");
+
     if (changed) {
       redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.");
-      return "redirect:/login"; // 비밀번호 변경 후 보안을 위해 로그아웃 처리 후 로그인 페이지로 이동
+      return "redirect:/login";
     } else {
       bindingResult.reject("changePwdFail", "비밀번호 변경에 실패했습니다.");
-      return "member/editForm_pwd";
+      return "member/editForm";
     }
   }
+
+  // 이메일 인증번호 발송 처리
+  @PostMapping("/email/verification-requests")
+  public ResponseEntity<String> sendVerificationEmail(@RequestBody Map<String, String> payload, HttpSession session) {
+    String email = payload.get("email");
+    SecureRandom random = new SecureRandom();
+    int authCode = 100000 + random.nextInt(900000);
+
+    try {
+      String subject = "[모닥불즈] 이메일 인증 번호 안내";
+      String text = "인증 번호는 " + authCode + " 입니다. 이 번호는 5분간 유효합니다.";
+      emailService.sendEmail(email, subject, text);
+      session.setAttribute("authCode", new VerificationCode(String.valueOf(authCode), LocalDateTime.now()));
+      log.info("인증번호 발송 완료. 이메일: {}, 인증번호: {}", email, authCode);
+      return ResponseEntity.ok("인증번호가 발송되었습니다.");
+    } catch (Exception e) {
+      log.error("이메일 발송 실패. 이메일: {}", email, e);
+      return ResponseEntity.internalServerError().body("인증번호 발송에 실패했습니다.");
+    }
+  }
+
+  // 이메일 인증번호 확인 처리
+  @PostMapping("/verify-email")
+  public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam("authcode") String authCode, HttpSession session) {
+    VerificationCode sessionCode = (VerificationCode) session.getAttribute("authCode");
+
+    if (sessionCode == null) {
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 발급되지 않았습니다."));
+    }
+
+    if (sessionCode.isValid(authCode)) {
+      session.removeAttribute("authCode");
+      session.setAttribute("emailVerified", true); // 👈 인증 완료 상태를 세션에 저장
+      return ResponseEntity.ok(Map.of("verified", true, "message", "인증에 성공했습니다."));
+    } else {
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 올바르지 않거나 유효시간이 초과되었습니다."));
+    }
+  }
+
 
   // 내가 찜한 캠핑장
   @GetMapping("/likes")
@@ -137,16 +191,13 @@ public class MyPageController {
   @PostMapping("/delete")
   public String delete(@AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes redirectAttributes) {
     if (userDetails == null) return "redirect:/login";
-
     Optional<Member> memberOptional = memberSVC.findById(userDetails.getUsername());
     if(memberOptional.isEmpty()) return "redirect:/login";
-
     boolean deleted = memberSVC.deleteMember(memberOptional.get().getMemberId());
     if (!deleted) {
       redirectAttributes.addFlashAttribute("error", "deleteFail");
       return "redirect:/mypage";
     }
-
-    return "redirect:/logout"; // 탈퇴 후 로그아웃 처리
+    return "redirect:/logout";
   }
 }
