@@ -355,6 +355,8 @@ header {
     border-radius: 15px;
     width: 240px;
     box-sizing: border-box;
+    text-decoration: none;
+    color: #333;
 }
 .camp img {
     width: 100%;
