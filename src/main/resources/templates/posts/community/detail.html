@@ -7,38 +7,134 @@
   <link rel="stylesheet" href="" th:href="@{/css/community.css}">
 </head>
 <body>
-<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
-<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<!-- 로그인 전/후 상단 메뉴 -->
+<th:block th:if="${session.loginMember == null}" th:replace="~{fragments/topmenu :: beforeLoginTop}"></th:block>
+<th:block th:if="${session.loginMember != null}" th:replace="~{fragments/topmenu :: afterLoginTop}"></th:block>
 
+<!-- 헤더 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
 <main class="container">
   <h1>게시글 상세</h1>
+
+  <!-- 게시글 상세 정보 -->
   <div class="post-detail">
     <h2 th:text="${post.title}">제목</h2>
-
     <p><strong>작성자:</strong> <span th:text="${post.writer}">작성자</span></p>
-    <p><strong>작성일:</strong> <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+    <p><strong>작성일:</strong>
+      <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+    </p>
     <p><strong>조회수:</strong> <span th:text="${post.viewC}">0</span></p>
-
     <hr>
     <div class="content" th:text="${post.content}">내용</div>
     <hr>
   </div>
 
+  <!-- 게시글 버튼 (목록, 수정, 삭제) -->
   <div class="button">
     <button type="button" onclick="location.href='/posts/community'">목록</button>
-
     <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == post.memberId)}">
-      <form th:action="@{'/posts/community/' + ${post.coId} + '/edit'}" method="get" style="display: inline;">
+      <form th:action="@{/posts/community/{id}/edit(id=${post.coId})}" method="get" style="display: inline;">
         <button type="submit">수정</button>
       </form>
-      <form th:action="@{'/posts/community/' + ${post.coId} + '/delete'}" method="post" style="display: inline;"
+      <form th:action="@{/posts/community/{id}/delete(id=${post.coId})}" method="post" style="display: inline;"
             onsubmit="return confirm('정말 삭제하시겠습니까?');">
         <button type="submit">삭제</button>
       </form>
     </th:block>
   </div>
+
+  <!-- 댓글 영역 -->
+  <section class="comments">
+    <h3>댓글 목록</h3>
+
+    <!-- 댓글이 없을 경우 -->
+    <div th:if="${comments == null or #lists.isEmpty(comments)}">
+      댓글이 없습니다.
+    </div>
+
+    <!-- 댓글 목록 (재귀적으로 표시됨) -->
+    <ul class="comment-list-container" th:if="${comments != null and not #lists.isEmpty(comments)}">
+      <!-- ▼▼▼ 재귀 구조를 가장 안정적인 방식으로 변경 ▼▼▼ -->
+      <th:block th:each="comment : ${comments}">
+        <div th:replace="~{::commentFragment(comment=${comment}, post=${post}, commentForm=${commentForm}, replyForm=${replyForm}, editCommentId=${editCommentId}, isReplying=${isReplying})}"></div>
+      </th:block>
+    </ul>
+
+    <!-- 최상위 댓글 작성 폼 (수정 또는 답글 작성 중이 아닐 때만 보임) -->
+    <div th:if="${session.loginMember != null and editCommentId == null and !isReplying}">
+      <h4>댓글 작성</h4>
+      <form th:action="@{/posts/community/{postId}/comments/save(postId=${post.coId})}" th:object="${commentForm}" method="post">
+        <textarea th:field="*{content}" rows="4" cols="50"></textarea>
+        <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+        <button type="submit">댓글 등록</button>
+      </form>
+    </div>
+
+    <div th:if="${session.loginMember == null}">
+      <p>댓글 작성은 로그인 후 가능합니다.</p>
+    </div>
+  </section>
 </main>
-</body>
-</html>
+
+
+<!-- ====================================================================================================== -->
+<!-- ▼▼▼ 댓글 재귀 렌더링 프래그먼트 (가장 안정적인 구조로 재설계) ▼▼▼ -->
+<!-- ====================================================================================================== -->
+<div th:fragment="commentFragment(comment, post, commentForm, replyForm, editCommentId, isReplying)">
+  <li class="comment-unit" th:if="${comment != null}">
+
+    <!-- 댓글 한 줄의 레이아웃 (flexbox 적용) -->
+    <div class="comment-item">
+      <!-- 왼쪽 영역: 댓글 내용 -->
+      <div class="comment-content">
+        <p>
+          <strong th:text="${comment.writer}"></strong>
+          <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+        </p>
+        <div th:if="${editCommentId == comment.cComId}">
+          <form th:action="@{/posts/community/{postId}/comments/{commentId}/edit(postId=${post.coId}, commentId=${comment.cComId})}" th:object="${commentForm}" method="post">
+            <textarea th:field="*{content}" rows="3" cols="60"></textarea>
+            <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+            <button type="submit">수정 완료</button>
+            <button type="button" th:onclick="|window.location.href='@{/posts/community/{id}(id=${post.coId})}'|">취소</button>
+          </form>
+        </div>
+        <div th:if="${editCommentId != comment.cComId}">
+          <p th:text="${comment.content}">댓글 내용</p>
+        </div>
+        <div class="reply-form-container">
+          <th:block th:if="${session.loginMember != null and editCommentId == null and !isReplying}">
+            <a th:href="@{/posts/community/{postId}/comments/{parentCommentId}/reply(postId=${post.coId}, parentCommentId=${comment.cComId})}" class="reply-toggle-btn" style="text-decoration: none;">답글 작성</a>
+          </th:block>
+        </div>
+      </div>
+
+      <!-- 오른쪽 영역: 수정/삭제 버튼 -->
+      <div class="comment-actions" th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == comment.memberId) and editCommentId == null and !isReplying}">
+        <a th:href="@{/posts/community/{postId}/comments/{commentId}/edit(postId=${post.coId}, commentId=${comment.cComId})}" class="action-button">수정</a>
+        <form th:action="@{/posts/community/{postId}/comments/{commentId}/delete(postId=${post.coId}, commentId=${comment.cComId})}" method="post" style="display:inline" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+          <button type="submit" class="action-button">삭제</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 대댓글 작성 폼 -->
+    <div class="reply-form-wrapper" th:if="${isReplying and replyForm.prcComId == comment.cComId}" style="margin-top: 10px; margin-left: 40px;">
+      <form th:action="@{/posts/community/{postId}/comments/save(postId=${post.coId})}" th:object="${replyForm}" method="post">
+        <input type="hidden" th:field="*{prcComId}" />
+        <textarea th:field="*{content}" rows="3" cols="50" placeholder="답글을 입력하세요..."></textarea>
+        <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color: red; font-size: 0.9em;"></div>
+        <button type="submit">답글 등록</button>
+        <a th:href="@{/posts/community/{id}(id=${post.coId})}" style="text-decoration: none;"><button type="button">취소</button></a>
+      </form>
+    </div>
+
+    <!-- 자식 댓글 목록 (재귀 호출) -->
+    <ul class="replies-list" th:if="${comment.replies != null and not #lists.isEmpty(comment.replies)}" style="padding-left: 40px; list-style: none;">
+      <th:block th:each="reply : ${comment.replies}">
+        <div th:replace="~{::commentFragment(comment=${reply}, post=${post}, commentForm=${commentForm}, replyForm=${replyForm}, editCommentId=${editCommentId}, isReplying=${isReplying})}"></div>
+      </th:block>
+    </ul>
+  </li>
+</div>

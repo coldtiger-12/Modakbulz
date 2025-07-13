@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LoginMember {
-  private Long memberId;
+  private Long memberId;     // 관리 번호
   private String id;         // 사용자 로그인 ID
   private String email;
   private String nickname;

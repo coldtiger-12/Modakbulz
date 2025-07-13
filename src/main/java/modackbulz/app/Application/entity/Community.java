@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 public class Community {
   private Long coId;
-  private Long fileNo;
   private Long memberId;
   private String title;
   private String writer;

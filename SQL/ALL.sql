@@ -19,7 +19,6 @@ DROP SEQUENCE camp_faq_id_seq;
 DROP SEQUENCE faq_comment_seq;
 DROP SEQUENCE camp_scrap_id_seq;
 DROP SEQUENCE FILES_SEQ;
-
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
 
 -- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
@@ -76,8 +75,19 @@ BEGIN
   );
 END;
 
-SELECT * FROM MEMBER;
+ALTER TABLE MEMBER
+MODIFY PWD VARCHAR2(255)
+CHECK (
+  LENGTH(PWD) >= 8 AND
+  			  REGEXP_LIKE(PWD, '.*[A-Z].*') AND
+			  REGEXP_LIKE(PWD, '.*[a-z].*') AND
+			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
+			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
+);
 
+
+SELECT * FROM MEMBER;
+SELECT email, pwd FROM member WHERE email = 'pbtakcm@gmail.com';
 -------------------------------------------------------------------------------------------
 -- 2. 캠핑장 정보 저장 DB ---------------------------------------------------------------------
 
@@ -100,7 +110,7 @@ CREATE TABLE CAMPING_INFO (
     hvofBgnde          DATE,
     hvofEnddle         DATE,
     featureNm          VARCHAR2(2000),
-    induty             VARCHAR2(200),
+    induty             VARCHAR2(200) DEFAULT '일반야영장',
     lctCl              VARCHAR2(100),
     doNm               VARCHAR2(50),
     sigunguNm          VARCHAR2(50),
@@ -146,7 +156,7 @@ CREATE TABLE CAMPSITES (
     SC_C        NUMBER DEFAULT 0 NOT NULL,
     VIEW_C      NUMBER DEFAULT 0 NOT NULL,
     SCORE       NUMBER DEFAULT 0 NOT NULL
-                CHECK (SCORE BETWEEN 0 AND 5)
+                CHECK (SCORE BETWEEN 1 AND 5)
 );
 
 CREATE OR REPLACE TRIGGER trg_update_campsite_score
@@ -196,7 +206,7 @@ CREATE TABLE REVIEW (
     CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
     UPDATED_AT   TIMESTAMP,
     SCORE        NUMBER(10) DEFAULT 0 NOT NULL
-                 CHECK (SCORE BETWEEN 0 AND 5)
+                 CHECK (SCORE BETWEEN 1 AND 5)
 );
 
 CREATE SEQUENCE review_rev_id_seq
@@ -402,3 +412,4 @@ CREATE TABLE CAMP_LOCATION (
     mapX          VARCHAR2(30),
     address       VARCHAR2(255)
 );
+SELECT * FROM camp_location;
