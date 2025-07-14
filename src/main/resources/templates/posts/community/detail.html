@@ -65,9 +65,9 @@
     <div th:if="${session.loginMember != null and editCommentId == null and !isReplying}">
       <h4>댓글 작성</h4>
       <form th:action="@{/posts/community/{postId}/comments/save(postId=${post.coId})}" th:object="${commentForm}" method="post">
-        <textarea th:field="*{content}" rows="4" cols="50"></textarea>
+        <textarea th:field="*{content}" rows="2"></textarea>
         <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
-        <button type="submit">댓글 등록</button>
+        <button class="commentBtn" type="submit">댓글 등록</button>
       </form>
     </div>
 

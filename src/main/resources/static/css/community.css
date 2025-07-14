@@ -12,7 +12,27 @@ h1 {
     margin-bottom: 20px;
 }
 
+a {
+    color: #000;
+    text-decoration: none;
+}
+
 /* 글쓰기 폼 스타일 */
+.post-detail {
+    background-color: white;      /* 배경 없앰 */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px 28px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.post-detail h2 {
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #333;
+}
+
 label {
     display: block;
     margin-top: 15px;
@@ -29,9 +49,8 @@ input[type="text"], textarea {
     font-size: 1rem;
 }
 
-textarea {
+.post-form textarea {
     height: 300px;
-    resize: vertical;
 }
 
 /* 버튼 스타일 */
@@ -82,11 +101,18 @@ button + button {
 }
 
 .comment-item {
-  display: flex; /* 가장 중요: 자식 요소들을 가로로 배치 */
-  justify-content: space-between; /* 가장 중요: 양쪽 끝으로 밀어서 정렬 */
-  align-items: flex-start; /* 수직 상단 정렬 */
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+    display: flex; /* 가장 중요: 자식 요소들을 가로로 배치 */
+    justify-content: space-between; /* 가장 중요: 양쪽 끝으로 밀어서 정렬 */
+    align-items: flex-start; /* 수직 상단 정렬 */
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.content {
+    white-space: pre-line;
+    margin-top: 20px;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    color: #222;
 }
 
 /* 댓글 내용 영역 */
@@ -95,6 +121,56 @@ button + button {
   margin-right: 15px; /* 오른쪽 버튼과의 간격 */
 }
 
+.comments h4 {
+  margin-bottom: 6px;
+}
+
+.comment-content p {
+    margin: 2px;
+}
+
+.comments {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.comments form {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.comment-content strong {
+  color: #626F47;
+}
+
+.comment-content span {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.comments textarea {
+    flex: 1;
+    box-sizing: border-box;
+    height: 60px;
+    max-height: 80px;
+    resize: vertical;
+    background-color: #fdfdf8;
+    border: 1px solid #ccc;
+}
+
+.commentBtn {
+    height: 60px;
+    margin-top: 5px;
+}
+
+.comment-list-container {
+  list-style-type: none;   /* 마커 제거 */
+  padding-left: 0;         /* 기본 들여쓰기도 제거 */
+  margin: 0;
+}
 /* 댓글 수정 삭제 버튼 영역 */
 .comment-actions {
   display: flex;
@@ -113,19 +189,21 @@ button + button {
 /* 버튼 공통 스타일 */
 .comment-actions a.action-button,
 .comment-actions form button.action-button {
-  display: inline-block;
-  width: 80px;             /* 가로 길이 고정 */
-  padding: 4px 0;          /* 좌우 패딩 조절 */
-  font-size: 0.85rem;
-  border-radius: 4px;
-  cursor: pointer;
-  line-height: 1.2;
-  text-align: center;
-  text-decoration: none;
-  border: none;
-  color: white;
-  background-color: #84925a;
-  transition: background-color 0.2s ease;
+    display: inline-block;
+    width: 80px;             /* 가로 길이 고정 */
+    padding: 4px 0;          /* 좌우 패딩 조절 */
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    color: white;
+    background-color: #84925a;
+    transition: background-color 0.2s ease;
+    margin: 0;
+    height: auto;
 }
 
 .comment-actions a.action-button:hover,
@@ -136,6 +214,7 @@ button + button {
 /* 삭제 버튼만 빨간색으로 스타일 변경 */
 .comment-actions form button.action-button {
   background-color: #d9534f;  /* 빨간색 */
+  font-family: 'Paperlogy', sans-serif;
 }
 
 .comment-actions form button.action-button:hover {
@@ -146,7 +225,9 @@ button + button {
 .reply-form-container {
   margin-top: 8px;
 }
-
+.comment-unit {
+  margin-bottom: 16px;
+}
 .reply-toggle-btn {
   background-color: #84925a;
   color: white;

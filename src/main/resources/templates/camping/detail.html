@@ -106,7 +106,7 @@
     </div>
     
     <!-- 이미지가 없는 경우 안내 메시지 -->
-    <div class="no-images-message" th:if="${(camp.firstImageUrl == null or camp.firstImageUrl.isEmpty()) and (campImages == null or #arrays.length(campImages) == 0)}">
+    <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#arrays.isEmpty(campImages) or campImages == null)}">
       <p>📷 이미지 준비 중입니다.</p>
       <p>캠핑장의 아름다운 모습을 곧 만나보실 수 있습니다.</p>
     </div>
