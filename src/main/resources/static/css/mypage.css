@@ -92,6 +92,11 @@ body, input, select, button, textarea {
     font-size: 1.3rem;
 }
 
+a {
+    color: #000;
+    text-decoration: none;
+}
+
 /* 폼 그룹 */
 .form-group {
     margin-bottom: 20px;
@@ -111,6 +116,23 @@ body, input, select, button, textarea {
     border-radius: 6px;
     font-size: 1rem;
     box-sizing: border-box;
+}
+
+/* 내가 쓴 게시글 */
+.post-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.post-table th, .post-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.post-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
 }
 
 /* 버튼 영역 */
