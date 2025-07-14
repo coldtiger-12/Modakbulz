@@ -114,7 +114,31 @@
 
   <section class="detail-reviews">
     <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
+    <!-- 상단 요약 정보 -->
+    <div class="review-summary">
+      <!-- 평균 별점 -->
+      <div class="average-rating">
+        <span class="avg-score">⭐ <strong th:text="${reviewStats.avg}">4.8</strong> / 5</span>
+        <span class="review-count" th:text="'(' + ${reviewStats.count} + '건의 후기)'">(20건의 후기)</span>
+      </div>
 
+      <!-- 별점 분포 -->
+      <div class="rating-bars">
+        <div class="bar" th:each="i : ${#numbers.sequence(5,1)}">
+          <span th:text="'★ ' + i">★ 5</span>
+          <div class="bar-fill" th:style="'width:' + ${reviewStats.distribution[i]} + '%'"></div>
+        </div>
+      </div>
+
+      <!-- 키워드 -->
+      <div class="review-keywords">
+        <h4>연관 키워드</h4>
+        <div class="tag-cloud">
+          <span class="tag" th:each="word : ${reviewStats.keywords}" th:text="${word}">조용해요</span>
+        </div>
+      </div>
+    </div>
+    <!-- 리뷰 카드 슬라이드 -->
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
       <div class="review-card" th:each="review : ${reviews}">
         <div class="review-header">

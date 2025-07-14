@@ -30,7 +30,7 @@
     </div>
     <div>
       <label>내용</label>
-      <textarea th:field="*{content}"></textarea>
+      <textarea th:field="*{content}" class="post-textarea"></textarea>
       <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
     </div>
     <button type="submit">저장</button>
