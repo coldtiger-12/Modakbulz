@@ -37,9 +37,10 @@ window.addEventListener('DOMContentLoaded', function () {
     var addr = window.address || '';
     var img = window.campImgUrl || 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/place_thumb.png';
     var link = window.campLink || '#';
+    // 캠핑장명 a태그에 id 부여
     return (
       '<div class="overlay_info">' +
-      '  <a href="' + link + '" target="_blank"><strong>' + name + '</strong></a>' +
+      '  <a href="#" id="camp-detail-link" target="_blank"><strong>' + name + '</strong></a>' +
       '  <div class="desc">' +
       '    <img src="' + img + '" alt="">' +
       '    <span class="address">' + addr + '</span>' +
@@ -68,6 +69,40 @@ window.addEventListener('DOMContentLoaded', function () {
       } else {
         customOverlay.setMap(map);
         isOpen = true;
+        // 오버레이가 DOM에 추가된 후 캠핑장명 클릭 이벤트 바인딩
+        setTimeout(function() {
+          var detailLink = document.getElementById('camp-detail-link');
+          if (detailLink) {
+            detailLink.onclick = function(e) {
+              e.preventDefault();
+              var placeName = window.campName || '캠핑장';
+              var address = window.address || '';
+              var places = new kakao.maps.services.Places();
+              // 캠핑장명+주소로 우선 검색, 없으면 캠핑장명만
+              var keyword = placeName + (address ? ' ' + address : '');
+              places.keywordSearch(keyword, function(data, status) {
+                if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                  var place = data[0];
+                  if (place.place_url) {
+                    window.open(place.place_url, '_blank');
+                  } else {
+                    alert('상세정보가 없습니다.');
+                  }
+                } else {
+                  // 이름+주소로 안 나오면 이름만 재검색
+                  places.keywordSearch(placeName, function(data2, status2) {
+                    if (status2 === kakao.maps.services.Status.OK && data2.length > 0 && data2[0].place_url) {
+                      window.open(data2[0].place_url, '_blank');
+                    } else {
+                      alert('상세정보가 없습니다.');
+                    }
+                  });
+                }
+              });
+              return false;
+            };
+          }
+        }, 0);
       }
     });
     // 3가지 모드 컨트롤 추가

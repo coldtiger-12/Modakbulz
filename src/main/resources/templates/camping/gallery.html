@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>갤러리 전체보기</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
+    <style>
+        .gallery-all-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #fdfaf2;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .gallery-all-title {
+            font-size: 2rem;
+            color: #6a794f;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+        .gallery-img-item {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .gallery-img-item img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery-img-item:hover {
+            transform: scale(1.03);
+        }
+        .gallery-back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            background: #6a794f;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .gallery-back-btn:hover {
+            background: #a4b465;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<div class="gallery-all-container">
+    <div class="gallery-all-title" th:text="${camp.facltNm} + ' 갤러리 전체보기'">갤러리 전체보기</div>
+    <div class="gallery-grid">
+        <!-- 대표 이미지 -->
+        <div class="gallery-img-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">
+            <img th:src="${camp.firstImageUrl}" alt="대표 이미지">
+        </div>
+        <!-- 추가 이미지들 -->
+        <div class="gallery-img-item" th:each="img : ${campImages}" th:if="${img != null and !img.isEmpty()}">
+            <img th:src="${img}" alt="캠핑장 이미지">
+        </div>
+    </div>
+    <a th:href="@{/camping/{id}(id=${camp.contentId})}" class="gallery-back-btn">← 상세페이지로 돌아가기</a>
+</div>
+</body>
+</html> 

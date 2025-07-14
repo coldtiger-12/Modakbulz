@@ -52,6 +52,9 @@
     padding: 20px;
 
 }
+.camping-list-container h1 {
+    text-align: center;
+}
 .camping-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -113,28 +116,57 @@
     color: #007bff;
     text-decoration: none;
 }
+/* --- 커스텀 페이징 디자인 --- */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 40px;
+    gap: 0.5rem;
+    background: none;
 }
 .pagination a, .pagination span {
-    margin: 0 5px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    text-decoration: none;
+    margin: 0 4px;
+    padding: 0;
+    border: none;
+    background: none;
     color: #333;
+    font-size: 1.15rem;
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+.pagination a:hover:not(.active):not(.disabled) {
+    background: #ffe3b3;
+    color: #ff9800;
 }
 .pagination .active {
+    background: #ff9800;
+    color: #fff;
     font-weight: bold;
-    background-color: #6a794f;
-    color: white;
-    border-color: #6a794f;
+    box-shadow: 0 2px 8px rgba(255,152,0,0.08);
+    border: none;
 }
 .pagination .disabled {
     color: #ccc;
     pointer-events: none;
+    background: none;
+}
+.pagination a[aria-label], .pagination a[aria-label]:hover {
+    background: none;
+    color: #888;
+    font-size: 1.2rem;
+    border-radius: 0;
+    min-width: 28px;
+}
+.pagination a[aria-label].disabled {
+    color: #eee;
 }
 .scrap-btn {
     position: absolute;

@@ -144,6 +144,41 @@ public class CampingController {
     return "camping/detail";
   }
 
+  /**
+   * 캠핑장 갤러리 전체보기
+   */
+  @GetMapping("/gallery")
+  public String gallery(@RequestParam("campingId") Long campingId, Model model) {
+    // 캠핑장 상세 정보 조회
+    GoCampingDto.Item camp = goCampingService.getCampDetail(campingId).block();
+    model.addAttribute("camp", camp);
+
+    // 캠핑장 이미지 목록 조회
+    List<String> campImages = goCampingService.getCampImages(campingId).block();
+    // 대표 이미지와 campImages 내 중복 제거 (소문자, trim 처리)
+    if (campImages != null && camp != null && camp.getFirstImageUrl() != null && !camp.getFirstImageUrl().isEmpty()) {
+      String firstImageUrl = camp.getFirstImageUrl().trim().toLowerCase();
+      campImages = campImages.stream()
+          .filter(url -> url != null && !url.trim().isEmpty())
+          .map(url -> url.trim())
+          .filter(url -> !url.equalsIgnoreCase(firstImageUrl))
+          .distinct()
+          .collect(Collectors.toList());
+    } else if (campImages != null) {
+      campImages = campImages.stream()
+          .filter(url -> url != null && !url.trim().isEmpty())
+          .map(url -> url.trim())
+          .distinct()
+          .collect(Collectors.toList());
+    }
+    // 실제 이미지 중복 제거
+    if (campImages != null && !campImages.isEmpty()) {
+      campImages = removeDuplicateImagesByContent(campImages);
+    }
+    model.addAttribute("campImages", campImages != null ? campImages : Collections.emptyList());
+    return "camping/gallery";
+  }
+
   // campImages에서 실제 이미지 중복 제거 (MD5 해시)
   private List<String> removeDuplicateImagesByContent(List<String> imageUrls) {
     Set<Object> hashSet = new HashSet<>();
