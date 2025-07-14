@@ -19,4 +19,5 @@ public interface ReviewDAO {
 
   // 리뷰 삭제
   int delete(Long revId);
+
 }

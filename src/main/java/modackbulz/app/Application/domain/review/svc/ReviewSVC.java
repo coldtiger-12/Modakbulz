@@ -2,6 +2,7 @@ package modackbulz.app.Application.domain.review.svc;
 
 import modackbulz.app.Application.entity.Review;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface ReviewSVC {
@@ -40,4 +41,17 @@ public interface ReviewSVC {
    * @return 삭제 성공 시 1, 실패 시 0
    */
   int delete(Long revId);
+
+  /**
+   *  별점 평균값 구하기
+   */
+  Double calculateAverageScore(Long contentId);
+
+  /**
+   * 별점 분포를 계산합니다. (예: 5점: 3개, 4점: 2개 ...)
+   * @param contentId 캠핑장 ID
+   * @return 점수별 개수 분포 Map (key: 점수, value: 개수)
+   */
+  Map<Integer, Long> calculateScoreDistribution(Long contentId);
 }
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>리뷰 전체보기</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/review-all.css}">
+</head>
+<body>
+<div class="review-all-container">
+  <!-- 상단: 평점, 분포, 키워드 -->
+  <div class="review-summary">
+    <div class="summary-left">
+      <div class="avg-score">
+        <span class="score" th:text="${averageRating}">4.8</span>
+        <span class="slash">/ 5</span>
+        <span class="count" th:text="'(' + ${reviewCount} + '건의 후기)'">(20건의 후기)</span>
+      </div>
+      <div class="score-bars">
+        <div class="score-bar" th:each="i : ${#numbers.sequence(5,1,-1)}">
+          <span class="star-label">★ <span th:text="${i}">5</span></span>
+          <div class="bar-bg">
+            <div class="bar-fill" th:style="'width:' + ${scorePercent[i]} + '%'" th:text="''"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="summary-right">
+      <a th:href="@{/reviews/write(campingId=${param.campingId})}" class="write-review-btn review-all-write-btn">리뷰 작성</a>
+      <div class="keyword-box">
+        <div class="keyword-title">언급된 키워드들</div>
+        <div class="keyword-list">
+          <span class="keyword" th:each="kw : ${keywords}" th:text="${kw}">키워드</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <!-- 하단: 리뷰 리스트 -->
+  <div class="review-list">
+    <div class="review-item" th:each="review : ${reviews}">
+      <div class="review-stars">
+        <span th:each="i : ${#numbers.sequence(1, 5)}"
+              th:classappend="${i <= review.score} ? '' : 'empty'">★</span>
+      </div>
+      <div class="review-keyword" th:text="${review.keywordSummary}">추천해요!</div>
+      <div class="review-photo">
+        <img th:if="${review.photoUrl != null}" th:src="${review.photoUrl}" alt="사진">
+        <span th:if="${review.photoUrl == null}">사진</span>
+      </div>
+      <div class="review-content" th:text="${review.content}">사용자 리뷰</div>
+    </div>
+  </div>
+</div>
+<script src="/js/review-all.js"></script>
+</body>
+</html> 

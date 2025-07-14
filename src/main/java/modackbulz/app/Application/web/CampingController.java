@@ -96,6 +96,22 @@ public class CampingController {
     List<Review> reviews = reviewSVC.findByContentId(contentId);
     model.addAttribute("reviews", reviews);
 
+    // 해당 캠핑장의 리뷰 목록을 조회하여 모델에 추가
+    List<Review> review = reviewSVC.findByContentId(contentId);
+    model.addAttribute("reviews", reviews);
+
+    // 리뷰 통계 정보 추가 (평점 + 개수)
+    Double avgRating = reviewSVC.calculateAverageScore(contentId);
+    Map<Integer, Long> distribution = reviewSVC.calculateScoreDistribution(contentId);
+
+    Map<String, Object> reviewStats = new HashMap<>();
+    reviewStats.put("avg", avgRating != null ? avgRating : 0.0);
+    reviewStats.put("distribution", distribution);
+    reviewStats.put("count", reviews.size());
+    reviewStats.put("keywords", List.of());
+
+    model.addAttribute("reviewStats", reviewStats);
+
     // 캠핑장 이미지 목록을 API에서 조회하여 모델에 추가
     if (camp != null) {
       List<String> campImages = goCampingService.getCampImages(contentId).block();

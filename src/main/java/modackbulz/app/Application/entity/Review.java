@@ -13,4 +13,6 @@ public class Review {
   private LocalDateTime createdAt; // CREATED_AT
   private LocalDateTime updatedAt; // UPDATED_AT
   private int score;          // SCORE
+  private String keywordSummary;
+  private String photoUrl;
 }

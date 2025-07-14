@@ -1,0 +1,81 @@
+.review-all-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 40px 32px;
+}
+.review-summary {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+.summary-left { flex: 1; }
+.summary-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.avg-score {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffc107;
+  margin-bottom: 16px;
+}
+.avg-score .slash { color: #888; font-size: 1.2rem; }
+.avg-score .count { color: #888; font-size: 1rem; margin-left: 8px; }
+.score-bars { margin-top: 8px; }
+.score-bar { display: flex; align-items: center; margin-bottom: 6px; }
+.star-label { width: 40px; color: #ffc107; font-weight: 600; }
+.bar-bg {
+  flex: 1;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  margin-left: 8px;
+  position: relative;
+}
+.bar-fill {
+  height: 10px;
+  background: #ffc107;
+  border-radius: 5px;
+  position: absolute;
+  left: 0; top: 0;
+}
+.keyword-box { border: 1px solid #eee; border-radius: 8px; padding: 16px; }
+.keyword-title { font-weight: 600; margin-bottom: 8px; }
+.keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.keyword { background: #fffbe6; color: #bfa100; border-radius: 12px; padding: 4px 12px; font-size: 0.95rem; }
+.review-list { margin-top: 32px; }
+.review-item { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 18px 0; gap: 24px; }
+.review-stars { font-size: 1.3rem; color: #ffc107; min-width: 90px; }
+.review-stars .empty { color: #ddd; }
+.review-keyword { font-weight: 600; min-width: 90px; }
+.review-photo { width: 90px; height: 70px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.review-photo img { width: 100%; height: 100%; object-fit: cover; }
+.review-content { flex: 1; color: #333; font-size: 1rem; }
+
+.review-all-write-btn {
+  background: #d6f5c9;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  outline: none;
+  vertical-align: middle;
+  display: inline-block;
+}
+.review-all-write-btn:hover {
+  background: #b6e6a7;
+  color: #222;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+} 

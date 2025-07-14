@@ -85,12 +85,15 @@
 
   <!-- 갤러리 영역 (이미지 슬라이더 형식) -->
   <section class="detail-slider">
-    <h2>
-      갤러리
-      <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
-        (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #arrays.length(campImages)}"></span>장)
-      </span>
-    </h2>
+    <div class="gallery-header-row">
+      <h2>
+        갤러리
+        <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
+          (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #arrays.length(campImages)}"></span>장)
+        </span>
+      </h2>
+      <a th:href="@{/camping/gallery(campingId=${camp.contentId})}" class="all-review-btn gallery-all-review-btn">갤러리 전체보기</a>
+    </div>
     
     <!-- 이미지가 있는 경우 -->
     <div class="slider-wrapper" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
@@ -98,7 +101,6 @@
 <!--      <div class="slide-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">-->
 <!--        <img th:src="${camp.firstImageUrl}" alt="캠핑장 대표 이미지">-->
 <!--      </div>-->
-      
       <!-- API에서 가져온 추가 이미지들 표시 -->
       <div class="slide-item" th:each="imageUrl : ${campImages}" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
         <img th:src="${imageUrl}" th:alt="'캠핑장 이미지 ' + ${#arrays.length(campImages)}">
@@ -113,7 +115,11 @@
   </section>
 
   <section class="detail-reviews">
-    <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
+    <div class="reviews-header">
+      <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
+      <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
+      <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
+    </div>
     <!-- 상단 요약 정보 -->
     <div class="review-summary">
       <!-- 평균 별점 -->
@@ -125,7 +131,7 @@
       <!-- 별점 분포 -->
       <div class="rating-bars">
         <div class="bar" th:each="i : ${#numbers.sequence(5,1)}">
-          <span th:text="'★ ' + i">★ 5</span>
+          <span th:text="'★ ' + ${i}">★ 5</span>
           <div class="bar-fill" th:style="'width:' + ${reviewStats.distribution[i]} + '%'"></div>
         </div>
       </div>
@@ -138,7 +144,7 @@
         </div>
       </div>
     </div>
-    <!-- 리뷰 카드 슬라이드 -->
+
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
       <div class="review-card" th:each="review : ${reviews}">
         <div class="review-header">
@@ -160,6 +166,46 @@
       <p>이 캠핑장의 첫 번째 리뷰를 남겨주세요!</p>
     </div>
   </section>
+
+  <!-- 리뷰 작성/수정 모달 -->
+  <div id="reviewModal" class="review-modal">
+    <div class="review-modal-content">
+      <div class="review-modal-header">
+        <h3>리뷰 작성</h3>
+        <span class="close-modal" onclick="closeReviewModal()">&times;</span>
+      </div>
+      <form id="reviewForm" class="review-form">
+        <input type="hidden" id="campingId" th:value="${camp.contentId}">
+        <input type="hidden" id="reviewId" value="">
+        
+        <div class="rating-section">
+          <label>평점</label>
+          <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5">
+            <label for="star5">★</label>
+            <input type="radio" id="star4" name="rating" value="4">
+            <label for="star4">★</label>
+            <input type="radio" id="star3" name="rating" value="3">
+            <label for="star3">★</label>
+            <input type="radio" id="star2" name="rating" value="2">
+            <label for="star2">★</label>
+            <input type="radio" id="star1" name="rating" value="1">
+            <label for="star1">★</label>
+          </div>
+        </div>
+        
+        <div class="content-section">
+          <label for="reviewContent">리뷰 내용</label>
+          <textarea id="reviewContent" name="content" placeholder="캠핑장에 대한 솔직한 후기를 남겨주세요..." required></textarea>
+        </div>
+        
+        <div class="form-buttons">
+          <button type="button" class="cancel-btn" onclick="closeReviewModal()">취소</button>
+          <button type="submit" class="submit-btn">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- 지도 표시 영역 -->
   <section class="detail-map">

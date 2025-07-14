@@ -6,7 +6,9 @@ import modackbulz.app.Application.entity.Review;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,4 +59,34 @@ public class ReviewSVCImpl implements ReviewSVC {
   public int delete(Long revId) {
     return reviewDAO.delete(revId);
   }
+
+  /**
+   * 별점의 평균 구하기
+   */
+  @Override
+  public Double calculateAverageScore(Long contentId) {
+    List<Review> reviews = reviewDAO.findByContentId(contentId);
+
+    if (reviews == null || reviews.isEmpty()) {
+      return 0.0;
+    }
+
+    double sum = 0.0;
+    for (Review r : reviews) {
+      sum += r.getScore();
+    }
+
+    return sum / reviews.size();
+  }
+
+  @Override
+  public Map<Integer, Long> calculateScoreDistribution(Long contentId) {
+    List<Review> reviews = findByContentId(contentId);
+    return reviews.stream()
+        .collect(Collectors.groupingBy(
+            Review::getScore,
+            Collectors.counting()
+        ));
+  }
 }
+
