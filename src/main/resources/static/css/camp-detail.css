@@ -361,6 +361,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
+<<<<<<< HEAD
 }
 
 .review-modal-content {
@@ -650,48 +651,291 @@
   padding: 20px 0 40px;
   border-bottom: 1px solid #ddd;
   flex-wrap: wrap;
+=======
+>>>>>>> 30e2bd5 (2025-07-14-16)
 }
 
-.average-rating {
-  flex: 0 0 180px;
-  font-size: 1.1rem;
-  color: #5a4b3a;
+.review-modal-content {
+    background-color: #fdfaf2;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
 }
 
-.avg-score strong {
-  font-size: 1.6rem;
-  color: #f0b878;
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.review-count {
-  display: block;
-  color: #888;
-  margin-top: 6px;
+.review-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px 20px 30px;
+    border-bottom: 1px solid #eaddc0;
 }
 
-.rating-bars {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 180px;
+.review-modal-header h3 {
+    margin: 0;
+    color: #6a794f;
+    font-size: 1.4rem;
 }
 
-.bar {
+.close-modal {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: #6a794f;
+}
+
+.review-form {
+    padding: 30px;
+}
+
+.rating-section {
+    margin-bottom: 25px;
+}
+
+.rating-section label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 5px;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+    margin: 0;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input[type="radio"]:checked ~ label {
+    color: #ffc107;
+}
+
+.content-section {
+    margin-bottom: 30px;
+}
+
+.content-section label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+#reviewContent {
+    width: 100%;
+    height: 120px;
+    padding: 15px;
+    border: 2px solid #eaddc0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+#reviewContent:focus {
+    outline: none;
+    border-color: #6a794f;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.cancel-btn {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.submit-btn {
+    background-color: #6a794f;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #a4b465;
+}
+
+.submit-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.all-review-btn {
+  background: #fff;
+  color: #ffc107;
+  border: 2px solid #ffc107;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.all-review-btn:hover {
+  background: #fffbe6;
+  color: #bfa100;
+  border-color: #bfa100;
+  text-decoration: none;
+}
+
+.gallery-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.gallery-write-review-btn {
+    background: #d6f5c9; /* 연두색 */
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-right: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    outline: none;
+    vertical-align: middle;
+    display: inline-block;
+}
+.gallery-write-review-btn:hover {
+    background: #b6e6a7;
+    color: #222;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.gallery-all-review-btn {
+  margin-left: 0;
+  margin-right: 4px;
+  background: #fff;
+  color: #ffc107;
+  border: 2px solid #ffc107;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.gallery-all-review-btn:hover {
+  background: #fffbe6;
+  color: #bfa100;
+  border-color: #bfa100;
+  text-decoration: none;
+}
+
+.slider-row-with-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.gallery-slider-all-review-btn {
+  margin-left: 18px;
+  background: #fff;
+  color: #ffc107;
+  border: 2px solid #ffc107;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  height: 40px;
+  line-height: 24px;
+  align-self: flex-start;
+}
+.gallery-slider-all-review-btn:hover {
+  background: #fffbe6;
+  color: #bfa100;
+  border-color: #bfa100;
+  text-decoration: none;
 }
 
-.bar-fill {
-  height: 10px;
-  background-color: #f0b878;
-  border-radius: 5px;
-  flex-grow: 1;
-  max-width: 100%;
-  transition: width 0.3s;
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .review-modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .review-form {
+        padding: 20px;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+    }
+    
+    .form-buttons button {
+        width: 100%;
+    }
 }
+<<<<<<< HEAD
 
 .review-keywords {
   flex: 1;
@@ -719,3 +963,5 @@
   border: 1px solid #e0d4b5;
 }
 
+=======
+>>>>>>> 30e2bd5 (2025-07-14-16)

@@ -29,12 +29,12 @@ CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
     ID          VARCHAR2(10) NOT NULL UNIQUE CHECK (REGEXP_LIKE(ID, '^[A-Za-z0-9]+$')),
-    PWD       VARCHAR2(15) NOT NULL CHECK (
-              LENGTH(PWD) >= 8 AND
-           REGEXP_LIKE(PWD, '.*[A-Z].*') AND
-           REGEXP_LIKE(PWD, '.*[a-z].*') AND
-           REGEXP_LIKE(PWD, '.*[0-9].*') AND
-           REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
+    PWD 		VARCHAR2(15) NOT NULL CHECK (
+  				LENGTH(PWD) >= 8 AND
+			  REGEXP_LIKE(PWD, '.*[A-Z].*') AND
+			  REGEXP_LIKE(PWD, '.*[a-z].*') AND
+			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
+			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
 ),
     EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL,
                     '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
@@ -79,10 +79,10 @@ ALTER TABLE MEMBER
 MODIFY PWD VARCHAR2(255)
 CHECK (
   LENGTH(PWD) >= 8 AND
-             REGEXP_LIKE(PWD, '.*[A-Z].*') AND
-           REGEXP_LIKE(PWD, '.*[a-z].*') AND
-           REGEXP_LIKE(PWD, '.*[0-9].*') AND
-           REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
+  			  REGEXP_LIKE(PWD, '.*[A-Z].*') AND
+			  REGEXP_LIKE(PWD, '.*[a-z].*') AND
+			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
+			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
 );
 
 
@@ -159,13 +159,6 @@ CREATE TABLE CAMPSITES (
                 CHECK (SCORE BETWEEN 0 AND 5)
 );
 
-INSERT INTO CAMPSITES (CONTENT_ID, SC_C, VIEW_C, SCORE)
-SELECT C.CONTENTID, 0, 0, 1
-FROM CAMPING_INFO C
-WHERE NOT EXISTS (
-  SELECT 1 FROM CAMPSITES S WHERE S.CONTENT_ID = C.CONTENTID
-);
-
 CREATE OR REPLACE TRIGGER trg_update_campsite_score
 AFTER INSERT OR UPDATE OR DELETE ON REVIEW
 FOR EACH ROW
@@ -191,6 +184,13 @@ BEGIN
     SET SCORE = NVL(v_avg_score, 0)
     WHERE CONTENTID = v_contentid;
 END;
+
+INSERT INTO CAMPSITES (CONTENT_ID, SC_C, VIEW_C, SCORE)
+SELECT C.CONTENTID, 0, 0, 1
+FROM CAMPING_INFO C
+WHERE NOT EXISTS (
+  SELECT 1 FROM CAMPSITES S WHERE S.CONTENT_ID = C.CONTENTID
+);
 
 SELECT * FROM CAMPSITES;
 -------------------------------------------------------------------------------------------
@@ -409,17 +409,6 @@ CREATE SEQUENCE FILES_SEQ
     START WITH 1
     INCREMENT BY 1
     NOCACHE
-    NOCYCLE;
--------------------------------------------------------------------------------------------
--- 11. 지도 정보 DB------------------------------------------------------------------------------
-CREATE TABLE CAMP_LOCATION (
-    location_id   NUMBER(10) PRIMARY KEY,
-    contentId     NUMBER(10) NOT NULL REFERENCES CAMPING_INFO(contentId) ON DELETE CASCADE,
-    mapY          VARCHAR2(30),
-    mapX          VARCHAR2(30),
-    address       VARCHAR2(255)
-);
-SELECT * FROM camp_location;  NOCACHE
     NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 11. 지도 정보 DB------------------------------------------------------------------------------

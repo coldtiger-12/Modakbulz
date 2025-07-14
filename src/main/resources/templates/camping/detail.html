@@ -119,6 +119,7 @@
       <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
       <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
       <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
+<<<<<<< HEAD
     </div>
     <!-- 상단 요약 정보 -->
     <div class="review-summary">
@@ -143,6 +144,8 @@
           <span class="tag" th:each="word : ${reviewStats.keywords}" th:text="${word}">조용해요</span>
         </div>
       </div>
+=======
+>>>>>>> 30e2bd5 (2025-07-14-16)
     </div>
 
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
