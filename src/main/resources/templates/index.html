@@ -89,19 +89,51 @@
       <a th:href="@{/camping}" class="more">더보기</a>
     </h3>
     <div class="recommend-scroll">
-      <div class="recommend-camps" th:if="${recommendCamps}">
-        <a class="camp" th:each="camp : ${recommendCamps}"
-           th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
-          <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty()
-            ? camp.firstImageUrl
-            : (camp.campImages != null && !#lists.isEmpty(camp.campImages) ? camp.campImages[0] : '/images/임시사진.png')}"
-               alt="캠핑장 이미지">
-          <div class="camp-name" th:text="${camp.facltNm}">캠핑장 이름</div>
-          <p th:text="${camp.lineIntro}"></p>
-        </a>
+      <div class="recommend-camps" id="recommend-camps-container">
+        <p>추천 캠핑장 정보를 불러오는 중입니다...</p>
       </div>
     </div>
   </section>
 </div>
+
+<script>
+  // 페이지 로딩이 완료되면 자동으로 실행됩니다.
+  document.addEventListener('DOMContentLoaded', () => {
+    // 추천 캠핑장 데이터를 비동기로 요청합니다.
+    fetch('/camping/recommendations')
+      .then(response => response.json())
+      .then(camps => {
+        const container = document.getElementById('recommend-camps-container');
+        container.innerHTML = ''; // "불러오는 중" 메시지 제거
+
+        if (camps && camps.length > 0) {
+          camps.forEach(camp => {
+            // 각 캠핑장 정보를 바탕으로 HTML 요소를 생성합니다.
+            const campLink = document.createElement('a');
+            campLink.className = 'camp';
+            campLink.href = `/camping/${camp.contentId}`;
+
+            const defaultImageUrl = '/images/임시사진.png';
+            const imageUrl = camp.firstImageUrl ? camp.firstImageUrl : defaultImageUrl;
+
+            campLink.innerHTML = `
+              <img src="${imageUrl}" alt="캠핑장 이미지">
+              <div class="camp-name">${camp.facltNm}</div>
+              <p>${camp.lineIntro || ''}</p>
+            `;
+            container.appendChild(campLink);
+          });
+        } else {
+          container.innerHTML = '<p>추천 캠핑장 정보가 없습니다.</p>';
+        }
+      })
+      .catch(error => {
+        console.error('추천 캠핑장 정보를 불러오는 데 실패했습니다:', error);
+        const container = document.getElementById('recommend-camps-container');
+        container.innerHTML = '<p>정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
+      });
+  });
+</script>
+
 </body>
 </html>

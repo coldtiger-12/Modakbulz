@@ -12,14 +12,13 @@ import modackbulz.app.Application.domain.review.svc.ReviewSVC;
 import modackbulz.app.Application.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Hex;
@@ -149,5 +148,16 @@ public class CampingController {
       }
     }
     return result;
+  }
+
+  /**
+   * [추가] 메인 페이지 추천 캠핑장 목록을 비동기로 제공하는 API
+   */
+  @GetMapping("/recommendations")
+  @ResponseBody // HTML 뷰가 아닌 JSON 데이터를 직접 반환하도록 설정
+  public ResponseEntity<List<GoCampingDto.Item>> getRecommendations() {
+    Pageable pageable = PageRequest.of(0, 8); // 8개 항목 조회
+    List<GoCampingDto.Item> campList = goCampingService.getCampListPageWithImageFallback(pageable).block().getContent();
+    return ResponseEntity.ok(campList); // 조회된 데이터를 JSON 형태로 반환
   }
 }

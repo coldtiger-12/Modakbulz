@@ -28,11 +28,11 @@ public class HomeController {
   @GetMapping("/")
   public String home(Model model) {
     // 추천 캠핑장 8개를 가져오기 위한 Pageable 객체 생성
-    Pageable pageable = PageRequest.of(0, 8);
+//    Pageable pageable = PageRequest.of(0, 8);
     // 대표 이미지가 없는 경우를 처리하는 getCampListPageWithImageFallback 메소드 사용
-    List<GoCampingDto.Item> campList = goCampingService.getCampListPageWithImageFallback(pageable).block().getContent();
+//    List<GoCampingDto.Item> campList = goCampingService.getCampListPageWithImageFallback(pageable).block().getContent();
 
-    model.addAttribute("recommendCamps", campList);
+//    model.addAttribute("recommendCamps", campList);
 
     //커뮤니티 최근 글 8개 가져오기
     List<Community> recentPosts = communityDAO.findRecentPosts(8);
