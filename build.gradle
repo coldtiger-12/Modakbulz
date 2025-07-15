@@ -44,7 +44,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-	implementation 'com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter:7.1.0' // 👈 [추가]
+	implementation 'com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter:7.1.0' // [추가]
+	// ❗️ 1. Jasypt (암호화) 라이브러리가 반드시 포함되어야 합니다.
+	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+	// ❗️ 2. P6Spy (SQL 로깅) 라이브러리도 함께 사용합니다.
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
 }
 
 dependencyManagement {
