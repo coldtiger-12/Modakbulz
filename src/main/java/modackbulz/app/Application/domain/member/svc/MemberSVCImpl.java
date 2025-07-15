@@ -25,6 +25,14 @@ public class MemberSVCImpl implements MemberSVC {
     return memberDAO.isExist(id);
   }
 
+  /**
+   * 닉네임 중복 확인 서비스 구현 (추가)
+   */
+  @Override
+  public boolean isExistNickname(String nickname) {
+    return memberDAO.isExistNickname(nickname);
+  }
+
   @Override
   public Optional<Member> findByMemeberId(Long memberId) {
     return memberDAO.findByMemeberId(memberId);

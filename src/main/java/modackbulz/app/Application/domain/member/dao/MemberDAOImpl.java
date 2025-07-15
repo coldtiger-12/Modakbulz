@@ -32,35 +32,6 @@ public class MemberDAOImpl implements MemberDAO {
     this.encryptService = encryptService;
   }
 
-  // Member
-//  private RowMapper<Member> memberRowMapper = (rs, rowNum) -> {
-//      Member member = new Member();
-//      member.setMemberId(rs.getLong("MEMBER_ID"));
-//      member.setGubun(rs.getString("GUBUN"));
-//      member.setId(rs.getString("ID"));
-//      member.setNickname(rs.getString("NICKNAME"));
-//      member.setGender(rs.getString("GENDER"));
-//      member.setRegion(rs.getString("REGION"));
-//      member.setIsDel(rs.getString("IS_DEL"));
-//      //email과 tel을 복호화하여 설정
-//      member.setEmail(encryptService.decrypt(rs.getString("EMAIL")));
-//      member.setTel(encryptService.decrypt(rs.getString("TEL")));
-//
-//
-//      if (rs.getTimestamp("DEL_DATE") != null) {
-//        member.setDelDate(rs.getTimestamp("DEL_DATE").toLocalDateTime());
-//      }
-//
-//      // 'PWD' 컬럼이 ResultSet에 존재할 경우에만 비밀번호 설정
-//      if (hasColumn(rs,"PWD")){
-//        member.setPwd(rs.getString("PWD"));
-//      }
-//
-//      return member;
-//  };
-
-
-
   @Override
   public Member insertMember(Member member) {
     StringBuffer sql = new StringBuffer();
@@ -83,6 +54,14 @@ public class MemberDAOImpl implements MemberDAO {
   public boolean isExist(String id) {
     String sql = "SELECT COUNT(*) FROM MEMBER WHERE ID = :id ";
     SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+    Integer cnt = template.queryForObject(sql, param, Integer.class);
+    return cnt != null && cnt > 0;
+  }
+
+  @Override
+  public boolean isExistNickname(String nickname) {
+    String sql = "SELECT COUNT(*) FROM MEMBER WHERE NICKNAME = :nickname ";
+    SqlParameterSource param = new MapSqlParameterSource().addValue("nickname", nickname);
     Integer cnt = template.queryForObject(sql, param, Integer.class);
     return cnt != null && cnt > 0;
   }
@@ -128,7 +107,7 @@ public class MemberDAOImpl implements MemberDAO {
   @Override
   public Optional<Member> findById(String id) {
     String sql = " SELECT MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE " +
-      " FROM MEMBER WHERE ID = :id AND IS_DEL = 'N' ";
+        " FROM MEMBER WHERE ID = :id AND IS_DEL = 'N' ";
 
     // ❗️ RowMapper를 이 메소드 안에서도 똑같이 만듭니다.
     RowMapper<Member> rowMapper = (rs, rowNum) -> {
@@ -233,6 +212,4 @@ public class MemberDAOImpl implements MemberDAO {
       return false;
     }
   }
-
-
 }

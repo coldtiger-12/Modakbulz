@@ -9,10 +9,9 @@ CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
     ID          VARCHAR2(10) NOT NULL UNIQUE CHECK (REGEXP_LIKE(ID, '^[A-Za-z0-9]+$')),
-    PWD 		VARCHAR2(100) NOT NULL,
-    EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL,
-                    '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
-    TEL         VARCHAR2(11) NOT NULL UNIQUE,
+    PWD 		VARCHAR2(255) NOT NULL,
+    EMAIL       VARCHAR2(255) NOT NULL UNIQUE,
+    TEL         VARCHAR2(255) NOT NULL UNIQUE,
     NICKNAME    VARCHAR2(20) NOT NULL UNIQUE,
     GENDER      VARCHAR2(10) CHECK (GENDER IN ('남', '여')),
     REGION      VARCHAR2(10),
@@ -49,6 +48,8 @@ BEGIN
   );
 END;
 
+DELETE FROM MEMBER WHERE ID = 'admin1';
+COMMIT;
 SELECT * FROM MEMBER;
 
 -------------------------------------------------------------------------------------------
@@ -119,7 +120,7 @@ CREATE TABLE CAMPSITES (
     SC_C        NUMBER DEFAULT 0 NOT NULL,
     VIEW_C      NUMBER DEFAULT 0 NOT NULL,
     SCORE       NUMBER DEFAULT 0 NOT NULL
-                CHECK (SCORE BETWEEN 0 AND 5)
+                CHECK (SCORE BETWEEN 1 AND 5)
 );
 
 CREATE OR REPLACE TRIGGER trg_update_campsite_score

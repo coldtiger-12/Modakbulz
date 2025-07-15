@@ -13,11 +13,18 @@ public interface MemberDAO {
   Member insertMember(Member member);
 
   /**
-   * 회원 유무
+   * 아이디로 회원 유무 확인
    * @param id
    * @return
    */
   boolean isExist(String id);
+
+  /**
+   * 닉네임으로 회원 유무 확인 (추가)
+   * @param nickname
+   * @return
+   */
+  boolean isExistNickname(String nickname);
 
   /**
    * 회원 조회

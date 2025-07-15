@@ -11,6 +11,9 @@ public interface MemberSVC {
   // 회원 존재 유무 확인(아이디)
   boolean isExist(String id);
 
+  // 회원 존재 유무 확인(닉네임) (추가)
+  boolean isExistNickname(String nickname);
+
   // 회원 조회(멤버 아이디)
   Optional<Member> findByMemeberId(Long memberId);
 

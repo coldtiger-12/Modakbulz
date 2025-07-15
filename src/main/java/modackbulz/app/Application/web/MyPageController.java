@@ -2,8 +2,6 @@ package modackbulz.app.Application.web;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
@@ -36,17 +34,7 @@ public class MyPageController {
   private final EmailService emailService;
   private final PasswordEncoder passwordEncoder;
 
-  @Data
-  @AllArgsConstructor
-  private static class VerificationCode {
-    private String code;
-    private LocalDateTime createdAt;
-
-    public boolean isValid(String inputCode) {
-      return this.code.equals(inputCode) && createdAt.plusMinutes(5).isAfter(LocalDateTime.now());
-    }
-  }
-
+  // VerificationCode 내부 클래스 삭제
 
   // 회원정보 수정 폼
   @GetMapping({"", "/edit"})
@@ -102,7 +90,6 @@ public class MyPageController {
       RedirectAttributes redirectAttributes,
       HttpSession session
   ) {
-    // 👇 [핵심] 서버 측에서 이메일 인증 완료 여부를 직접 확인
     Boolean isVerified = (Boolean) session.getAttribute("emailVerified");
     if (isVerified == null || !isVerified) {
       bindingResult.reject("unauthorizedChange", "이메일 인증이 완료되지 않았습니다. 인증을 먼저 진행해주세요.");
@@ -118,7 +105,6 @@ public class MyPageController {
     Member member = memberOptional.get();
     boolean changed = memberSVC.changePassword(member.getMemberId(), passwordEncoder.encode(editForm_Pwd.getPwd()));
 
-    // [추가] 사용한 인증 상태는 세션에서 제거하여 재사용 방지
     session.removeAttribute("emailVerified");
 
     if (changed) {
@@ -141,6 +127,7 @@ public class MyPageController {
       String subject = "[모닥불즈] 이메일 인증 번호 안내";
       String text = "인증 번호는 " + authCode + " 입니다. 이 번호는 5분간 유효합니다.";
       emailService.sendEmail(email, subject, text);
+      // 새로 만든 VerificationCode 클래스 사용
       session.setAttribute("authCode", new VerificationCode(String.valueOf(authCode), LocalDateTime.now()));
       log.info("인증번호 발송 완료. 이메일: {}, 인증번호: {}", email, authCode);
       return ResponseEntity.ok("인증번호가 발송되었습니다.");
@@ -153,6 +140,7 @@ public class MyPageController {
   // 이메일 인증번호 확인 처리
   @PostMapping("/verify-email")
   public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam("authcode") String authCode, HttpSession session) {
+    // 새로 만든 VerificationCode 클래스 사용
     VerificationCode sessionCode = (VerificationCode) session.getAttribute("authCode");
 
     if (sessionCode == null) {
@@ -161,13 +149,12 @@ public class MyPageController {
 
     if (sessionCode.isValid(authCode)) {
       session.removeAttribute("authCode");
-      session.setAttribute("emailVerified", true); // 👈 인증 완료 상태를 세션에 저장
+      session.setAttribute("emailVerified", true);
       return ResponseEntity.ok(Map.of("verified", true, "message", "인증에 성공했습니다."));
     } else {
       return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 올바르지 않거나 유효시간이 초과되었습니다."));
     }
   }
-
 
   // 내가 찜한 캠핑장
   @GetMapping("/likes")

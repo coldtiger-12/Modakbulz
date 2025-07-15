@@ -24,16 +24,19 @@ public class SecurityConfig {
                 "/",
                 "/login",
                 "/member/join",
+                "/member/check-nickname", // 닉네임 중복 확인 API 경로 허용
+                "/member/email/**",       // 이메일 인증 API 경로 허용
+                "/member/verify-email",
                 "/camping/**",
                 "/posts/community/**",
                 "/css/**",
                 "/js/**",
                 "/images/**",
                 "/fonts/**",
-                "/api/scraps/**" // API 경로도 허용 필요
+                "/api/scraps/**"
             ).permitAll()
             .requestMatchers("/admin/**").hasRole("A")
-            .requestMatchers("/api/scraps/**").authenticated() // 👈 [수정] 로그인한 사용자만 접근 가능
+            .requestMatchers("/api/scraps/**").authenticated()
             .anyRequest().authenticated()
         )
 
