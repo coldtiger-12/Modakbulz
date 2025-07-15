@@ -54,7 +54,7 @@ public class AdminInquiryController {
 
   // 관리자 삭제
   @PostMapping("/delete")
-  public String delete(@RequestParam Long id, HttpSession session) {
+  public String delete(@RequestParam("id") Long id, HttpSession session) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
 
     if (loginMember == null || !"A".equals(loginMember.getGubun())) {
