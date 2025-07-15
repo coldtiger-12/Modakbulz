@@ -1,61 +1,47 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>관리자 대시보드</title>
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
-<style>
-  body {
-  font-family: Arial, sans-serif;
-  padding: 30px;
-  background: #f4f4f4;
-  }
-
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-  }
-
-  h1 {
-    text-align: center;
-    color: #333;
-  }
-
-  .menu {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .menu a {
-    padding: 12px 20px;
-    background: #007acc;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    text-align: center;
-  }
-
-  .menu a:hover {
-    background: #005fa3;
-  }
-</style>
 <body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<div class="container">
-  <h1> 관리자 대시 보드 </h1>
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
-  <div class="menu">
-    <a th:href="@{/admin/posts}">게시글 전체 관리</a>
-    <a th:href="@{/}">홈으로 돌아가기</a>
+<div class="dashboard-container">
+  <!-- 사이드 메뉴 -->
+  <aside class="dashboard-sidebar">
+    <ul>
+      <li class="now"><a href="/admin/posts">게시글 관리</a></li>
+      <li><a th:href="@{/admin/inquiry}">문의사항 게시판</a></li>
+    </ul>
+  </aside>
+  <div class="dashboard-content">
+    <h2>게시글 관리</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>제목</th>
+        <th>작성일</th>
+        <th>조회수</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="post : ${myPosts}">
+        <td>
+          <a th:href="@{'/posts/community/' + ${post.coId}}" th:text="${post.title}">제목</a>
+        </td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</td>
+        <td th:text="${post.viewC}">0</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>
-
 </body>
 </html>

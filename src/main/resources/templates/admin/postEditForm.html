@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 수정</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<div class="mypage-container">
+  <aside class="mypage-sidebar">
+    <ul>
+      <li class="now"><a href="/admin/posts">게시글 관리</a></li>
+      <li><a href="/admin/reviews">리뷰 관리</a></li>
+    </ul>
+  </aside>
+  <div class="mypage-content">
+    <h2>게시글 수정</h2>
+    <form th:action="@{'/admin/posts/' + ${communityForm.coId} + '/edit'}" th:object="${communityForm}" method="post">
+      <div class="form-group">
+        <label>제목</label>
+        <input type="text" th:field="*{title}" />
+        <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+      </div>
+      <div class="form-group">
+        <label>작성자</label>
+        <input type="text" th:field="*{writer}" readonly />
+      </div>
+      <div class="form-group">
+        <label>내용</label>
+        <textarea th:field="*{content}"></textarea>
+        <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+      </div>
+      <div class="button-group">
+        <button type="submit" class="btn-submit">저장</button>
+        <a th:href="@{'/admin/posts/' + ${communityForm.coId}}"><button type="button">취소</button></a>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html> 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문의 목록</title>
+  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<div class="dashboard-container">
+  <aside class="dashboard-sidebar">
+    <ul>
+      <li><a href="/admin/posts">게시글 관리</a></li>
+      <li class="now"><a th:href="@{/admin/inquiry}">문의사항 게시판</a></li>
+    </ul>
+  </aside>
+  <div class="dashboard-content">
+
+    <h1>문의 목록</h1>
+    <table>
+      <thead>
+      <tr>
+        <th>번호</th>
+        <th>작성자</th>
+        <th>내용</th>
+        <th>작성일</th>
+        <th>삭제</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="faq : ${inquiries}">
+        <td th:text="${faq.faqId}">1</td>
+        <td th:text="${faq.writer}">작성자</td>
+        <td>
+          <a th:href="@{'/admin/inquiry/' + ${faq.faqId}}"
+             th:text="${#strings.abbreviate(faq.content, 30)}">내용</a>
+        </td>
+        <td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd')}">2025-07-15</td>
+        <td>
+          <form th:action="@{/admin/inquiry/delete}" method="post">
+            <input type="hidden" name="id" th:value="${faq.faqId}" />
+            <button type="submit">삭제</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

@@ -251,7 +251,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 0;
 }
 
 .reviews-header h2 {
@@ -361,7 +361,6 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
-<<<<<<< HEAD
 }
 
 .review-modal-content {
@@ -647,12 +646,8 @@
 /* 리뷰 상단 요약 영역 */
 .review-summary {
   display: flex;
-  gap: 30px;
-  padding: 20px 0 40px;
-  border-bottom: 1px solid #ddd;
   flex-wrap: wrap;
-=======
->>>>>>> 30e2bd5 (2025-07-14-16)
+  margin-bottom: 0;
 }
 
 .review-modal-content {
@@ -935,7 +930,6 @@
         width: 100%;
     }
 }
-<<<<<<< HEAD
 
 .review-keywords {
   flex: 1;
@@ -963,5 +957,3 @@
   border: 1px solid #e0d4b5;
 }
 
-=======
->>>>>>> 30e2bd5 (2025-07-14-16)

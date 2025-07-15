@@ -23,6 +23,27 @@
       <li class="now"><a href="/mypage/inquiry">문의사항</a></li>
     </ul>
   </aside>
+  <h2>내 문의 목록</h2>
+  <a th:href="@{/mypage/inquiry/write}" class="btn">문의하기</a>
+  <table>
+    <thead>
+    <tr>
+      <th>번호</th>
+      <th>내용</th>
+      <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="faq : ${inquiries}">
+      <td th:text="${faq.faqId}">1</td>
+      <td>
+        <a th:href="@{|/mypage/inquiry/${faq.faqId}|}"
+           th:text="${#strings.abbreviate(faq.content, 30)}">내용</a>
+      </td>
+      <td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd')}">작성일</td>
+    </tr>
+    </tbody>
+  </table>
 </div>
 </body>
 </html>

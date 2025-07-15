@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문의 상세</title>
+</head>
+<body>
+  <h1>문의 상세 보기</h1>
+  <p><strong>번호:</strong> <span th:text="${faq.faqId}"></span></p>
+  <p><strong>작성자:</strong> <span th:text="${faq.writer}"></span></p>
+  <p><strong>작성일:</strong> <span th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+  <hr>
+  <p th:text="${faq.content}">문의 내용</p>
+  <hr>
+  <a href="/admin/inquiry">← 목록으로</a>
+</body>
+</html>

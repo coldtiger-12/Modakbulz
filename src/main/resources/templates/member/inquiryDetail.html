@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Title</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/mypage.css}">
+</head>
+<body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<div class="mypage-container">
+    <!-- 사이드 메뉴 -->
+    <aside class="mypage-sidebar">
+        <ul>
+            <li><a href="/mypage/edit">회원정보 관리</a></li>
+            <li><a href="/mypage/likes">찜한 캠핑장</a></li>
+            <li><a href="/mypage/posts">내가 쓴 게시글</a></li>
+            <li class="now"><a href="/mypage/inquiry">문의사항</a></li>
+        </ul>
+    </aside>
+
+    <div class="mypage-main">
+        <h2>문의 상세</h2>
+        <p><strong>작성자:</strong> <span th:text="${faq.writer}">닉네임</span></p>
+        <p><strong>작성일:</strong> <span th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}">2025-07-15</span></p>
+        <hr>
+        <p th:text="${faq.content}">문의 내용</p>
+        <div class="button-group" style="margin-top: 20px;">
+            <a th:href="@{/mypage/inquiry}" class="btn-submit">목록으로</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

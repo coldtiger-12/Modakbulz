@@ -236,17 +236,6 @@ public class MyPageController {
     return "member/myPosts";
   }
 
-  // 문의사항 목록 화면
-  @GetMapping("/inquiry")
-  public String myInquiries(HttpSession session, Model model) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
-      return "redirect:/login";
-    }
-
-    return "member/inquiry";
-  }
-
   // 회원 탈퇴 처리
   @PostMapping("/delete")
   public String delete(HttpSession session) {

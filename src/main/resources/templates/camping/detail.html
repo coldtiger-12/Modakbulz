@@ -7,6 +7,7 @@
   <!-- 공통 스타일시트와 캠핑장 상세 페이지 전용 스타일시트 불러오기 -->
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
+  <link rel="stylesheet" th:href="@{/css/review-all.css}">
 
   <!-- 타이틀 설정: 캠핑장 이름이 있으면 이름 + 상세정보, 없으면 기본 문구 -->
   <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
@@ -119,33 +120,14 @@
       <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
       <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
       <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
-<<<<<<< HEAD
     </div>
     <!-- 상단 요약 정보 -->
     <div class="review-summary">
       <!-- 평균 별점 -->
-      <div class="average-rating">
-        <span class="avg-score">⭐ <strong th:text="${reviewStats.avg}">4.8</strong> / 5</span>
-        <span class="review-count" th:text="'(' + ${reviewStats.count} + '건의 후기)'">(20건의 후기)</span>
+      <div class="avg-score">
+        <span class="score">⭐ <strong th:text="${reviewStats.avg}">4.8</strong ></span>
+        <span class="slash">/ 5</span>
       </div>
-
-      <!-- 별점 분포 -->
-      <div class="rating-bars">
-        <div class="bar" th:each="i : ${#numbers.sequence(5,1)}">
-          <span th:text="'★ ' + ${i}">★ 5</span>
-          <div class="bar-fill" th:style="'width:' + ${reviewStats.distribution[i]} + '%'"></div>
-        </div>
-      </div>
-
-      <!-- 키워드 -->
-      <div class="review-keywords">
-        <h4>연관 키워드</h4>
-        <div class="tag-cloud">
-          <span class="tag" th:each="word : ${reviewStats.keywords}" th:text="${word}">조용해요</span>
-        </div>
-      </div>
-=======
->>>>>>> 30e2bd5 (2025-07-14-16)
     </div>
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
       <div class="review-card" th:each="review : ${reviews}">
