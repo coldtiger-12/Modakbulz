@@ -2,11 +2,15 @@ package modackbulz.app.Application.domain.review.dao;
 
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.entity.Review;
+import modackbulz.app.Application.entity.UploadFile;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,67 +23,132 @@ public class ReviewDAOImpl implements ReviewDAO {
 
   private final NamedParameterJdbcTemplate template;
 
-  /**
-   * 특정 캠핑장(contentId)에 해당하는 모든 리뷰를 최신순으로 조회합니다.
-   */
   @Override
   public List<Review> findByContentId(Long contentId) {
     String sql = "SELECT REV_ID, CONTENT_ID, MEMBER_ID, WRITER, CONTENT, CREATED_AT, UPDATED_AT, SCORE FROM REVIEW WHERE CONTENT_ID = :contentId ORDER BY CREATED_AT DESC";
     Map<String, Object> param = Map.of("contentId", contentId);
-    // SQL 실행 결과를 Review 객체 리스트로 변환하여 반환
-    return template.query(sql, param, BeanPropertyRowMapper.newInstance(Review.class));
+    List<Review> reviews = template.query(sql, param, BeanPropertyRowMapper.newInstance(Review.class));
+
+    reviews.forEach(review -> {
+      review.setFiles(findFilesByRevId(review.getRevId()));
+      review.setKeywordIds(findKeywordIdsByRevId(review.getRevId()));
+    });
+    return reviews;
   }
 
-  /**
-   * 리뷰 ID(revId)로 특정 리뷰 1건을 조회합니다.
-   */
   @Override
   public Optional<Review> findById(Long revId) {
     String sql = "SELECT REV_ID, CONTENT_ID, MEMBER_ID, WRITER, CONTENT, CREATED_AT, UPDATED_AT, SCORE FROM REVIEW WHERE REV_ID = :revId";
     Map<String, Object> param = Map.of("revId", revId);
     try {
-      // SQL 실행 결과를 Review 객체로 변환
       Review review = template.queryForObject(sql, param, BeanPropertyRowMapper.newInstance(Review.class));
-      // Optional.of()를 사용하여 null이 아닌 객체를 포함하는 Optional 반환
-      return Optional.of(review);
+      if (review != null) {
+        review.setFiles(findFilesByRevId(review.getRevId()));
+        review.setKeywordIds(findKeywordIdsByRevId(review.getRevId()));
+      }
+      return Optional.ofNullable(review);
     } catch (EmptyResultDataAccessException e) {
-      // 결과가 없을 경우, 빈 Optional 반환
       return Optional.empty();
     }
   }
 
-  /**
-   * 새로운 리뷰를 데이터베이스에 등록합니다.
-   * review_rev_id_seq 시퀀스를 사용하여 REV_ID를 자동 생성합니다.
-   */
   @Override
-  public Review save(Review review) {
+  public Long save(Review review) {
     String sql = "INSERT INTO REVIEW (REV_ID, CONTENT_ID, MEMBER_ID, WRITER, CONTENT, SCORE) " +
         "VALUES (review_rev_id_seq.NEXTVAL, :contentId, :memberId, :writer, :content, :score)";
-    // Review 객체의 필드를 SQL 파라미터로 매핑
+
     SqlParameterSource param = new BeanPropertySqlParameterSource(review);
-    template.update(sql, param);
-    return review;
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    template.update(sql, param, keyHolder, new String[]{"REV_ID"});
+    return keyHolder.getKey().longValue();
   }
 
-  /**
-   * 기존 리뷰의 내용과 평점을 수정합니다.
-   * SQL의 trg_set_review_updated_at 트리거에 의해 UPDATED_AT 컬럼은 자동으로 현재 시각으로 갱신됩니다.
-   */
   @Override
   public int update(Review review) {
-    String sql = "UPDATE REVIEW SET CONTENT = :content, SCORE = :score WHERE REV_ID = :revId";
+    String sql = "UPDATE REVIEW SET CONTENT = :content, SCORE = :score, UPDATED_AT = SYSTIMESTAMP WHERE REV_ID = :revId";
     SqlParameterSource param = new BeanPropertySqlParameterSource(review);
     return template.update(sql, param);
   }
 
-  /**
-   * 특정 리뷰를 데이터베이스에서 삭제합니다.
-   */
   @Override
   public int delete(Long revId) {
     String sql = "DELETE FROM REVIEW WHERE REV_ID = :revId";
-    Map<String, Object> param = Map.of("revId", revId);
-    return template.update(sql, param);
+    return template.update(sql, Map.of("revId", revId));
+  }
+
+  @Override
+  public void insertKeywords(Long revId, List<Long> keywordIds) {
+    String sql = "INSERT INTO REVIEW_KEYWORD (REV_ID, KEYWORD_ID) VALUES (:revId, :keywordId)";
+    for (Long keywordId : keywordIds) {
+      template.update(sql, Map.of("revId", revId, "keywordId", keywordId));
+    }
+  }
+
+  @Override
+  public void deleteKeywordsByRevId(Long revId) {
+    String sql = "DELETE FROM REVIEW_KEYWORD WHERE REV_ID = :revId";
+    template.update(sql, Map.of("revId", revId));
+  }
+
+  @Override
+  public List<Long> findKeywordIdsByRevId(Long revId) {
+    String sql = "SELECT KEYWORD_ID FROM REVIEW_KEYWORD WHERE REV_ID = :revId";
+    return template.queryForList(sql, Map.of("revId", revId), Long.class);
+  }
+
+  @Override
+  public void insertFiles(Long revId, List<UploadFile> files) {
+    String sql = """
+        INSERT INTO FILES (
+            FILE_ID, ORIGIN_NAME, SAVE_NAME, FILE_PATH,
+            FILE_URL, BOARD_TYPE, BOARD_ID, UPLOAD_AT
+        ) VALUES (
+            FILES_SEQ.NEXTVAL, :originName, :saveName, :filePath,
+            :fileUrl, 'REVIEW', :boardId, SYSTIMESTAMP
+        )
+    """;
+    for (UploadFile file : files) {
+      MapSqlParameterSource params = new MapSqlParameterSource();
+      params.addValue("originName", file.getOriginName());
+      params.addValue("saveName", file.getSaveName());
+      params.addValue("filePath", file.getFilePath());
+      params.addValue("fileUrl", file.getFileUrl());
+      params.addValue("boardId", revId);
+      template.update(sql, params);
+    }
+  }
+
+  @Override
+  public List<UploadFile> findFilesByRevId(Long revId) {
+    String sql = "SELECT FILE_ID, ORIGIN_NAME, SAVE_NAME, FILE_PATH, FILE_URL FROM FILES WHERE BOARD_TYPE = 'REVIEW' AND BOARD_ID = :revId";
+    return template.query(sql, Map.of("revId", revId), BeanPropertyRowMapper.newInstance(UploadFile.class));
+  }
+
+  @Override
+  public void deleteFileById(Long fileId) {
+    String sql = "DELETE FROM FILES WHERE FILE_ID = :fileId";
+    template.update(sql, Map.of("fileId", fileId));
+  }
+
+  @Override
+  public Optional<Double> calculateAverageScore(Long contentId) {
+    String sql = "SELECT AVG(SCORE) FROM REVIEW WHERE CONTENT_ID = :contentId";
+    Map<String, Object> param = Map.of("contentId", contentId);
+    try {
+      Double avgScore = template.queryForObject(sql, param, Double.class);
+      return Optional.ofNullable(avgScore);
+    } catch (EmptyResultDataAccessException e) {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public void updateCampsiteScore(Long contentId, double score) {
+    String sql = "UPDATE CAMPSITES SET SCORE = :score WHERE CONTENT_ID = :contentId";
+    Map<String, Object> param = Map.of(
+        "score", Math.round(score * 10.0) / 10.0,
+        "contentId", contentId
+    );
+    template.update(sql, param);
   }
 }

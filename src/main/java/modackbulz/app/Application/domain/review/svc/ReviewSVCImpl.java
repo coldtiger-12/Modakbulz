@@ -1,9 +1,12 @@
 package modackbulz.app.Application.domain.review.svc;
 
 import lombok.RequiredArgsConstructor;
+import modackbulz.app.Application.common.FileStore;
 import modackbulz.app.Application.domain.review.dao.ReviewDAO;
 import modackbulz.app.Application.entity.Review;
+import modackbulz.app.Application.entity.UploadFile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -15,68 +18,105 @@ import java.util.stream.Collectors;
 public class ReviewSVCImpl implements ReviewSVC {
 
   private final ReviewDAO reviewDAO;
+  private final FileStore fileStore;
 
-  /**
-   * DAO를 호출하여 특정 캠핑장의 리뷰 목록을 그대로 반환합니다.
-   */
   @Override
   public List<Review> findByContentId(Long contentId) {
     return reviewDAO.findByContentId(contentId);
   }
 
-  /**
-   * DAO를 호출하여 특정 리뷰를 그대로 반환합니다.
-   */
   @Override
   public Optional<Review> findById(Long revId) {
     return reviewDAO.findById(revId);
   }
 
-  /**
-   * DAO를 호출하여 리뷰를 저장합니다.
-   * 추가적인 비즈니스 로직(예: 포인트 적립)이 필요하다면 여기에 구현할 수 있습니다.
-   */
   @Override
-  public Review save(Review review) {
-    return reviewDAO.save(review);
+  @Transactional
+  public Long save(Review review) {
+    Long revId = reviewDAO.save(review);
+
+    List<Long> keywordIds = review.getKeywordIds();
+    if (keywordIds != null && !keywordIds.isEmpty()) {
+      reviewDAO.insertKeywords(revId, keywordIds);
+    }
+
+    List<UploadFile> files = review.getFiles();
+    if (files != null && !files.isEmpty()) {
+      reviewDAO.insertFiles(revId, files);
+    }
+
+    updateAverageScore(review.getContentId());
+
+    return revId;
   }
 
-  /**
-   * DAO를 호출하여 리뷰를 수정합니다.
-   * 권한 검사 등의 로직은 컨트롤러 단에서 처리하거나,
-   * 파라미터로 로그인 정보를 받아와 여기서 처리할 수 있습니다.
-   */
   @Override
-  public int update(Review review) {
-    return reviewDAO.update(review);
+  @Transactional
+  public int update(Review review, List<Long> deletedFileIds) {
+    // 1. 리뷰 기본 정보(내용, 평점) 수정
+    int affectedRows = reviewDAO.update(review);
+    if(affectedRows == 0) return 0;
+
+    Long revId = review.getRevId();
+
+    // 2. 키워드 수정 (기존 것 모두 삭제 후 새로 삽입)
+    reviewDAO.deleteKeywordsByRevId(revId);
+    List<Long> keywordIds = review.getKeywordIds();
+    if (keywordIds != null && !keywordIds.isEmpty()) {
+      reviewDAO.insertKeywords(revId, keywordIds);
+    }
+
+    // 3. 파일 DB 정보 삭제
+    if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
+      for(Long fileId : deletedFileIds) {
+        reviewDAO.deleteFileById(fileId);
+      }
+    }
+
+    // 4. 새로 추가된 파일들 DB에 저장
+    List<UploadFile> newFiles = review.getFiles();
+    if (newFiles != null && !newFiles.isEmpty()) {
+      reviewDAO.insertFiles(revId, newFiles);
+    }
+
+    // 5. 평균 점수 업데이트
+    updateAverageScore(review.getContentId());
+
+    return affectedRows;
   }
 
-  /**
-   * DAO를 호출하여 리뷰를 삭제합니다.
-   * 권한 검사 로직은 컨트롤러에서 처리하는 것을 권장합니다.
-   */
   @Override
+  @Transactional
   public int delete(Long revId) {
-    return reviewDAO.delete(revId);
+    Optional<Review> optionalReview = reviewDAO.findById(revId);
+    if (optionalReview.isEmpty()) {
+      return 0;
+    }
+    Review review = optionalReview.get();
+    Long contentId = review.getContentId();
+
+    // 1. 서버에 저장된 물리적 파일 삭제
+    fileStore.deleteFiles(review.getFiles());
+
+    // 2. DB에서 리뷰 삭제 (연관된 키워드, 파일 정보도 CASCADE로 함께 삭제됨)
+    int affectedRows = reviewDAO.delete(revId);
+
+    // 3. 평균 점수 업데이트
+    if (affectedRows > 0) {
+      updateAverageScore(contentId);
+    }
+
+    return affectedRows;
   }
 
-  /**
-   * 별점의 평균 구하기
-   */
+  private void updateAverageScore(Long contentId) {
+    double averageScore = reviewDAO.calculateAverageScore(contentId).orElse(0.0);
+    reviewDAO.updateCampsiteScore(contentId, averageScore);
+  }
+
   @Override
   public Double calculateAverageScore(Long contentId) {
-    List<Review> reviews = reviewDAO.findByContentId(contentId);
-
-    if (reviews == null || reviews.isEmpty()) {
-      return 0.0;
-    }
-
-    double sum = 0.0;
-    for (Review r : reviews) {
-      sum += r.getScore();
-    }
-
-    return sum / reviews.size();
+    return reviewDAO.calculateAverageScore(contentId).orElse(0.0);
   }
 
   @Override
@@ -89,4 +129,3 @@ public class ReviewSVCImpl implements ReviewSVC {
         ));
   }
 }
-

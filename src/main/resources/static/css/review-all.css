@@ -78,4 +78,47 @@
   background: #b6e6a7;
   color: #222;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-} 
+}
+
+.review-actions .action-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.review-actions .action-button:hover {
+  background-color: #fffbe6;
+  border-color: #aaa;
+}
+
+.review-edit-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.review-edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.review-delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.review-delete-btn:hover {
+  background-color: #b02a37;
+}

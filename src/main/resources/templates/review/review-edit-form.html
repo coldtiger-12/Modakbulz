@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>리뷰 수정</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/review-form.css}">
+</head>
+<body>
+<div class="yanolja-review-container">
+  <div class="review-form-section">
+    <div class="form-container">
+      <h2>리뷰 수정</h2>
+
+      <form th:action="@{/reviews/{revId}/edit(revId=${revId})}" th:object="${editForm}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{contentId}">
+
+        <div class="rating-input-section">
+          <h3>평점</h3>
+          <div class="rating-input">
+            <div class="star-input">
+              <input type="radio" id="star5" th:field="*{score}" value="5"><label for="star5">★</label>
+              <input type="radio" id="star4" th:field="*{score}" value="4"><label for="star4">★</label>
+              <input type="radio" id="star3" th:field="*{score}" value="3"><label for="star3">★</label>
+              <input type="radio" id="star2" th:field="*{score}" value="2"><label for="star2">★</label>
+              <input type="radio" id="star1" th:field="*{score}" value="1"><label for="star1">★</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="features-section">
+          <h3>한눈에 보는 특징</h3>
+          <div class="features-grid">
+            <label class="feature-item" th:each="keyword : ${allKeywords}">
+              <input type="checkbox" th:field="*{keywordIds}" th:value="${keyword.keywordId}">
+              <span class="feature-text" th:text="${keyword.words}">키워드 이름</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <h3>리뷰 내용</h3>
+          <textarea th:field="*{content}" required minlength="10" maxlength="2000"></textarea>
+        </div>
+
+        <div class="photo-section" th:if="${existingFiles != null && !existingFiles.isEmpty()}">
+          <h3>기존 사진 (삭제할 사진 선택)</h3>
+          <div class="photo-grid">
+            <label th:each="file : ${existingFiles}" class="photo-item existing">
+              <img th:src="${file.fileUrl}" alt="기존 사진">
+              <input type="checkbox" name="deletedFileIds" th:value="${file.fileId}" title="삭제 체크">
+              <span class="delete-check">삭제</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="photo-section">
+          <h3>새로운 사진 추가</h3>
+          <input type="file" name="newImageFiles" multiple accept="image/*">
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="cancel-btn" th:onclick="|location.href='@{/camping/{id}(id=*{contentId})}'|">취소</button>
+          <button type="submit" class="submit-btn">수정 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,23 +1,39 @@
 package modackbulz.app.Application.domain.review.dao;
 
 import modackbulz.app.Application.entity.Review;
+import modackbulz.app.Application.entity.UploadFile;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface ReviewDAO {
-  // 캠핑장 ID로 리뷰 목록 조회
+
   List<Review> findByContentId(Long contentId);
 
-  // 리뷰 단건 조회
   Optional<Review> findById(Long revId);
 
-  // 리뷰 등록
-  Review save(Review review);
+  Long save(Review review);
 
-  // 리뷰 수정
   int update(Review review);
 
-  // 리뷰 삭제
   int delete(Long revId);
 
+  // --- 키워드 관련 ---
+  void insertKeywords(Long revId, List<Long> keywordIds);
+
+  void deleteKeywordsByRevId(Long revId);
+
+  List<Long> findKeywordIdsByRevId(Long revId);
+
+  // --- 파일 관련 ---
+  void insertFiles(Long revId, List<UploadFile> files);
+
+  List<UploadFile> findFilesByRevId(Long revId);
+
+  void deleteFileById(Long fileId);
+
+  // --- 점수 계산 관련 ---
+  Optional<Double> calculateAverageScore(Long contentId);
+
+  void updateCampsiteScore(Long contentId, double score);
 }

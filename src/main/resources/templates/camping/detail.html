@@ -7,7 +7,6 @@
   <!-- 공통 스타일시트와 캠핑장 상세 페이지 전용 스타일시트 불러오기 -->
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
-  <link rel="stylesheet" th:href="@{/css/review-all.css}">
 
   <!-- 타이틀 설정: 캠핑장 이름이 있으면 이름 + 상세정보, 없으면 기본 문구 -->
   <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
@@ -89,25 +88,27 @@
     <div class="gallery-header-row">
       <h2>
         갤러리
-        <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
-          (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #arrays.length(campImages)}"></span>장)
+        <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and !#lists.isEmpty(campImages))}">
+        (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #lists.size(campImages)}"></span>장)
         </span>
+
+        <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#lists.isEmpty(campImages) or campImages == null)}">
       </h2>
       <a th:href="@{/camping/gallery(campingId=${camp.contentId})}" class="all-review-btn gallery-all-review-btn">갤러리 전체보기</a>
     </div>
-    
+
     <!-- 이미지가 있는 경우 -->
     <div class="slider-wrapper" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
       <!-- 대표 이미지가 있으면 먼저 표시 -->
-<!--      <div class="slide-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">-->
-<!--        <img th:src="${camp.firstImageUrl}" alt="캠핑장 대표 이미지">-->
-<!--      </div>-->
+      <!--      <div class="slide-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">-->
+      <!--        <img th:src="${camp.firstImageUrl}" alt="캠핑장 대표 이미지">-->
+      <!--      </div>-->
       <!-- API에서 가져온 추가 이미지들 표시 -->
       <div class="slide-item" th:each="imageUrl : ${campImages}" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
         <img th:src="${imageUrl}" th:alt="'캠핑장 이미지 ' + ${#arrays.length(campImages)}">
       </div>
     </div>
-    
+
     <!-- 이미지가 없는 경우 안내 메시지 -->
     <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#arrays.isEmpty(campImages) or campImages == null)}">
       <p>📷 이미지 준비 중입니다.</p>
@@ -118,17 +119,38 @@
   <section class="detail-reviews">
     <div class="reviews-header">
       <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
-      <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
-      <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
+      <div class="reviews-header">
+        <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
+        <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
+      </div>
     </div>
     <!-- 상단 요약 정보 -->
     <div class="review-summary">
       <!-- 평균 별점 -->
-      <div class="avg-score">
-        <span class="score">⭐ <strong th:text="${reviewStats.avg}">4.8</strong ></span>
-        <span class="slash">/ 5</span>
+      <div class="average-rating">
+        <div class="average-rating">
+          <span class="avg-score">⭐ <strong th:text="${#numbers.formatDecimal(reviewStats.avg, 1, 1)}">4.8</strong> / 5</span>
+          <span class="review-count" th:text="'(' + ${reviewStats.count} + '건의 후기)'">(20건의 후기)</span>
+        </div>
+      </div>
+
+      <!-- 별점 분포 -->
+      <div class="rating-bars">
+        <div class="bar" th:each="i : ${#numbers.sequence(5,1)}">
+          <span th:text="'★ ' + ${i}">★ 5</span>
+          <div class="bar-fill" th:style="'width:' + ${reviewStats.distribution[i]} + '%'"></div>
+        </div>
+      </div>
+
+      <!-- 키워드 -->
+      <div class="review-keywords">
+        <h4>연관 키워드</h4>
+        <div class="tag-cloud">
+          <span class="tag" th:each="word : ${reviewStats.keywords}" th:text="${word}">조용해요</span>
+        </div>
       </div>
     </div>
+
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
       <div class="review-card" th:each="review : ${reviews}">
         <div class="review-header">
@@ -161,7 +183,7 @@
       <form id="reviewForm" class="review-form">
         <input type="hidden" id="campingId" th:value="${camp.contentId}">
         <input type="hidden" id="reviewId" value="">
-        
+
         <div class="rating-section">
           <label>평점</label>
           <div class="star-rating">
@@ -177,12 +199,12 @@
             <label for="star1">★</label>
           </div>
         </div>
-        
+
         <div class="content-section">
           <label for="reviewContent">리뷰 내용</label>
           <textarea id="reviewContent" name="content" placeholder="캠핑장에 대한 솔직한 후기를 남겨주세요..." required></textarea>
         </div>
-        
+
         <div class="form-buttons">
           <button type="button" class="cancel-btn" onclick="closeReviewModal()">취소</button>
           <button type="submit" class="submit-btn">등록</button>

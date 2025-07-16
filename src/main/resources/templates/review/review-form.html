@@ -8,258 +8,162 @@
     <link rel="stylesheet" th:href="@{/css/review-form.css}">
 </head>
 <body>
-    <!-- 로그인 전 상단 메뉴 -->
-    <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 
-    <!-- 로그인 후 상단 메뉴 -->
-    <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-    <!-- 공통 헤더 영역 -->
-    <div th:replace="~{fragments/topmenu :: header}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
 
-    <div class="yanolja-review-container">
-        <!-- 캠핑장 정보 헤더 -->
-        <div class="camping-header">
-            <div class="camping-info">
-                <h1 th:text="${camping.facltNm}">캠핑장 이름</h1>
-                <p class="camping-location" th:text="${camping.addr1}">캠핑장 위치</p>
-            </div>
-            <div class="camping-rating">
-                <div class="rating-display">
-                    <span class="rating-score" th:text="${averageRating != null ? averageRating : '0.0'}">4.8</span>
-                </div>
-                <div class="rating-stars">
-                    <span class="star filled">★</span>
-                    <span class="star filled">★</span>
-                    <span class="star filled">★</span>
-                    <span class="star filled">★</span>
-                    <span class="star">★</span>
-                </div>
-            </div>
+<div class="yanolja-review-container">
+    <div class="camping-header">
+        <div class="camping-info">
+            <h1 th:text="${camping.facltNm}">캠핑장 이름</h1>
+            <p class="camping-location" th:text="${camping.addr1}">캠핑장 위치</p>
         </div>
-
-        <!-- 리뷰 작성 폼 -->
-        <div class="review-form-section">
-            <div class="form-container">
-                <h2>리뷰 작성</h2>
-                
-                <form th:action="@{/reviews}" th:object="${reviewForm}" method="post" class="yanolja-review-form" enctype="multipart/form-data">
-                    <input type="hidden" name="campingId" th:value="${camping.contentId}">
-                    <input type="hidden" name="revId" th:value="${review?.revId}" />
-
-                    <!-- 평점 선택 -->
-                    <div class="rating-input-section">
-                        <h3>평점</h3>
-                        <div class="rating-input">
-                            <div class="star-input">
-                                <input type="radio" id="star5" name="score" value="5" th:checked="${review?.score == 5}">
-                                <label for="star5">★</label>
-                                <input type="radio" id="star4" name="score" value="4" th:checked="${review?.score == 4}">
-                                <label for="star4">★</label>
-                                <input type="radio" id="star3" name="score" value="3" th:checked="${review?.score == 3}">
-                                <label for="star3">★</label>
-                                <input type="radio" id="star2" name="score" value="2" th:checked="${review?.score == 2}">
-                                <label for="star2">★</label>
-                                <input type="radio" id="star1" name="score" value="1" th:checked="${review?.score == 1}">
-                                <label for="star1">★</label>
-                            </div>
-                            <span class="rating-text">평점을 선택해주세요</span>
-                        </div>
-                    </div>
-
-                    <!-- 한눈에 보는 특징 -->
-                    <div class="features-section">
-                        <h3>한눈에 보는 특징</h3>
-                        <p class="features-subtitle">499명 참여</p>
-                        <div class="features-grid">
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="clean">
-                                <span class="feature-text">객실이 깨끗해요</span>
-                                <span class="feature-count">359</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="bedding">
-                                <span class="feature-text">침구가 좋아요</span>
-                                <span class="feature-count">314</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="service">
-                                <span class="feature-text">고객 응대가 친절해요</span>
-                                <span class="feature-count">286</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="view">
-                                <span class="feature-text">전망이 좋아요</span>
-                                <span class="feature-count">225</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="parking">
-                                <span class="feature-text">주차하기 편해요</span>
-                                <span class="feature-count">207</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="breakfast">
-                                <span class="feature-text">조식이 맛있어요</span>
-                                <span class="feature-count">165</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="facilities">
-                                <span class="feature-text">부대시설을 잘 갖췄어요</span>
-                                <span class="feature-count">132</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="amenity">
-                                <span class="feature-text">어메니티가 좋아요</span>
-                                <span class="feature-count">67</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="family">
-                                <span class="feature-text">아이와 가기 좋아요</span>
-                                <span class="feature-count">54</span>
-                            </label>
-                            <label class="feature-item">
-                                <input type="checkbox" name="features" value="pool">
-                                <span class="feature-text">수영장이 좋아요</span>
-                                <span class="feature-count">39</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 사진 업로드 -->
-                    <div class="photo-section">
-                        <h3>사진 후기</h3>
-                        <div class="photo-upload-area">
-                            <div class="photo-grid" id="photoGrid">
-                                <div class="photo-upload-item" onclick="document.getElementById('photoInput').click()">
-                                    <div class="upload-icon">📷</div>
-                                    <span>사진 추가</span>
-                                    <span class="upload-limit">최대 10장</span>
-                                </div>
-                            </div>
-                            <input type="file" id="photoInput" name="photos" multiple accept="image/*" style="display: none;">
-                        </div>
-                    </div>
-
-                    <!-- 리뷰 내용 -->
-                    <div class="content-section">
-                        <h3>리뷰 내용</h3>
-                        <textarea 
-                            id="content" 
-                            name="content" 
-                            th:field="*{content}"
-                            placeholder="캠핑장에 대한 솔직한 후기를 남겨주세요..."
-                            required
-                            minlength="10"
-                            maxlength="2000"></textarea>
-                        <div class="char-count">
-                            <span id="currentCount">0</span> / 2000
-                        </div>
-                    </div>
-
-                    <!-- 버튼 영역 -->
-                    <div class="form-buttons">
-                        <button type="button" class="cancel-btn" onclick="goBack()">취소</button>
-                        <button type="submit" class="submit-btn" th:text="${review != null ? '수정' : '등록'}">등록</button>
-                    </div>
-                </form>
+        <div class="camping-rating">
+            <div class="rating-display">
+                <span class="rating-score" th:text="${averageRating != null ? #numbers.formatDecimal(averageRating, 1, 1) : '0.0'}">4.8</span>
+            </div>
+            <div class="rating-stars">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">★</span>
             </div>
         </div>
     </div>
 
-    <script th:inline="javascript">
-        // 평점 선택 시 텍스트 변경
-        document.querySelectorAll('input[name="score"]').forEach(input => {
-            input.addEventListener('change', function() {
-                const ratingText = document.querySelector('.rating-text');
-                const score = this.value;
-                const texts = {
-                    '5': '매우 만족',
-                    '4': '만족',
-                    '3': '보통',
-                    '2': '불만족',
-                    '1': '매우 불만족'
-                };
-                ratingText.textContent = texts[score] || '평점을 선택해주세요';
-            });
+    <div class="review-form-section">
+        <div class="form-container">
+            <h2>리뷰 작성</h2>
+
+            <form th:action="@{/reviews/write}" th:object="${reviewForm}" method="post" class="yanolja-review-form" enctype="multipart/form-data">
+                <input type="hidden" name="campingId" th:value="${camping.contentId}">
+
+                <div class="rating-input-section">
+                    <h3>평점</h3>
+                    <div class="rating-input">
+                        <div class="star-input">
+                            <input type="radio" id="star5" name="score" value="5">
+                            <label for="star5">★</label>
+                            <input type="radio" id="star4" name="score" value="4">
+                            <label for="star4">★</label>
+                            <input type="radio" id="star3" name="score" value="3">
+                            <label for="star3">★</label>
+                            <input type="radio" id="star2" name="score" value="2">
+                            <label for="star2">★</label>
+                            <input type="radio" id="star1" name="score" value="1" checked> <label for="star1">★</label>
+                        </div>
+                        <span class="rating-text">평점을 선택해주세요</span>
+                    </div>
+                </div>
+
+                <div class="features-section">
+                    <h3>한눈에 보는 특징</h3>
+                    <div class="features-grid">
+                        <label class.feature-item th:each="keyword : ${allKeywords}">
+                            <input type="checkbox" name="keywordIds" th:value="${keyword.keywordId}">
+                            <span class="feature-text" th:text="${keyword.words}">키워드 이름</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="photo-section">
+                    <h3>사진 후기</h3>
+                    <div class="photo-upload-area">
+                        <div class="photo-grid" id="photoGrid">
+                            <div class="photo-upload-item" onclick="document.getElementById('photoInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <span>사진 추가</span>
+                                <span class="upload-limit">최대 10장</span>
+                            </div>
+                        </div>
+                        <input type="file" id="photoInput" name="imageFiles" multiple accept="image/*" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3>리뷰 내용</h3>
+                    <textarea
+                        id="content"
+                        name="content"
+                        th:field="*{content}"
+                        placeholder="캠핑장에 대한 솔직한 후기를 남겨주세요..."
+                        required
+                        minlength="10"
+                        maxlength="2000"></textarea>
+                    <div class="char-count">
+                        <span id="currentCount">0</span> / 2000
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="cancel-btn" onclick="history.back()">취소</button>
+                    <button type="submit" class="submit-btn">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 평점 선택 시 텍스트 변경
+    document.querySelectorAll('input[name="score"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const ratingText = document.querySelector('.rating-text');
+            const score = this.value;
+            const texts = {
+                '5': '매우 만족',
+                '4': '만족',
+                '3': '보통',
+                '2': '불만족',
+                '1': '매우 불만족'
+            };
+            ratingText.textContent = texts[score] || '평점을 선택해주세요';
         });
+    });
 
-        // 글자 수 카운트
-        document.getElementById('content').addEventListener('input', function() {
-            const currentLength = this.value.length;
-            document.getElementById('currentCount').textContent = currentLength;
-            
-            const charCount = document.querySelector('.char-count');
-            if (currentLength > 1800) {
-                charCount.style.color = '#dc3545';
-            } else if (currentLength > 1600) {
-                charCount.style.color = '#ffc107';
-            } else {
-                charCount.style.color = '#6c757d';
-            }
+    // 글자 수 카운트
+    document.getElementById('content').addEventListener('input', function() {
+        const currentLength = this.value.length;
+        document.getElementById('currentCount').textContent = currentLength;
+    });
+
+    // 사진 업로드 미리보기 처리
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        const photoGrid = document.getElementById('photoGrid');
+        const uploadItem = photoGrid.querySelector('.photo-upload-item');
+
+        // 기존 미리보기 사진들 제거 (업로드 아이템 제외)
+        const existingPhotos = photoGrid.querySelectorAll('.photo-item');
+        existingPhotos.forEach(photo => photo.remove());
+
+        files.forEach((file, index) => {
+            if (index >= 10) return; // 최대 10장 제한
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="업로드된 사진">
+                `;
+                photoGrid.insertBefore(photoItem, uploadItem);
+            };
+            reader.readAsDataURL(file);
         });
+    });
 
-        // 사진 업로드 처리
-        document.getElementById('photoInput').addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            const photoGrid = document.getElementById('photoGrid');
-            const uploadItem = photoGrid.querySelector('.photo-upload-item');
-            
-            // 기존 사진들 제거 (업로드 아이템 제외)
-            const existingPhotos = photoGrid.querySelectorAll('.photo-item');
-            existingPhotos.forEach(photo => photo.remove());
-            
-            files.forEach((file, index) => {
-                if (index >= 10) return; // 최대 10장 제한
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const photoItem = document.createElement('div');
-                    photoItem.className = 'photo-item';
-                    photoItem.innerHTML = `
-                        <img src="${e.target.result}" alt="업로드된 사진">
-                        <button type="button" class="remove-photo" onclick="removePhoto(this)">×</button>
-                    `;
-                    photoGrid.insertBefore(photoItem, uploadItem);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        // 사진 제거
-        function removePhoto(button) {
-            button.parentElement.remove();
-        }
-
-        // 페이지 로드 시 초기 글자 수 설정
-        document.addEventListener('DOMContentLoaded', function() {
-            const textarea = document.getElementById('content');
+    // 페이지 로드 시 초기 글자 수 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('content');
+        if(textarea) {
             const currentLength = textarea.value.length;
             document.getElementById('currentCount').textContent = currentLength;
-        });
-
-        // 뒤로 가기
-        function goBack() {
-            const campingId = document.querySelector('input[name="campingId"]').value;
-            window.location.href = `/camping/${campingId}`;
         }
-
-        // 폼 제출 전 유효성 검사
-        document.querySelector('.yanolja-review-form').addEventListener('submit', function(e) {
-            const score = document.querySelector('input[name="score"]:checked');
-            const content = document.getElementById('content').value.trim();
-
-            if (!score) {
-                e.preventDefault();
-                alert('평점을 선택해주세요.');
-                return;
-            }
-
-            if (!content || content.length < 10) {
-                e.preventDefault();
-                alert('리뷰 내용은 최소 10자 이상 입력해주세요.');
-                return;
-            }
-        });
-    </script>
+    });
+</script>
 </body>
-</html> 
+</html>

@@ -3,10 +3,15 @@ package modackbulz.app.Application.web;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import modackbulz.app.Application.common.FileStore;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
+import modackbulz.app.Application.domain.keyword.svc.KeywordSVC;
 import modackbulz.app.Application.domain.review.svc.ReviewSVC;
+import modackbulz.app.Application.entity.Keyword;
 import modackbulz.app.Application.entity.Review;
+import modackbulz.app.Application.entity.UploadFile;
 import modackbulz.app.Application.web.form.login.LoginMember;
 import modackbulz.app.Application.web.form.review.EditForm;
 import modackbulz.app.Application.web.form.review.ReviewForm;
@@ -17,224 +22,193 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+@Slf4j
 @Controller
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
+  //== 의존성 주입 ==//
   private final ReviewSVC reviewSVC;
   private final GoCampingService goCampingService;
+  private final KeywordSVC keywordSVC;
+  private final FileStore fileStore;
 
-  // 리뷰 작성 폼 (GET 요청)
+  /**
+   * 리뷰 작성 폼 (GET)
+   */
   @GetMapping("/write")
-  public String writeForm(@RequestParam("campingId") Long campingId,
-                          HttpSession session,
-                          Model model,
-                          RedirectAttributes redirectAttributes) {
-
+  public String writeForm(@RequestParam("campingId") Long campingId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    // 1. 로그인 여부 확인
     if (loginMember == null) {
       redirectAttributes.addFlashAttribute("msg", "리뷰를 작성하려면 먼저 로그인해야 합니다.");
       return "redirect:/login";
     }
 
-    // 2. 캠핑장 정보 조회
-    GoCampingDto.Item camping = goCampingService.getCampDetail(campingId).block();
-    if (camping == null) {
-      redirectAttributes.addFlashAttribute("msg", "캠핑장 정보를 찾을 수 없습니다.");
-      return "redirect:/camping";
-    }
+    model.addAttribute("reviewForm", new ReviewForm());
+    model.addAttribute("camping", goCampingService.getCampDetail(campingId).block());
+    model.addAttribute("allKeywords", keywordSVC.findAll());
 
-    // 3. 이미 작성한 리뷰가 있는지 확인
-    List<Review> existingReviews = reviewSVC.findByContentId(campingId);
-    Review existingReview = existingReviews.stream()
-        .filter(review -> review.getMemberId().equals(loginMember.getMemberId()))
-        .findFirst()
-        .orElse(null);
-
-    // 4. 평균 평점 계산
-    double averageRating = 0.0;
-    if (!existingReviews.isEmpty()) {
-      double totalScore = existingReviews.stream()
-          .mapToInt(Review::getScore)
-          .sum();
-      averageRating = Math.round((totalScore / existingReviews.size()) * 10.0) / 10.0;
-    }
-
-    // 5. 모델에 데이터 추가
-    model.addAttribute("camping", camping);
+    double averageRating = reviewSVC.calculateAverageScore(campingId);
     model.addAttribute("averageRating", averageRating);
-    
-    if (existingReview != null) {
-      // 기존 리뷰가 있으면 수정 모드
-      ReviewForm reviewForm = new ReviewForm();
-      BeanUtils.copyProperties(existingReview, reviewForm);
-      model.addAttribute("reviewForm", reviewForm);
-      model.addAttribute("review", existingReview);
-    } else {
-      // 새 리뷰 작성 모드
-      ReviewForm reviewForm = new ReviewForm();
-      reviewForm.setCampingId(campingId);
-      model.addAttribute("reviewForm", reviewForm);
-    }
 
     return "review/review-form";
   }
-
-  // 리뷰 작성/수정 처리 (POST 요청)
-  @PostMapping
+  /**
+   * 새 리뷰 작성 처리 (POST)
+   */
+  @PostMapping("/write")
   public String write(@Valid @ModelAttribute("reviewForm") ReviewForm reviewForm,
                       BindingResult bindingResult,
                       HttpSession session,
-                      RedirectAttributes redirectAttributes) {
+                      RedirectAttributes redirectAttributes,
+                      Model model) throws IOException {
 
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
-      return "redirect:/login";
-    }
+    if (loginMember == null) return "redirect:/login";
 
     if (bindingResult.hasErrors()) {
-      // 에러가 있으면 다시 작성 폼으로
-      GoCampingDto.Item camping = goCampingService.getCampDetail(reviewForm.getCampingId()).block();
-      if (camping != null) {
-        redirectAttributes.addFlashAttribute("camping", camping);
-      }
+      log.info("리뷰 작성 유효성 검사 오류: {}", bindingResult);
+      model.addAttribute("camping", goCampingService.getCampDetail(reviewForm.getCampingId()).block());
+      model.addAttribute("allKeywords", keywordSVC.findAll());
       return "review/review-form";
     }
 
-    // 리뷰 엔티티 생성
+    List<UploadFile> storedFiles = fileStore.storeFiles(reviewForm.getImageFiles());
+
     Review review = new Review();
     BeanUtils.copyProperties(reviewForm, review);
-    review.setContentId(reviewForm.getCampingId()); // campingId -> contentId 매핑
+    review.setContentId(reviewForm.getCampingId());
     review.setMemberId(loginMember.getMemberId());
     review.setWriter(loginMember.getNickname());
+    review.setKeywordIds(reviewForm.getKeywordIds());
+    review.setFiles(storedFiles);
 
-    // 기존 리뷰가 있는지 확인
-    List<Review> existingReviews = reviewSVC.findByContentId(reviewForm.getCampingId());
-    Review existingReview = existingReviews.stream()
-        .filter(r -> r.getMemberId().equals(loginMember.getMemberId()))
-        .findFirst()
-        .orElse(null);
-
-    if (existingReview != null) {
-      // 기존 리뷰 수정
-      review.setRevId(existingReview.getRevId());
-      reviewSVC.update(review);
-      redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 수정되었습니다.");
-    } else {
-      // 새 리뷰 작성
-      reviewSVC.save(review);
-      redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 등록되었습니다.");
-    }
+    reviewSVC.save(review);
+    redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 등록되었습니다.");
 
     return "redirect:/camping/" + reviewForm.getCampingId();
   }
 
-  // 리뷰 수정 폼 (GET 요청)
+  /**
+   * 리뷰 수정 폼 (GET)
+   */
   @GetMapping("/{revId}/edit")
-  public String editForm(@PathVariable("revId") Long revId,
-                         HttpSession session,
-                         Model model,
-                         RedirectAttributes redirectAttributes) {
-
+  public String editForm(@PathVariable("revId") Long revId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    // 1. 로그인 여부 확인
     if (loginMember == null) {
-      redirectAttributes.addFlashAttribute("msg", "리뷰를 수정하려면 먼저 로그인해야 합니다.");
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
 
-    Review review = reviewSVC.findById(revId).orElse(null);
-    // 2. 리뷰 존재 여부 확인
-    if (review == null) {
-      redirectAttributes.addFlashAttribute("msg", "해당 리뷰를 찾을 수 없습니다.");
-      return "redirect:/"; // 혹은 캠핑장 상세 페이지로 리다이렉트
+    Optional<Review> optionalReview = reviewSVC.findById(revId);
+    if (optionalReview.isEmpty()) {
+      redirectAttributes.addFlashAttribute("msg", "존재하지 않는 리뷰입니다.");
+      return "redirect:/";
     }
 
-    // 3. 권한 확인 (관리자 또는 작성자 본인)
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = review.getMemberId().equals(loginMember.getMemberId());
-
-    if (!isAdmin && !isOwner) {
-      redirectAttributes.addFlashAttribute("msg", "리뷰를 수정할 권한이 없습니다.");
-      return "redirect:/camping/" + review.getContentId(); // 캠핑장 상세 페이지로 리다이렉트
+    Review review = optionalReview.get();
+    if (!review.getMemberId().equals(loginMember.getMemberId())) {
+      redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
+      return "redirect:/camping/" + review.getContentId();
     }
 
-    // 뷰에 전달할 수정용 폼 객체 생성
     EditForm editForm = new EditForm();
     BeanUtils.copyProperties(review, editForm);
-    editForm.setContentId(review.getContentId());
+    editForm.setKeywordIds(review.getKeywordIds());
 
     model.addAttribute("editForm", editForm);
-    model.addAttribute("revId", revId); // 폼 전송 시 사용할 리뷰 ID
+    model.addAttribute("revId", revId);
+    model.addAttribute("allKeywords", keywordSVC.findAll());
+    model.addAttribute("existingFiles", review.getFiles());
 
-    return "reviews/editForm"; // reviews/editForm.html (새로 생성 필요)
+    return "review/review-edit-form";
   }
 
-  // 리뷰 수정 처리 (POST 요청)
+  /**
+   * 리뷰 수정 처리 (POST)
+   */
   @PostMapping("/{revId}/edit")
   public String edit(@PathVariable("revId") Long revId,
                      @Valid @ModelAttribute("editForm") EditForm editForm,
                      BindingResult bindingResult,
                      HttpSession session,
-                     RedirectAttributes redirectAttributes) {
+                     RedirectAttributes redirectAttributes,
+                     Model model) throws IOException {
 
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
-      return "redirect:/login";
-    }
+    if (loginMember == null) return "redirect:/login";
 
-    Review review = reviewSVC.findById(revId).orElse(null);
-    if (review == null) {
+    Optional<Review> optionalReview = reviewSVC.findById(revId);
+    if (optionalReview.isEmpty()) {
+      redirectAttributes.addFlashAttribute("msg", "존재하지 않는 리뷰입니다.");
       return "redirect:/";
     }
 
-    // 수정 권한 재확인
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = review.getMemberId().equals(loginMember.getMemberId());
-    if (!isAdmin && !isOwner) {
+    Review foundReview = optionalReview.get();
+    if (!foundReview.getMemberId().equals(loginMember.getMemberId())) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
-      return "redirect:/camping/" + review.getContentId();
+      return "redirect:/camping/" + foundReview.getContentId();
     }
 
     if (bindingResult.hasErrors()) {
-      return "reviews/editForm";
+      log.info("리뷰 수정 유효성 검사 오류: {}", bindingResult);
+      model.addAttribute("revId", revId);
+      model.addAttribute("allKeywords", keywordSVC.findAll());
+      model.addAttribute("existingFiles", foundReview.getFiles());
+      return "review/review-edit-form";
     }
 
-    // 수정 로직 수행
-    BeanUtils.copyProperties(editForm, review);
-    reviewSVC.update(review);
+    // 1. 물리적 파일 삭제 (DB 삭제보다 먼저 수행)
+    List<Long> deletedFileIds = editForm.getDeletedFileIds();
+    if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
+      List<UploadFile> allFiles = foundReview.getFiles();
+      List<UploadFile> filesToDelete = allFiles.stream()
+          .filter(file -> deletedFileIds.contains(file.getFileId()))
+          .toList();
+      fileStore.deleteFiles(filesToDelete);
+    }
 
-    return "redirect:/camping/" + review.getContentId(); // 수정 후 캠핑장 상세 페이지로 이동
+    // 2. 새로 업로드된 파일 서버에 저장
+    List<UploadFile> newStoredFiles = fileStore.storeFiles(editForm.getNewImageFiles());
+
+    // 3. 서비스 계층에 전달할 Review 객체 준비
+    Review reviewToUpdate = new Review();
+    BeanUtils.copyProperties(editForm, reviewToUpdate);
+    reviewToUpdate.setRevId(revId);
+    reviewToUpdate.setFiles(newStoredFiles);
+
+    // 4. 서비스 호출하여 DB 업데이트
+    reviewSVC.update(reviewToUpdate, deletedFileIds);
+    redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 수정되었습니다.");
+
+    return "redirect:/camping/" + editForm.getContentId();
   }
 
-
-  // 리뷰 삭제 처리 (POST 요청)
+  /**
+   * 리뷰 삭제 처리 (POST)
+   */
   @PostMapping("/{revId}/delete")
-  public String delete(@PathVariable("revId") Long revId,
-                       HttpSession session,
-                       RedirectAttributes redirectAttributes) {
-
+  public String delete(@PathVariable("revId") Long revId, HttpSession session, RedirectAttributes redirectAttributes) {
     LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    // 1. 로그인 여부 확인
     if (loginMember == null) {
-      redirectAttributes.addFlashAttribute("msg", "리뷰를 삭제하려면 먼저 로그인해야 합니다.");
+      redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
 
-    Review review = reviewSVC.findById(revId).orElse(null);
-    // 2. 리뷰 존재 여부 확인
-    if (review == null) {
+    Optional<Review> optionalReview = reviewSVC.findById(revId);
+    if (optionalReview.isEmpty()) {
       redirectAttributes.addFlashAttribute("msg", "삭제할 리뷰를 찾을 수 없습니다.");
       return "redirect:/";
     }
 
-    Long contentId = review.getContentId(); // 리다이렉션을 위해 미리 받아둠
-
-    // 3. 권한 확인
+    Review review = optionalReview.get();
+    Long contentId = review.getContentId();
     boolean isAdmin = "A".equals(loginMember.getGubun());
     boolean isOwner = review.getMemberId().equals(loginMember.getMemberId());
 
@@ -243,39 +217,39 @@ public class ReviewController {
       return "redirect:/camping/" + contentId;
     }
 
-    // 삭제 로직 수행
+    // 서비스 계층에서 DB삭제와 물리적 파일 삭제를 모두 처리
     reviewSVC.delete(revId);
     redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 삭제되었습니다.");
 
-    return "redirect:/camping/" + contentId; // 삭제 후 캠핑장 상세 페이지로 이동
+    return "redirect:/camping/" + contentId;
   }
 
-  // 리뷰 전체보기 페이지
+  /**
+   * 리뷰 전체보기 페이지 (GET)
+   */
   @GetMapping("/all")
   public String allReviews(@RequestParam("campingId") Long campingId, Model model) {
-    // 캠핑장 정보
     GoCampingDto.Item camping = goCampingService.getCampDetail(campingId).block();
     model.addAttribute("camping", camping);
 
-    // 리뷰 목록
     List<Review> reviews = reviewSVC.findByContentId(campingId);
     model.addAttribute("reviews", reviews);
 
-    // 평점 분포 계산
-    int[] counts = new int[6];
-    for (Review r : reviews) counts[r.getScore()]++;
     int total = reviews.size();
-    double avg = total > 0 ? reviews.stream().mapToInt(Review::getScore).average().orElse(0) : 0;
+    double avg = reviewSVC.calculateAverageScore(campingId);
     model.addAttribute("averageRating", String.format("%.1f", avg));
     model.addAttribute("reviewCount", total);
 
-    // 각 점수별 비율
+    Map<Integer, Long> scoreDistribution = reviewSVC.calculateScoreDistribution(campingId);
     int[] percent = new int[6];
-    for (int i = 1; i <= 5; i++) percent[i] = total > 0 ? (int) ((counts[i] * 100.0) / total) : 0;
+    for (int i = 1; i <= 5; i++) {
+      long count = scoreDistribution.getOrDefault(i, 0L);
+      percent[i] = total > 0 ? (int) ((count * 100.0) / total) : 0;
+    }
     model.addAttribute("scorePercent", percent);
 
-    // 키워드(임시)
-    model.addAttribute("keywords", List.of("객실이 깨끗해요", "침구가 좋아요", "전망이 좋아요"));
+    // (참고) 실제 서비스에서는 리뷰에 포함된 키워드들을 집계하는 로직 필요
+    model.addAttribute("keywords", List.of("힐링", "자연친화", "휴양지", "봄꽃", "여름나기", "가을낙엽", "겨울눈구경"));
 
     return "review/review-all";
   }

@@ -1,7 +1,10 @@
 package modackbulz.app.Application.entity;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class Review {
@@ -13,6 +16,9 @@ public class Review {
   private LocalDateTime createdAt; // CREATED_AT
   private LocalDateTime updatedAt; // UPDATED_AT
   private int score;          // SCORE
-  private String keywordSummary;
-  private String photoUrl;
+  // 키워드 ID 목록 (다중 선택)
+  private List<Long> keywordIds;
+
+  // 업로드된 파일 ID 목록 또는 별도 FileDTO 사용 가능
+  private List<UploadFile> files;
 }

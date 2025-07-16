@@ -159,32 +159,7 @@ CREATE TABLE CAMPSITES (
                 CHECK (SCORE BETWEEN 0 AND 5)
 );
 
-CREATE OR REPLACE TRIGGER trg_update_campsite_score
-AFTER INSERT OR UPDATE OR DELETE ON REVIEW
-FOR EACH ROW
-DECLARE
-    v_avg_score NUMBER;
-    v_contentid REVIEW.CONTENTID%TYPE;
-BEGIN
-
-    IF INSERTING OR UPDATING THEN
-        v_contentid := :NEW.CONTENTID;
-    ELSIF DELETING THEN
-        v_contentid := :OLD.CONTENTID;
-    END IF;
-
-    -- 평균 평점 재계산
-    SELECT ROUND(AVG(SCORE), 1)
-    INTO v_avg_score
-    FROM REVIEW
-    WHERE CONTENTID = v_contentid;
-
-    -- CAMPSITES 테이블의 SCORE 업데이트
-    UPDATE CAMPSITES
-    SET SCORE = NVL(v_avg_score, 0)
-    WHERE CONTENTID = v_contentid;
-END;
-
+-- 캠핑장 동기화 이후 실행
 INSERT INTO CAMPSITES (CONTENT_ID, SC_C, VIEW_C, SCORE)
 SELECT C.CONTENTID, 0, 0, 1
 FROM CAMPING_INFO C
@@ -411,7 +386,7 @@ CREATE SEQUENCE FILES_SEQ
     NOCACHE
     NOCYCLE;
 -------------------------------------------------------------------------------------------
--- 11. 지도 정보 DB------------------------------------------------------------------------------
+-- 11. 지도 정보 DB--------------------------------------------------------------------------
 CREATE TABLE CAMP_LOCATION (
     location_id   NUMBER(10) PRIMARY KEY,
     contentId     NUMBER(10) NOT NULL REFERENCES CAMPING_INFO(contentId) ON DELETE CASCADE,
@@ -420,3 +395,18 @@ CREATE TABLE CAMP_LOCATION (
     address       VARCHAR2(255)
 );
 SELECT * FROM camp_location;
+-------------------------------------------------------------------------------------------
+-- 12. 키워드 정보 DB------------------------------------------------------------------------
+CREATE TABLE KEYWORD (
+    KEYWORD_ID NUMBER(10) PRIMARY KEY,
+    WORDS      VARCHAR2(255) UNIQUE NOT NULL
+);
+
+CREATE SEQUENCE keyword_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+-------------------------------------------------------------------------------------------
+-- 13. 리뷰 키워드 정보 DB--------------------------------------------------------------------
+CREATE TABLE REVIEW_KEYWORD (
+    REV_ID     NUMBER(10) NOT NULL REFERENCES REVIEW(REV_ID) ON DELETE CASCADE,
+    KEYWORD_ID NUMBER(10) NOT NULL REFERENCES KEYWORD(KEYWORD_ID) ON DELETE CASCADE,
+    PRIMARY KEY (REV_ID, KEYWORD_ID)
+    );

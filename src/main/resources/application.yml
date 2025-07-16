@@ -39,3 +39,5 @@ logging:
     root: info
     org.springframework.web: DEBUG
 
+file:
+  dir: C:/Files/

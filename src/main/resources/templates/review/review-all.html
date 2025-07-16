@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>리뷰 전체보기</title>
-  <link rel="stylesheet" th:href="@{/css/common.css}">
-  <link rel="stylesheet" th:href="@{/css/review-all.css}">
+  <link rel="stylesheet" th:href="@{/css/common.css}" href="/css/common.css">
+  <link rel="stylesheet" th:href="@{/css/review-all.css}" href="/css/review-all.css">
 </head>
 <body>
 <div class="review-all-container">
-  <!-- 상단: 평점, 분포, 키워드 -->
   <div class="review-summary">
     <div class="summary-left">
       <div class="avg-score">
-        <span class="score" th:text="${averageRating}">4.8</span>
+        <span class="score" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.8</span>
         <span class="slash">/ 5</span>
         <span class="count" th:text="'(' + ${reviewCount} + '건의 후기)'">(20건의 후기)</span>
       </div>
@@ -36,22 +35,38 @@
     </div>
   </div>
   <hr>
-  <!-- 하단: 리뷰 리스트 -->
   <div class="review-list">
     <div class="review-item" th:each="review : ${reviews}">
       <div class="review-stars">
         <span th:each="i : ${#numbers.sequence(1, 5)}"
               th:classappend="${i <= review.score} ? '' : 'empty'">★</span>
       </div>
-      <div class="review-keyword" th:text="${review.keywordSummary}">추천해요!</div>
+
+      <div class="review-keyword"></div>
+
       <div class="review-photo">
-        <img th:if="${review.photoUrl != null}" th:src="${review.photoUrl}" alt="사진">
-        <span th:if="${review.photoUrl == null}">사진</span>
+        <img th:if="${review.files != null and !review.files.isEmpty()}"
+             th:src="${review.files[0].fileUrl}"
+             alt="리뷰 사진">
+        <span th:if="${review.files == null or review.files.isEmpty()}">사진 없음</span>
       </div>
+
       <div class="review-content" th:text="${review.content}">사용자 리뷰</div>
+
+      <!-- 수정/삭제 버튼 -->
+      <div class="review-actions"
+           th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == review.memberId)}"
+           style="margin-left:auto; display: flex; gap: 8px; align-items: center;">
+        <form th:action="@{/reviews/{id}/edit(id=${review.revId})}" method="get">
+          <button type="submit" class="review-edit-btn">수정</button>
+        </form>
+        <form th:action="@{/reviews/{revId}/delete(revId=${review.revId})}" method="post"
+              onsubmit="return confirm('정말 삭제하시겠습니까?');">
+          <button type="submit" class="review-delete-btn">삭제</button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
-<script src="/js/review-all.js"></script>
 </body>
-</html> 
+</html>

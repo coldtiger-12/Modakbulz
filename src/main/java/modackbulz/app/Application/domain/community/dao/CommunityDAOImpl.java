@@ -21,7 +21,7 @@ public class CommunityDAOImpl implements CommunityDAO {
 
   @Override
   public List<Community> findAll() {
-    String sql = "SELECT * FROM COMMUNITY ORDER BY CO_ID ASC";
+    String sql = "SELECT * FROM COMMUNITY ORDER BY CO_ID DESC";
     return template.query(sql, BeanPropertyRowMapper.newInstance(Community.class));
   }
 

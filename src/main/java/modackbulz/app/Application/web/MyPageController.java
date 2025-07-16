@@ -253,4 +253,15 @@ public class MyPageController {
     session.invalidate();  // 세션 무효화 (로그아웃 처리)
     return "redirect:/";   // 홈으로 이동
   }
+
+//  // 문의사항 목록 화면
+//  @GetMapping("/inquiry")
+//  public String myInquiries(HttpSession session, Model model) {
+//    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+//    if (loginMember == null) {
+//      return "redirect:/login";
+//    }
+//
+//    return "member/inquiry";
+//  }
 }
