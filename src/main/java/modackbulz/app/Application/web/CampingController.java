@@ -112,6 +112,19 @@ public class CampingController {
 
     model.addAttribute("reviewStats", reviewStats);
 
+    // 리뷰 개수 기반 점수 분포 퍼센트 계산
+    List<Integer> scorePercent = new ArrayList<>();
+    long totalReviews = reviews.size();
+
+    for (int i = 1; i <= 5; i++) {
+      long count = distribution.getOrDefault(i, 0L);
+      int percent = totalReviews > 0 ? (int) Math.round((double) count / totalReviews * 100) : 0;
+      scorePercent.add(percent);
+    }
+    System.out.println("scorePercent = " + scorePercent);
+    System.out.println("size = " + scorePercent.size());
+    model.addAttribute("scorePercent", scorePercent);
+
     // 캠핑장 이미지 목록을 API에서 조회하여 모델에 추가
     if (camp != null) {
       List<String> campImages = goCampingService.getCampImages(contentId).block();
