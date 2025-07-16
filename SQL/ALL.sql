@@ -6,12 +6,15 @@ DROP TABLE FAQ_COMMENT CASCADE CONSTRAINTS;
 DROP TABLE FAQ CASCADE CONSTRAINTS;
 DROP TABLE CO_COMMENT CASCADE CONSTRAINTS;
 DROP TABLE COMMUNITY CASCADE CONSTRAINTS;
+DROP TABLE REVIEW_KEYWORD CASCADE CONSTRAINTS;
+DROP TABLE KEYWORD CASCADE CONSTRAINTS;
 DROP TABLE REVIEW CASCADE CONSTRAINTS;
 DROP TABLE CAMPSITES CASCADE CONSTRAINTS;
 DROP TABLE CAMPING_INFO CASCADE CONSTRAINTS;
 DROP TABLE MEMBER CASCADE CONSTRAINTS;
-DROP TABLE NAVER_USERS CASCADE CONSTRAINTS;
 
+DROP SEQUENCE review_keyword_seq;
+DROP SEQUENCE keyword_seq
 DROP SEQUENCE member_member_id_seq;
 DROP SEQUENCE review_rev_id_seq;
 DROP SEQUENCE member_co_id_seq;
@@ -20,8 +23,6 @@ DROP SEQUENCE camp_faq_id_seq;
 DROP SEQUENCE faq_comment_seq;
 DROP SEQUENCE camp_scrap_id_seq;
 DROP SEQUENCE FILES_SEQ;
-DROP SEQUENCE SEQ_NAVER_USER_ID;
-
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
 
 -- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
@@ -32,12 +33,12 @@ CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
     ID          VARCHAR2(10) NOT NULL UNIQUE CHECK (REGEXP_LIKE(ID, '^[A-Za-z0-9]+$')),
-    PWD 		VARCHAR2(15) NOT NULL CHECK (
-  				LENGTH(PWD) >= 8 AND
-			  REGEXP_LIKE(PWD, '.*[A-Z].*') AND
-			  REGEXP_LIKE(PWD, '.*[a-z].*') AND
-			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
-			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
+    PWD       VARCHAR2(15) NOT NULL CHECK (
+              LENGTH(PWD) >= 8 AND
+           REGEXP_LIKE(PWD, '.*[A-Z].*') AND
+           REGEXP_LIKE(PWD, '.*[a-z].*') AND
+           REGEXP_LIKE(PWD, '.*[0-9].*') AND
+           REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
 ),
     EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL,
                     '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
@@ -78,19 +79,7 @@ BEGIN
   );
 END;
 
-ALTER TABLE MEMBER
-MODIFY PWD VARCHAR2(255)
-CHECK (
-  LENGTH(PWD) >= 8 AND
-  			  REGEXP_LIKE(PWD, '.*[A-Z].*') AND
-			  REGEXP_LIKE(PWD, '.*[a-z].*') AND
-			  REGEXP_LIKE(PWD, '.*[0-9].*') AND
-			  REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
-);
-
-
 SELECT * FROM MEMBER;
-SELECT email, pwd FROM member WHERE email = 'pbtakcm@gmail.com';
 -------------------------------------------------------------------------------------------
 -- 2. 캠핑장 정보 저장 DB ---------------------------------------------------------------------
 
@@ -207,6 +196,7 @@ BEGIN
     :NEW.UPDATED_AT := SYSTIMESTAMP;
 END;
 
+SELECT * FROM review;
 -------------------------------------------------------------------------------------------
 -- 5. 자유 게시판 정보 DB ---------------------------------------------------------------------
 
@@ -239,6 +229,8 @@ FOR EACH ROW
 BEGIN
     :NEW.UPDATED_AT := SYSTIMESTAMP;
 END;
+
+SELECT * FROM community;
 -------------------------------------------------------------------------------------------
 -- 6. 자유 게시판 댓글 정보 DB -----------------------------------------------------------------
 
@@ -262,6 +254,7 @@ PRC_COM_ID    NUMBER(10)
                        REFERENCES CO_COMMENT(c_com_id)
                        ON DELETE CASCADE
 );
+
 CREATE SEQUENCE co_comment_seq
 START WITH 1
 INCREMENT BY 1
@@ -274,6 +267,8 @@ FOR EACH ROW
 BEGIN
     :NEW.UPDATED_AT := SYSTIMESTAMP;
 END;
+
+SELECT * FROM co_comment;
 -------------------------------------------------------------------------------------------
 -- 7. 문의사항 게시판 정보 DB ------------------------------------------------------------------
 
@@ -296,6 +291,8 @@ START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
+
+SELECT * FROM faq;
 -------------------------------------------------------------------------------------------
 -- 8. 문의사항 게시판 댓글 정보 DB --------------------------------------------------------------
 
@@ -319,6 +316,7 @@ PRC_COM_ID    NUMBER(10)
                        REFERENCES FAQ_COMMENT(f_com_id)
                        ON DELETE CASCADE
 );
+
 CREATE SEQUENCE faq_comment_seq
 START WITH 1
 INCREMENT BY 1
@@ -331,6 +329,8 @@ FOR EACH ROW
 BEGIN
     :NEW.UPDATED_AT := SYSTIMESTAMP;
 END;
+
+SELECT * FROM faq_comment;
 -------------------------------------------------------------------------------------------
 -- 9. 스크랩 정보 DB -------------------------------------------------------------------------
 
@@ -354,6 +354,8 @@ START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
+
+SELECT * FROM scrap;
 -------------------------------------------------------------------------------------------
 -- 10. 파일 관리 정보 DB ---------------------------------------------------------------------
 
@@ -388,6 +390,8 @@ CREATE SEQUENCE FILES_SEQ
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
+
+SELECT * FROM files;
 -------------------------------------------------------------------------------------------
 -- 11. 지도 정보 DB--------------------------------------------------------------------------
 CREATE TABLE CAMP_LOCATION (
@@ -413,19 +417,5 @@ CREATE TABLE REVIEW_KEYWORD (
     KEYWORD_ID NUMBER(10) NOT NULL REFERENCES KEYWORD(KEYWORD_ID) ON DELETE CASCADE,
     PRIMARY KEY (REV_ID, KEYWORD_ID)
     );
---------------------------------------------------------------------------------------------
--- 14. 네이버 리뷰 작성자 테이블 생성------------------------------------------------------------
-CREATE TABLE NAVER_REVIEW_USERS(
-	NRU_ID	NUMBER PRIMARY KEY,									-- 네이버 리뷰 작성자 테이블 고유 아이디
-	NAVER_USER_ID	VARCHAR2(100 CHAR) NOT NULL,		-- 네이버 사용자 고유 ID (NULL 비허용)
-	NICKNAME VARCHAR2(255 CHAR),									-- 사용자 닉네임
-	CREATED_AT TIMESTAMP DEFAULT SYSDATE,					-- 레코드 생성 시각 (기본값으로 현재 시각)
 
-	CONSTRAINT UQ_NU_NAVER_ID UNIQUE (NAVER_USER_ID)		-- naver_user_id에 대한 UNIQUE 제약조건
-);
-
--- 시퀀스 생성
-CREATE SEQUENCE SEQ_NAVER_USER_ID START WITH 1 INCREMENT BY 1NOCACHENOCYCLE;
-
--- 테이블 조회
-SELECT * FROM NAVER_USERS;
+CREATE SEQUENCE review_keyword_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
