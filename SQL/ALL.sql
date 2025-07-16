@@ -415,8 +415,8 @@ CREATE TABLE REVIEW_KEYWORD (
     );
 --------------------------------------------------------------------------------------------
 -- 14. 네이버 리뷰 작성자 테이블 생성------------------------------------------------------------
-CREATE TABLE NAVER_USERS(
-	ID	NUMBER PRIMARY KEY,												-- 테이블 고유 아이디
+CREATE TABLE NAVER_REVIEW_USERS(
+	NRU_ID	NUMBER PRIMARY KEY,									-- 네이버 리뷰 작성자 테이블 고유 아이디
 	NAVER_USER_ID	VARCHAR2(100 CHAR) NOT NULL,		-- 네이버 사용자 고유 ID (NULL 비허용)
 	NICKNAME VARCHAR2(255 CHAR),									-- 사용자 닉네임
 	CREATED_AT TIMESTAMP DEFAULT SYSDATE,					-- 레코드 생성 시각 (기본값으로 현재 시각)
