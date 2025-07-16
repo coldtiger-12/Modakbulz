@@ -10,6 +10,7 @@ DROP TABLE REVIEW CASCADE CONSTRAINTS;
 DROP TABLE CAMPSITES CASCADE CONSTRAINTS;
 DROP TABLE CAMPING_INFO CASCADE CONSTRAINTS;
 DROP TABLE MEMBER CASCADE CONSTRAINTS;
+DROP TABLE NAVER_USERS CASCADE CONSTRAINTS;
 
 DROP SEQUENCE member_member_id_seq;
 DROP SEQUENCE review_rev_id_seq;
@@ -19,6 +20,8 @@ DROP SEQUENCE camp_faq_id_seq;
 DROP SEQUENCE faq_comment_seq;
 DROP SEQUENCE camp_scrap_id_seq;
 DROP SEQUENCE FILES_SEQ;
+DROP SEQUENCE SEQ_NAVER_USER_ID;
+
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
 
 -- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
@@ -410,3 +413,19 @@ CREATE TABLE REVIEW_KEYWORD (
     KEYWORD_ID NUMBER(10) NOT NULL REFERENCES KEYWORD(KEYWORD_ID) ON DELETE CASCADE,
     PRIMARY KEY (REV_ID, KEYWORD_ID)
     );
+--------------------------------------------------------------------------------------------
+-- 14. 네이버 리뷰 작성자 테이블 생성------------------------------------------------------------
+CREATE TABLE NAVER_USERS(
+	ID	NUMBER PRIMARY KEY,												-- 테이블 고유 아이디
+	NAVER_USER_ID	VARCHAR2(100 CHAR) NOT NULL,		-- 네이버 사용자 고유 ID (NULL 비허용)
+	NICKNAME VARCHAR2(255 CHAR),									-- 사용자 닉네임
+	CREATED_AT TIMESTAMP DEFAULT SYSDATE,					-- 레코드 생성 시각 (기본값으로 현재 시각)
+
+	CONSTRAINT UQ_NU_NAVER_ID UNIQUE (NAVER_USER_ID)		-- naver_user_id에 대한 UNIQUE 제약조건
+);
+
+-- 시퀀스 생성
+CREATE SEQUENCE SEQ_NAVER_USER_ID START WITH 1 INCREMENT BY 1NOCACHENOCYCLE;
+
+-- 테이블 조회
+SELECT * FROM NAVER_USERS;
