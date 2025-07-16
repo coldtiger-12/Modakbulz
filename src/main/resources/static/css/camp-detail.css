@@ -242,6 +242,11 @@
 }
 
 /* [6. 방문자 리뷰 섹션] */
+.detail-reviews {
+  padding: 0;
+  margin: 0;
+}
+
 .detail-reviews h2::before {
     content: '💬'; /* 리뷰 섹션 아이콘 변경 */
 }
@@ -258,6 +263,14 @@
     margin-bottom: 0;
     border-bottom: none;
 }
+
+.score {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffc107;
+    margin-bottom: 16px;
+}
+.slash { color: #888; font-size: 1.2rem; }
 
 /* 리뷰 작성 버튼 */
 .write-review-btn {

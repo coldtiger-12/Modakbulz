@@ -84,4 +84,6 @@ public class CommunityDAOImpl implements CommunityDAO {
     Map<String, Object> param = Map.of("count",count);
     return template.query(sql, param, BeanPropertyRowMapper.newInstance(Community.class));
   }
+
+
 }

@@ -132,4 +132,6 @@ public class AdminController {
   public String testAdminDirect() {
     return "admin/posts";
   }
+
+
 }

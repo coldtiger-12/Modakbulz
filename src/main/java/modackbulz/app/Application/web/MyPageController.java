@@ -32,6 +32,11 @@ public class MyPageController {
   private final EmailService emailService; // EmailService 주입
   private final CommunitySVC communitySVC;
 
+  @ModelAttribute("editForm_Pwd")
+  public EditForm_Pwd editFormPwd() {
+    return new EditForm_Pwd();
+  }
+
   // 마이페이지 메인 화면 (수정됨)
   @GetMapping
   public String myPage(HttpSession session, Model model, RedirectAttributes redirectAttributes) {

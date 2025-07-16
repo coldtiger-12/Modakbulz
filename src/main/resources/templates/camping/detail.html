@@ -152,7 +152,7 @@
     </div>
 
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
-      <div class="review-card" th:each="review : ${reviews}">
+      <div class="review-card" th:each="review, iterStat : ${reviews}" th:if="${iterStat.index < 3}">
         <div class="review-header">
           <span class="review-stars">
             <th:block th:each="i : ${#numbers.sequence(1, 5)}">
