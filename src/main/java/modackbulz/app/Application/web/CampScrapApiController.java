@@ -1,37 +1,55 @@
 package modackbulz.app.Application.web;
 
-import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
-import modackbulz.app.Application.domain.scrap.svc.CampScrapService;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
+import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
+import modackbulz.app.Application.domain.scrap.dao.CampScrapDAO;
 import modackbulz.app.Application.entity.CampScrap;
-import modackbulz.app.Application.web.form.login.LoginMember;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/scraps")
 public class CampScrapApiController {
 
-  private final CampScrapService campScrapService;
+  private final CampScrapDAO campScrapDAO;
 
   @PostMapping("/toggle")
-  public ResponseEntity<Map<String, Object>> toggleScrap(@RequestBody CampScrap scrapRequest, HttpSession session) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+  public ResponseEntity<?> toggleScrap(@RequestBody GoCampingDto.Item campItem,
+                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    scrapRequest.setMemberId(loginMember.getMemberId());
+    Long memberId = userDetails.getMemberId();
+    Long contentId = campItem.getContentId();
 
-    campScrapService.toggleScrap(scrapRequest);
+    Optional<CampScrap> existing = campScrapDAO.findByMemberIdAndContentId(memberId, contentId);
 
-    // 토글 후 현재 스크랩 상태를 다시 확인하여 반환
-    boolean isScrapped = campScrapService.isScrapped(loginMember.getMemberId(), scrapRequest.getContentId());
+    boolean isScrapped;
 
-    return ResponseEntity.ok(Map.of("message", "Success", "isScrapped", isScrapped));
+    if (existing.isPresent()) {
+      campScrapDAO.delete(memberId, contentId);
+      isScrapped = false;
+    } else {
+      CampScrap newScrap = CampScrap.builder()
+          .memberId(memberId)
+          .contentId(contentId)
+          .facltNm(campItem.getFacltNm())
+          .addr1(campItem.getAddr1())
+          .firstImageUrl(campItem.getFirstImageUrl())
+          .build();
+      campScrapDAO.add(newScrap);
+      isScrapped = true;
+    }
+
+    return ResponseEntity.ok(Map.of("isScrapped", isScrapped));
   }
 }

@@ -1,6 +1,8 @@
 package modackbulz.app.Application.web;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
@@ -9,13 +11,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import modackbulz.app.Application.domain.review.svc.ReviewSVC;
+import modackbulz.app.Application.domain.scrap.dao.CampScrapDAO;
 import modackbulz.app.Application.entity.Review;
+import modackbulz.app.Application.web.form.login.LoginMember;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,16 +37,30 @@ public class CampingController {
   private final GoCampingService goCampingService;
   private final CampingDAO campingDAO;
   private final ReviewSVC reviewSVC;
+  private final CampScrapDAO campScrapDAO;
 
   /**
    * 전체 캠핑장 목록 (수정됨: DB 우선 조회)
-   * 1. DB에서 데이터를 먼저 조회합니다.
-   * 2. DB에 데이터가 없으면 API를 호출하여 DB에 저장합니다.
    */
   @GetMapping
-  public String campList(@PageableDefault(size = 9, sort = "facltNm") Pageable pageable, Model model) {
-    // DB 우선 조회 로직이 이미 GoCampingService에 구현되어 있음
+  public String campList(
+      @PageableDefault(size = 9, sort = "facltNm") Pageable pageable,
+      Model model,
+      @AuthenticationPrincipal CustomUserDetails userDetails // <-- 수정: HttpSession 대신 사용
+  ) {
     Page<GoCampingDto.Item> campPage = goCampingService.getCampListPageWithImageFallback(pageable).block();
+
+    // --- 추가된 코드 시작 ---
+    if (userDetails != null) {
+      Long memberId = userDetails.getMemberId();
+      for (GoCampingDto.Item item : campPage) {
+        boolean scrapped = campScrapDAO.findByMemberIdAndContentId(memberId, item.getContentId()).isPresent();
+        item.setScrapped(scrapped);
+      }
+      model.addAttribute("loginMember", userDetails);
+    }
+    // --- 추가된 코드 끝 ---
+
     model.addAttribute("campPage", campPage);
     return "camping/list";
   }
@@ -55,24 +74,37 @@ public class CampingController {
       @RequestParam(name = "region", required = false) String region,
       @RequestParam(name = "theme", required = false) String theme,
       @PageableDefault(size = 9) Pageable pageable,
+      @AuthenticationPrincipal CustomUserDetails userDetails,
       Model model
   ) {
-    // region, theme 파라미터는 현재 DAO에서 사용하지 않으므로 keyword만 사용
+    // 로그인 여부 확인
+    boolean isLoggedIn = (userDetails != null);
+    model.addAttribute("loginMember", isLoggedIn ? userDetails : null);
+
+    // 검색어 조합 처리
     String finalKeyword = (keyword != null ? keyword : "")
         + (region != null ? " " + region : "")
         + (theme != null ? " " + theme : "");
     finalKeyword = finalKeyword.trim();
 
+    // 캠핑장 검색 or 전체 목록
     Page<GoCampingDto.Item> campPage;
-
     if (finalKeyword.isBlank()) {
-      // 키워드가 없으면 전체 목록 조회 (DB 우선 조회 로직 사용)
       campPage = goCampingService.getCampListPage(pageable).block();
     } else {
-      // 키워드가 있으면 검색 (DB 우선 조회 로직 사용)
       campPage = goCampingService.searchCampList(finalKeyword, pageable).block();
     }
 
+    // 스크랩 여부 설정 (로그인한 경우에만)
+    if (isLoggedIn) {
+      Long memberId = userDetails.getMemberId();
+      for (GoCampingDto.Item item : campPage) {
+        boolean scrapped = campScrapDAO.findByMemberIdAndContentId(memberId, item.getContentId()).isPresent();
+        item.setScrapped(scrapped);
+      }
+    }
+
+    // 모델 속성 추가
     model.addAttribute("campPage", campPage);
     model.addAttribute("keyword", keyword);
     model.addAttribute("region", region);
@@ -223,5 +255,34 @@ public class CampingController {
     Pageable pageable = PageRequest.of(0, 8); // 8개 항목 조회
     List<GoCampingDto.Item> campList = goCampingService.getCampListPageWithImageFallback(pageable).block().getContent();
     return ResponseEntity.ok(campList); // 조회된 데이터를 JSON 형태로 반환
+  }
+
+  /**
+   * 캠핑장 스크랩 (이 메소드는 더 이상 사용되지 않으므로 삭제하거나 아래와 같이 수정합니다)
+   */
+  @GetMapping("/list")
+  public String campingList(
+      Model model,
+      @AuthenticationPrincipal CustomUserDetails userDetails // <-- 수정: HttpSession 대신 사용
+  ) {
+    if (userDetails != null) {
+      model.addAttribute("loginMember", userDetails);
+    }
+
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<GoCampingDto.Item> campPage = goCampingService
+        .getCampListPageWithImageFallback(pageable)
+        .block();
+
+    if (userDetails != null) {
+      Long memberId = userDetails.getMemberId();
+      for (GoCampingDto.Item item : campPage) {
+        boolean scrapped = campScrapDAO.findByMemberIdAndContentId(memberId, item.getContentId()).isPresent();
+        item.setScrapped(scrapped);
+      }
+    }
+    // Page 객체를 모델에 추가합니다.
+    model.addAttribute("campPage", campPage);
+    return "camping/list";
   }
 }

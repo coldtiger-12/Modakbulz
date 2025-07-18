@@ -1,5 +1,6 @@
 package modackbulz.app.Application.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   @Bean
@@ -22,18 +24,27 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         // 1. 인가(Authorization) 설정
-        .authorizeHttpRequests(authorize -> authorize
-            // 닉네임 중복 확인 API는 POST 방식이므로 명시적으로 허용
+        .authorizeHttpRequests(auth -> auth
+            // POST: 닉네임 중복 체크 허용
             .requestMatchers(HttpMethod.POST, "/member/check-nickname").permitAll()
+
+            // 🎯 인증이 필요한 API
+            .requestMatchers("/api/scraps/**").authenticated()
+
+            // 나머지 공개 API
             .requestMatchers(
                 "/", "/login", "/logout",
-                "/member/**", // 회원가입 관련 모든 하위 경로 허용
+                "/member/**",
                 "/camping/**",
                 "/posts/community/**",
-                "/api/**",
+                "/api/**",  // ❗ 여기서 /api/**는 제외하거나 scrap보다 아래로 내려야 함
                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/upload-images/**"
             ).permitAll()
+
+            // 관리자 페이지
             .requestMatchers("/admin/**").hasRole("A")
+
+            // 나머지는 인증 필요
             .anyRequest().authenticated()
         )
 

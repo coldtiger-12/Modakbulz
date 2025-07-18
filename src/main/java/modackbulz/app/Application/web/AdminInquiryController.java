@@ -1,16 +1,15 @@
 package modackbulz.app.Application.web;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.faq.svc.FaqSVC;
 import modackbulz.app.Application.entity.Faq;
-import modackbulz.app.Application.web.form.login.LoginMember;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.*;
 import java.util.List;
 
 @Slf4j
@@ -23,27 +22,17 @@ public class AdminInquiryController {
 
   //관리자 전체 문의 목록
   @GetMapping
-  public String list(HttpSession session, Model model) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    if(loginMember == null || !"A".equals(loginMember.getGubun())) {
-      log.warn("비로그인 사용자의 관리자 페이지 접근 시도");
-      return "redirect:/access-denied";
-    }
+  public String list(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    // Spring Security가 이미 관리자(A) 역할만 허용하므로, userDetails는 null이 될 수 없습니다.
+    // 하지만 안전을 위해 null 체크를 유지할 수 있습니다.
     List<Faq> inquiries = faqSVC.findAll();
     model.addAttribute("inquiries", inquiries);
     return "admin/faqList";
   }
   // 관리자 상세 보기
   @GetMapping("/{id}")
-  public String detail(@PathVariable("id") Long id, HttpSession session, Model model) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    if (loginMember == null || !"A".equals(loginMember.getGubun())) {
-      log.warn("비인가된 문의 상세 접근 시도");
-      return "redirect:/access-denied";
-    }
-
+  public String detail(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    // SecurityConfig에서 이미 관리자만 접근 가능하도록 설정되어 있습니다.
     return faqSVC.findById(id)
         .map(faq -> {
           model.addAttribute("faq", faq);
@@ -54,14 +43,8 @@ public class AdminInquiryController {
 
   // 관리자 삭제
   @PostMapping("/delete")
-  public String delete(@RequestParam("id") Long id, HttpSession session) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    if (loginMember == null || !"A".equals(loginMember.getGubun())) {
-      log.warn("비인가된 삭제 시도");
-      return "redirect:/access-denied";
-    }
-
+  public String delete(@RequestParam("id") Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    // SecurityConfig에서 이미 관리자만 접근 가능하도록 설정되어 있습니다.
     faqSVC.delete(id);
     return "redirect:/admin/inquiry";
   }

@@ -28,7 +28,11 @@
         <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
       </a>
 
-      <button class="scrap-btn">☆</button>
+      <button class="scrap-btn"
+              th:data-content-id="${camp.contentId}"
+              th:data-scrapped="${camp.scrapped}"
+              th:text="${camp.scrapped} ? '★' : '☆'">
+      </button>
 
       <div class="camp-card-body">
         <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
@@ -66,60 +70,49 @@
 
 </div>
 
-<script>
+<script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
-      const scrapButtons = document.querySelectorAll('.scrap-btn');
+    const isLoggedIn = [[${loginMember != null}]];
+    const scrapButtons = document.querySelectorAll('.scrap-btn');
 
-      scrapButtons.forEach(button => {
-          button.addEventListener('click', async (event) => {
-              const isLoggedIn = '[[${session.loginMember != null}]]' ? true : false;
-              if (!isLoggedIn) {
-                  alert('로그인이 필요한 기능입니다.');
-                  window.location.href = '/login';
-                  return;
-              }
+    scrapButtons.forEach(button => {
+      button.addEventListener('click', async (event) => {
+        if (!isLoggedIn) {
+          alert('로그인이 필요한 기능입니다.');
+          window.location.href = '/login';
+          return;
+        }
 
-              const card = event.target.closest('.camp-card');
-              const scrapData = {
-                  contentId:  parseInt(card.dataset.contentId, 10),
-                  facltNm: card.dataset.facltNm,
-                  addr1: card.dataset.addr1,
-                  firstImageUrl: card.dataset.imageUrl
-              };
+        const card = event.target.closest('.camp-card');
+        const scrapData = {
+          contentId: parseInt(card.dataset.contentId, 10),
+          facltNm: card.dataset.facltNm,
+          addr1: card.dataset.addr1,
+          firstImageUrl: card.dataset.imageUrl
+        };
 
-              try {
-                  const response = await fetch('/api/scraps/toggle', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(scrapData)
-                  });
-
-                  if (response.status === 401) {
-                      alert('세션이 만료되었거나 로그인이 필요합니다.');
-                      window.location.href = '/login';
-                      return;
-                  }
-
-                  if (!response.ok) {
-                      throw new Error('스크랩 처리 중 오류가 발생했습니다.');
-                  }
-
-                  const result = await response.json();
-
-                  if (result.isScrapped) {
-                      event.target.classList.add('scrapped');
-                      event.target.textContent = '★';
-                  } else {
-                      event.target.classList.remove('scrapped');
-                      event.target.textContent = '☆';
-                  }
-
-              } catch (error) {
-                  console.error('Error:', error);
-                  alert(error.message);
-              }
+        try {
+          const response = await fetch('/api/scraps/toggle', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(scrapData)
           });
+
+          if (response.status === 401) {
+            alert('세션이 만료되었거나 로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+          }
+
+          const result = await response.json();
+          event.target.textContent = result.isScrapped ? '★' : '☆';
+        } catch (error) {
+          console.error('스크랩 오류:', error);
+          alert('스크랩 처리 중 오류가 발생했습니다.');
+        }
       });
+    });
   });
 </script>
 </body>

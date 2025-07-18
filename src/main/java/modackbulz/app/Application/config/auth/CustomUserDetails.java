@@ -36,6 +36,11 @@ public class CustomUserDetails implements UserDetails {
     return member.getGubun();
   }
 
+  // 사용자 이메일 반환
+  public String getEmail() {
+    return member.getEmail();
+  }
+
   // 1. 사용자의 '권한' 목록을 반환합니다.
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
