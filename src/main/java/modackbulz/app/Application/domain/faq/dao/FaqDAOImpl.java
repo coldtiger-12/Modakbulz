@@ -24,7 +24,7 @@ public class FaqDAOImpl implements FaqDAO{
         INSERT INTO FAQ (
           FAQ_ID, MEMBER_ID, WRITER, CONTENT, CREATED_AT
         ) VALUES (
-          camp_scrap_id_seq.NEXTVAL, :memberId, :writer, :content, SYSTIMESTAMP
+          camp_faq_id_seq.NEXTVAL, :memberId, :writer, :content, SYSTIMESTAMP
         )
         """;
     Map<String, Object> param = new HashMap<>();

@@ -117,7 +117,7 @@ public class MyPageController {
       BindingResult bindingResult,
       @AuthenticationPrincipal CustomUserDetails userDetails,
       RedirectAttributes redirectAttributes,
-      Model model
+      Model model, HttpSession session
   ) {
     if (userDetails == null) return "redirect:/login";
 
@@ -136,8 +136,9 @@ public class MyPageController {
     boolean changed = memberSVC.changePassword(userDetails.getMemberId(), encryptedPwd);
 
     if (changed) {
-      redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.");
-      return "redirect:/logout";
+      session.removeAttribute("isEmailVerifiedForPasswordChange");
+      // [최종 수정] POST 방식으로 로그아웃을 실행할 전용 페이지로 이동
+      return "member/processLogout";
     } else {
       redirectAttributes.addFlashAttribute("error", "비밀번호 변경에 실패했습니다.");
       return "redirect:/mypage/edit";
@@ -157,6 +158,24 @@ public class MyPageController {
     } catch (Exception e) {
       log.error("이메일 발송 실패", e);
       return ResponseEntity.internalServerError().body("인증번호 발송에 실패했습니다.");
+    }
+  }
+
+  @PostMapping("/verify-email")
+  public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam("authcode") String authcode, HttpSession session) {
+    // 새로 만든 VerificationCode 클래스 사용
+    VerificationCode sessionCode = (VerificationCode) session.getAttribute("authCode");
+
+    if (sessionCode == null) {
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 발급 되지 않았습니다."));
+    }
+    if (sessionCode.isValid(authcode)){
+      //비밀번호 변경을 위한 인증이 완료되었음을 세션에 기록
+      session.setAttribute("isEmailVerifiedForPasswordChange", true);
+      return ResponseEntity.ok(Map.of("verified", true, "message", "인증에 성공했습니다."));
+    } else {
+      log.warn("이메일 인증 실패. 세션 코드: {}, 입력 코드: {}", sessionCode.getCode(), authcode);
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 올바르지 않거나 유효시간이 초과되었습니다."));
     }
   }
 
