@@ -55,7 +55,8 @@
 
       <!-- 수정/삭제 버튼 -->
       <div class="review-actions"
-           th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == review.memberId)}"
+           sec:authorize="isAuthenticated()"
+           th:if="${#authentication.principal.gubun == 'A' or #authentication.principal.memberId == review.memberId}"
            style="margin-left:auto; display: flex; gap: 8px; align-items: center;">
         <form th:action="@{/reviews/{id}/edit(id=${review.revId})}" method="get">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

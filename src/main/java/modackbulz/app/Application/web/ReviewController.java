@@ -5,17 +5,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.common.FileStore;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
 import modackbulz.app.Application.domain.keyword.svc.KeywordSVC;
 import modackbulz.app.Application.domain.review.svc.ReviewSVC;
-import modackbulz.app.Application.entity.Keyword;
 import modackbulz.app.Application.entity.Review;
 import modackbulz.app.Application.entity.UploadFile;
 import modackbulz.app.Application.web.form.login.LoginMember;
 import modackbulz.app.Application.web.form.review.EditForm;
 import modackbulz.app.Application.web.form.review.ReviewForm;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,12 +41,15 @@ public class ReviewController {
   private final FileStore fileStore;
 
   /**
-   * 리뷰 작성 폼 (GET)
+   * 리뷰 작성 폼 (GET) - 수정된 코드
    */
   @GetMapping("/write")
-  public String writeForm(@RequestParam("campingId") Long campingId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+  public String writeForm(@RequestParam("campingId") Long campingId, Model model,
+                          @AuthenticationPrincipal CustomUserDetails userDetails, // HttpSession 대신 사용
+                          RedirectAttributes redirectAttributes) {
+
+    // 1. Spring Security를 통해 로그인 정보 확인
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "리뷰를 작성하려면 먼저 로그인해야 합니다.");
       return "redirect:/login";
     }
@@ -59,18 +63,20 @@ public class ReviewController {
 
     return "review/review-form";
   }
+
   /**
-   * 새 리뷰 작성 처리 (POST)
+   * 새 리뷰 작성 처리 (POST) - 수정된 코드
    */
   @PostMapping("/write")
   public String write(@Valid @ModelAttribute("reviewForm") ReviewForm reviewForm,
                       BindingResult bindingResult,
-                      HttpSession session,
+                      @AuthenticationPrincipal CustomUserDetails userDetails, // HttpSession 대신 사용
                       RedirectAttributes redirectAttributes,
                       Model model) throws IOException {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) return "redirect:/login";
+    if (userDetails == null) {
+      return "redirect:/login";
+    }
 
     if (bindingResult.hasErrors()) {
       log.info("리뷰 작성 유효성 검사 오류: {}", bindingResult);
@@ -84,8 +90,9 @@ public class ReviewController {
     Review review = new Review();
     BeanUtils.copyProperties(reviewForm, review);
     review.setContentId(reviewForm.getCampingId());
-    review.setMemberId(loginMember.getMemberId());
-    review.setWriter(loginMember.getNickname());
+    // 2. userDetails 객체에서 회원 정보 가져오기
+    review.setMemberId(userDetails.getMemberId());
+    review.setWriter(userDetails.getNickname());
     review.setKeywordIds(reviewForm.getKeywordIds());
     review.setFiles(storedFiles);
 
@@ -96,12 +103,13 @@ public class ReviewController {
   }
 
   /**
-   * 리뷰 수정 폼 (GET)
+   * 리뷰 수정 폼 (GET) - 수정된 코드
    */
   @GetMapping("/{revId}/edit")
-  public String editForm(@PathVariable("revId") Long revId, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+  public String editForm(@PathVariable("revId") Long revId, Model model,
+                         @AuthenticationPrincipal CustomUserDetails userDetails, // HttpSession 대신 사용
+                         RedirectAttributes redirectAttributes) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
@@ -113,7 +121,8 @@ public class ReviewController {
     }
 
     Review review = optionalReview.get();
-    if (!review.getMemberId().equals(loginMember.getMemberId())) {
+    // userDetails에서 직접 memberId를 가져와 비교합니다.
+    if (!review.getMemberId().equals(userDetails.getMemberId())) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
       return "redirect:/camping/" + review.getContentId();
     }
@@ -131,18 +140,17 @@ public class ReviewController {
   }
 
   /**
-   * 리뷰 수정 처리 (POST)
+   * 리뷰 수정 처리 (POST) - 수정된 코드
    */
   @PostMapping("/{revId}/edit")
   public String edit(@PathVariable("revId") Long revId,
                      @Valid @ModelAttribute("editForm") EditForm editForm,
                      BindingResult bindingResult,
-                     HttpSession session,
+                     @AuthenticationPrincipal CustomUserDetails userDetails, // HttpSession 대신 사용
                      RedirectAttributes redirectAttributes,
                      Model model) throws IOException {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) return "redirect:/login";
+    if (userDetails == null) return "redirect:/login";
 
     Optional<Review> optionalReview = reviewSVC.findById(revId);
     if (optionalReview.isEmpty()) {
@@ -151,11 +159,11 @@ public class ReviewController {
     }
 
     Review foundReview = optionalReview.get();
-    if (!foundReview.getMemberId().equals(loginMember.getMemberId())) {
+    if (!foundReview.getMemberId().equals(userDetails.getMemberId())) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
       return "redirect:/camping/" + foundReview.getContentId();
     }
-
+    // ... (이하 로직은 동일)
     if (bindingResult.hasErrors()) {
       log.info("리뷰 수정 유효성 검사 오류: {}", bindingResult);
       model.addAttribute("revId", revId);
@@ -190,13 +198,15 @@ public class ReviewController {
     return "redirect:/camping/" + editForm.getContentId();
   }
 
+
   /**
-   * 리뷰 삭제 처리 (POST)
+   * 리뷰 삭제 처리 (POST) - 수정된 코드
    */
   @PostMapping("/{revId}/delete")
-  public String delete(@PathVariable("revId") Long revId, HttpSession session, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+  public String delete(@PathVariable("revId") Long revId,
+                       @AuthenticationPrincipal CustomUserDetails userDetails, // HttpSession 대신 사용
+                       RedirectAttributes redirectAttributes) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
@@ -209,15 +219,14 @@ public class ReviewController {
 
     Review review = optionalReview.get();
     Long contentId = review.getContentId();
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = review.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun()); // userDetails에서 gubun 정보를 가져옵니다.
+    boolean isOwner = review.getMemberId().equals(userDetails.getMemberId()); // userDetails에서 memberId를 가져옵니다.
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "리뷰를 삭제할 권한이 없습니다.");
       return "redirect:/camping/" + contentId;
     }
 
-    // 서비스 계층에서 DB삭제와 물리적 파일 삭제를 모두 처리
     reviewSVC.delete(revId);
     redirectAttributes.addFlashAttribute("msg", "리뷰가 성공적으로 삭제되었습니다.");
 

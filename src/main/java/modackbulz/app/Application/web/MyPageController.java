@@ -39,6 +39,12 @@ public class MyPageController {
   private final CommunitySVC communitySVC;
   private final PasswordEncoder passwordEncoder;
 
+  // 👇 [추가된 코드] /mypage 요청을 /mypage/edit으로 리다이렉트합니다.
+  @GetMapping
+  public String mypageRoot() {
+    return "redirect:/mypage/edit";
+  }
+
   @ModelAttribute("editForm_Pwd")
   public EditForm_Pwd editFormPwd() {
     return new EditForm_Pwd();

@@ -1,10 +1,8 @@
 package modackbulz.app.Application.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.community.svc.CommunitySVC;
 import modackbulz.app.Application.domain.community.svc.CoCommentSVC;
 import modackbulz.app.Application.entity.CoComment;
@@ -12,8 +10,8 @@ import modackbulz.app.Application.entity.Community;
 import modackbulz.app.Application.web.form.community.CoCommentForm;
 import modackbulz.app.Application.web.form.community.EditForm;
 import modackbulz.app.Application.web.form.community.SaveForm;
-import modackbulz.app.Application.web.form.login.LoginMember;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,16 +40,14 @@ public class CommunityController {
 
   // 게시글 등록 폼
   @GetMapping("/new")
-  public String saveForm(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-
-    if (loginMember == null) {
+  public String saveForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model, RedirectAttributes redirectAttributes) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "회원만 글 작성 가능합니다.");
       return "redirect:/posts/community";
     }
 
     SaveForm form = new SaveForm();
-    form.setWriter(loginMember.getNickname());
+    form.setWriter(userDetails.getNickname()); // userDetails에서 닉네임 정보를 가져옵니다.
     model.addAttribute("communityForm", form);
     return "posts/community/saveForm";
   }
@@ -60,7 +56,7 @@ public class CommunityController {
   @PostMapping("/save")
   public String savePost(@Valid @ModelAttribute("communityForm") SaveForm form,
                          BindingResult bindingResult,
-                         HttpSession session) {
+                         @AuthenticationPrincipal CustomUserDetails userDetails) {
     if (bindingResult.hasErrors()) {
       return "posts/community/saveForm";
     }
@@ -68,10 +64,9 @@ public class CommunityController {
     Community community = new Community();
     BeanUtils.copyProperties(form, community);
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember != null) {
-      community.setMemberId(loginMember.getMemberId());
-      community.setWriter(loginMember.getNickname());
+    if (userDetails != null) {
+      community.setMemberId(userDetails.getMemberId());
+      community.setWriter(userDetails.getNickname());
     }
 
     communityService.createPost(community);
@@ -80,7 +75,7 @@ public class CommunityController {
 
   // 게시글 상세 조회 + 조회수 증가 + 댓글 목록 조회 + 댓글 작성 폼
   @GetMapping("/{id}")
-  public String detail(@PathVariable("id") Long id, Model model, HttpSession session) {
+  public String detail(@PathVariable("id") Long id, Model model) { // [수정] HttpSession 제거
     communityService.increaseViewCount(id);
     Community post = communityService.getPostById(id).orElse(null);
     if (post == null) {
@@ -92,7 +87,6 @@ public class CommunityController {
     model.addAttribute("comments", comments);
 
     model.addAttribute("post", post);
-    model.addAttribute("comments", comments);
 
     CoCommentForm commentForm = new CoCommentForm();
     model.addAttribute("commentForm", commentForm);
@@ -108,12 +102,11 @@ public class CommunityController {
   // 게시글 수정 폼
   @GetMapping("/{id}/edit")
   public String editForm(@PathVariable("id") Long id,
-                         HttpSession session,
+                         @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                          Model model,
                          RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
 
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
@@ -125,8 +118,8 @@ public class CommunityController {
       return "redirect:/posts/community";
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -144,13 +137,12 @@ public class CommunityController {
   public String updatePost(@PathVariable("id") Long id,
                            @Valid @ModelAttribute("communityForm") EditForm form,
                            BindingResult bindingResult,
-                           HttpSession session,
+                           @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                            RedirectAttributes redirectAttributes) {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
     Community post = communityService.getPostById(id).orElse(null);
 
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
@@ -159,8 +151,8 @@ public class CommunityController {
       return "redirect:/posts/community";
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -181,11 +173,12 @@ public class CommunityController {
 
   // 게시글 삭제 처리
   @PostMapping("/{id}/delete")
-  public String deletePost(@PathVariable("id") Long id, HttpSession session, RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
+  public String deletePost(@PathVariable("id") Long id,
+                           @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
+                           RedirectAttributes redirectAttributes) {
     Community post = communityService.getPostById(id).orElse(null);
 
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/login";
     }
@@ -194,8 +187,8 @@ public class CommunityController {
       return "redirect:/posts/community";
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = post.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = post.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "삭제 권한이 없습니다.");
@@ -215,12 +208,11 @@ public class CommunityController {
   public String saveComment(@PathVariable("postId") Long postId,
                             @Valid @ModelAttribute("commentForm") CoCommentForm form,
                             BindingResult bindingResult,
-                            HttpSession session,
+                            @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                             RedirectAttributes redirectAttributes,
                             Model model) {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/posts/community/" + postId;
     }
@@ -230,18 +222,15 @@ public class CommunityController {
       List<CoComment> comments = coCommentService.getCommentsByPostId(postId);
       model.addAttribute("post", post);
       model.addAttribute("comments", comments);
-
-      // 추가
       model.addAttribute("replyForm", new CoCommentForm());
       model.addAttribute("isReplying", false);
-
       return "posts/community/detail";
     }
 
     CoComment comment = new CoComment();
     comment.setCoId(postId);
-    comment.setMemberId(loginMember.getMemberId());
-    comment.setWriter(loginMember.getNickname());
+    comment.setMemberId(userDetails.getMemberId());
+    comment.setWriter(userDetails.getNickname());
     comment.setContent(form.getContent());
     comment.setPrcComId(form.getPrcComId());
 
@@ -255,11 +244,10 @@ public class CommunityController {
   @GetMapping("/{postId}/comments/{commentId}/edit")
   public String editCommentForm(@PathVariable("postId") Long postId,
                                 @PathVariable("commentId") Long commentId,
-                                HttpSession session,
+                                @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/posts/community/" + postId;
     }
@@ -270,8 +258,8 @@ public class CommunityController {
       return "redirect:/posts/community/" + postId;
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = comment.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = comment.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
@@ -288,8 +276,6 @@ public class CommunityController {
     model.addAttribute("comments", comments);
     model.addAttribute("commentForm", form);
     model.addAttribute("editCommentId", commentId);
-
-    // 추가
     model.addAttribute("replyForm", new CoCommentForm());
     model.addAttribute("isReplying", false);
 
@@ -302,12 +288,11 @@ public class CommunityController {
                               @PathVariable("commentId") Long commentId,
                               @Valid @ModelAttribute("commentForm") CoCommentForm form,
                               BindingResult bindingResult,
-                              HttpSession session,
+                              @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                               RedirectAttributes redirectAttributes,
                               Model model) {
 
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/posts/community/" + postId;
     }
@@ -318,8 +303,8 @@ public class CommunityController {
       return "redirect:/posts/community/" + postId;
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = original.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = original.getMemberId().equals(userDetails.getMemberId());
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "수정 권한이 없습니다.");
       return "redirect:/posts/community/" + postId;
@@ -331,11 +316,8 @@ public class CommunityController {
       model.addAttribute("post", post);
       model.addAttribute("comments", comments);
       model.addAttribute("editCommentId", commentId);
-
-      // 추가
       model.addAttribute("replyForm", new CoCommentForm());
       model.addAttribute("isReplying", false);
-
       return "posts/community/detail";
     }
 
@@ -356,10 +338,9 @@ public class CommunityController {
   @PostMapping("/{postId}/comments/{commentId}/delete")
   public String deleteComment(@PathVariable("postId") Long postId,
                               @PathVariable("commentId") Long commentId,
-                              HttpSession session,
+                              @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                               RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/posts/community/" + postId;
     }
@@ -370,8 +351,8 @@ public class CommunityController {
       return "redirect:/posts/community/" + postId;
     }
 
-    boolean isAdmin = "A".equals(loginMember.getGubun());
-    boolean isOwner = comment.getMemberId().equals(loginMember.getMemberId());
+    boolean isAdmin = "A".equals(userDetails.getGubun());
+    boolean isOwner = comment.getMemberId().equals(userDetails.getMemberId());
 
     if (!isAdmin && !isOwner) {
       redirectAttributes.addFlashAttribute("msg", "삭제 권한이 없습니다.");
@@ -383,16 +364,14 @@ public class CommunityController {
     return "redirect:/posts/community/" + postId;
   }
 
-  // 대댓글 작성 폼 (필요하면 만듦)
-  // 대댓글 작성 폼 (답글 작성 모드 진입)
+  // 대댓글 작성 폼
   @GetMapping("/{postId}/comments/{parentCommentId}/reply")
   public String replyCommentForm(@PathVariable("postId") Long postId,
                                  @PathVariable("parentCommentId") Long parentCommentId,
                                  Model model,
-                                 HttpSession session,
+                                 @AuthenticationPrincipal CustomUserDetails userDetails, // [수정] HttpSession -> AuthenticationPrincipal
                                  RedirectAttributes redirectAttributes) {
-    LoginMember loginMember = (LoginMember) session.getAttribute("loginMember");
-    if (loginMember == null) {
+    if (userDetails == null) {
       redirectAttributes.addFlashAttribute("msg", "로그인이 필요합니다.");
       return "redirect:/posts/community/" + postId;
     }
@@ -409,11 +388,9 @@ public class CommunityController {
     CoCommentForm replyForm = new CoCommentForm();
     replyForm.setPrcComId(parentCommentId);
     model.addAttribute("replyForm", replyForm);
-
     model.addAttribute("isReplying", true);
-
     model.addAttribute("commentForm", new CoCommentForm());
-    model.addAttribute("editCommentId", null); // 수정 모드는 아니므로 null
+    model.addAttribute("editCommentId", null);
 
     return "posts/community/detail";
   }
