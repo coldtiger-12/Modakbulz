@@ -14,7 +14,7 @@ DROP TABLE CAMPING_INFO CASCADE CONSTRAINTS;
 DROP TABLE MEMBER CASCADE CONSTRAINTS;
 
 DROP SEQUENCE review_keyword_seq;
-DROP SEQUENCE keyword_seq
+DROP SEQUENCE keyword_seq;
 DROP SEQUENCE member_member_id_seq;
 DROP SEQUENCE review_rev_id_seq;
 DROP SEQUENCE community_co_id_seq;
