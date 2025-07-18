@@ -1,95 +1,144 @@
 package modackbulz.app.Application.web;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
 import modackbulz.app.Application.entity.Member;
+import modackbulz.app.Application.global.service.EmailService;
 import modackbulz.app.Application.web.form.member.JoinForm;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/member")
 public class MemberController {
-  private final MemberSVC memberSVC;
 
-  // 회원가입 유형 선택 페이지
+  private final MemberSVC memberSVC;
+  private final EmailService emailService;
+
   @GetMapping("/join-type")
   public String joinType() {
     return "member/joinType";
   }
 
-  // 사용자 회원가입 폼
   @GetMapping("/join-user")
   public String userJoinForm(Model model) {
     model.addAttribute("joinForm", new JoinForm());
-    model.addAttribute("gubun","U");
+    model.addAttribute("gubun", "U");
     return "member/joinForm";
   }
 
-  // 관리자 회원가입 폼
   @GetMapping("/join-admin")
   public String adminJoinForm(Model model) {
     model.addAttribute("joinForm", new JoinForm());
-    model.addAttribute("gubun","A");
+    model.addAttribute("gubun", "A");
     return "member/joinForm";
   }
 
-  // 회원가입 폼
-  @GetMapping("/join")
-  public String joinForm(Model model) {
-    model.addAttribute("joinForm", new JoinForm());
-    return "member/joinForm";
-  }
-
-  // 회원가입 처리
   @PostMapping("/join")
   public String join(
-      @Valid @ModelAttribute JoinForm joinForm,
+      @Valid @ModelAttribute("joinForm") JoinForm joinForm,
       BindingResult bindingResult,
+      HttpSession session,
       Model model,
       @RequestParam("gubun") String gubun
   ) {
-    log.info("회원가입 요청: {}", joinForm);
-
-    // 1. 유효성 검사 실패 시 다시 폼으로
     if (bindingResult.hasErrors()) {
       model.addAttribute("gubun", gubun);
       return "member/joinForm";
     }
 
-    // 2. 아이디 중복 체크
     if (memberSVC.isExist(joinForm.getId())) {
       bindingResult.rejectValue("id", "duplicate", "이미 등록된 아이디입니다.");
+    }
+    if (memberSVC.isExistNickname(joinForm.getNickname())) {
+      bindingResult.rejectValue("nickname", "duplicate", "이미 사용 중인 닉네임입니다.");
+    }
+
+    Boolean isVerified = (Boolean) session.getAttribute("joinEmailVerified");
+    if (isVerified == null || !isVerified) {
+      bindingResult.reject("joinFail", "이메일 인증이 필요합니다.");
+    }
+
+    if (bindingResult.hasErrors()) {
+      model.addAttribute("gubun", gubun);
       return "member/joinForm";
     }
 
-    // 3. JoinForm → Member 매핑
     Member member = new Member();
     BeanUtils.copyProperties(joinForm, member);
-
-    // 4. 기본값 설정
-    member.setPwd(joinForm.getPwd());    // 암호화 없이 그대로 저장
-    member.setIsDel(null);
-    member.setDelDate(null);
-    member.setGubun(gubun); // 관리자 or 사용자
+    member.setGubun(gubun);
 
     try {
       memberSVC.insertMember(member);
     } catch (Exception e) {
       log.error("회원가입 실패", e);
       bindingResult.reject("joinFail", "회원가입 처리 중 오류가 발생했습니다.");
-      model.addAttribute("gubun",gubun);
+      model.addAttribute("gubun", gubun);
       return "member/joinForm";
     }
 
-    // 5. 회원가입 성공 → 로그인 페이지로 이동
+    session.removeAttribute("joinEmailVerified");
+    session.removeAttribute("authCode");
     return "redirect:/login";
+  }
+
+  @PostMapping("/check-nickname")
+  @ResponseBody
+  public ResponseEntity<Map<String, Boolean>> checkNickname(@RequestBody Map<String, String> payload) {
+    String nickname = payload.get("nickname");
+    boolean isAvailable = !memberSVC.isExistNickname(nickname);
+    return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
+  }
+
+  @PostMapping("/email/verification-requests")
+  public ResponseEntity<String> sendVerificationEmail(@RequestBody Map<String, String> payload, HttpSession session) {
+    String email = payload.get("email");
+    String authCode = createAuthCode();
+    try {
+      String subject = "모닥불즈 회원가입 이메일 인증번호 입니다.";
+      String text = "인증번호: " + authCode;
+      emailService.sendEmail(email, subject, text);
+      session.setAttribute("authCode", new VerificationCode(authCode, LocalDateTime.now()));
+      return ResponseEntity.ok("인증번호가 발송되었습니다.");
+    } catch (Exception e) {
+      log.error("이메일 발송 실패", e);
+      return ResponseEntity.internalServerError().body("인증번호 발송에 실패했습니다.");
+    }
+  }
+
+  @PostMapping("/verify-email")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> verifyEmailCode(
+      @RequestParam("authcode") String authcode, HttpSession session) {
+    VerificationCode sessionCode = (VerificationCode) session.getAttribute("authCode");
+
+    if (sessionCode == null) {
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호를 먼저 발송해주세요."));
+    }
+
+    if (sessionCode.isValid(authcode)) {
+      session.setAttribute("joinEmailVerified", true);
+      return ResponseEntity.ok(Map.of("verified", true, "message", "인증되었습니다."));
+    } else {
+      return ResponseEntity.ok(Map.of("verified", false, "message", "인증번호가 다르거나 유효시간이 지났습니다."));
+    }
+  }
+
+  private String createAuthCode() {
+    Random random = new Random();
+    return String.valueOf(100000 + random.nextInt(900000));
   }
 }

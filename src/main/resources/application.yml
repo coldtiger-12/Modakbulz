@@ -6,8 +6,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521/xe
-    username: c##camp
-    password: camp1234
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   #ai
   ai:
     openai:
@@ -15,18 +15,32 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: your-gmail-address@gmail.com
-    password: your-gmail-app-password # Gmail 앱 비밀번호
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD} # Gmail 앱 비밀번호
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+
+# [추가] Bucket4j Rate Limiting 설정
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: buckets
+      url: /mypage/email/verification-requests # 👈 요청을 제한할 URL
+      rate-limits:
+        - bandwidths:
+            - capacity: 3         # 👈 10분 동안 최대 3번의 요청만 허용
+              time: 10
+              unit: minutes
+              refill-speed: greedy
+
 #gocamping
 gocamping:
   api:
-    service-key: XgxDN4M9MKooR%2B5XPukrDf62%2BWTiA7kDwHygs5zhGSou4qAxEeNdJ1w6EzIlDJpIAJiGd7fMqO76ESZ%2FZvEmlw%3D%3D
+    service-key: ${GOCAMPING_API_KEY}
 
 # 웹서버 포트
 server:
@@ -38,6 +52,17 @@ logging:
   level:
     root: info
     org.springframework.web: DEBUG
+
+# [추가] Jasypt 암호화 설정
+jasypt:
+  encryptor:
+    # ❗️ JASYPT_PASSWORD 라는 이름의 환경 변수를 사용하도록 설정하는 것이 가장 안전합니다.
+    #    만약 환경 변수 설정이 어렵다면, 임시로 password: 'Your-Secret-Key-Here-12345' 와 같이 직접 입력할 수 있습니다.
+    password: ${JASYPT_PASSWORD}
+    algorithm: PBEWithMD5AndDES # 암호화 알고리즘 지정
+    pool-size: 1               # 암호화 인스턴스 풀 크기
+    string-output-type: base64 # 암호화 결과 인코딩 방식
+    key-obtention-iterations: 1000 # 키 생성 반복 횟수 (보안 강화)
 
 file:
   dir: C:/Files/

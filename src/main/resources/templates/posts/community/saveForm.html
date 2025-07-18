@@ -19,6 +19,7 @@
   <h1>게시글 작성</h1>
 
   <form action="#" th:action="@{/posts/community/save}" th:object="${communityForm}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
     <div>
       <label>제목</label>
       <input type="text" th:field="*{title}" />

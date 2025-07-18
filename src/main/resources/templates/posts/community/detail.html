@@ -35,10 +35,12 @@
     <button type="button" onclick="location.href='/posts/community'">목록</button>
     <th:block th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == post.memberId)}">
       <form th:action="@{/posts/community/{id}/edit(id=${post.coId})}" method="get" style="display: inline;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <button type="submit">수정</button>
       </form>
       <form th:action="@{/posts/community/{id}/delete(id=${post.coId})}" method="post" style="display: inline;"
             onsubmit="return confirm('정말 삭제하시겠습니까?');">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <button type="submit">삭제</button>
       </form>
     </th:block>
@@ -65,6 +67,7 @@
     <div th:if="${session.loginMember != null and editCommentId == null and !isReplying}">
       <h4>댓글 작성</h4>
       <form th:action="@{/posts/community/{postId}/comments/save(postId=${post.coId})}" th:object="${commentForm}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <textarea th:field="*{content}" rows="2"></textarea>
         <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
         <button class="commentBtn" type="submit">댓글 등록</button>
@@ -94,6 +97,7 @@
         </p>
         <div th:if="${editCommentId == comment.cComId}">
           <form th:action="@{/posts/community/{postId}/comments/{commentId}/edit(postId=${post.coId}, commentId=${comment.cComId})}" th:object="${commentForm}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <textarea th:field="*{content}" rows="3" cols="60"></textarea>
             <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
             <button type="submit">수정 완료</button>
@@ -114,6 +118,7 @@
       <div class="comment-actions" th:if="${session.loginMember != null and (session.loginMember.gubun == 'A' or session.loginMember.memberId == comment.memberId) and editCommentId == null and !isReplying}">
         <a th:href="@{/posts/community/{postId}/comments/{commentId}/edit(postId=${post.coId}, commentId=${comment.cComId})}" class="action-button">수정</a>
         <form th:action="@{/posts/community/{postId}/comments/{commentId}/delete(postId=${post.coId}, commentId=${comment.cComId})}" method="post" style="display:inline" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <button type="submit" class="action-button">삭제</button>
         </form>
       </div>
@@ -122,6 +127,7 @@
     <!-- 대댓글 작성 폼 -->
     <div class="reply-form-wrapper" th:if="${isReplying and replyForm.prcComId == comment.cComId}" style="margin-top: 10px; margin-left: 40px;">
       <form th:action="@{/posts/community/{postId}/comments/save(postId=${post.coId})}" th:object="${replyForm}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <input type="hidden" th:field="*{prcComId}" />
         <textarea th:field="*{content}" rows="3" cols="50" placeholder="답글을 입력하세요..."></textarea>
         <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color: red; font-size: 0.9em;"></div>

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <title>게시글 관리</title>
-  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
-  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_parameter_name" th:content="${_csrf.parameterName}"/>
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
@@ -21,11 +22,11 @@
   <div class="dashboard-content">
     <h2>게시글 관리</h2>
     <div th:if="${msg}" class="warning-msg" th:text="${msg}"></div>
-    
+
     <p>게시글 개수: <span th:text="${posts != null ? posts.size() : 0}">0</span></p>
-    
+
     <button type="button" id="bulkDeleteBtn" disabled onclick="bulkDelete()">선택 삭제</button>
-    
+
     <table>
       <thead>
       <tr>
@@ -59,83 +60,72 @@
       </tr>
       </tbody>
     </table>
-    
+
     <script>
-      function toggleAll(source) {
-        const checkboxes = document.getElementsByName('postIds');
-        for (let i = 0; i < checkboxes.length; i++) {
-          checkboxes[i].checked = source.checked;
-        }
-        updateBulkDeleteBtn();
-      }
-      function updateBulkDeleteBtn() {
-        const checkboxes = document.getElementsByName('postIds');
-        const btn = document.getElementById('bulkDeleteBtn');
-        let checked = false;
-        for (let i = 0; i < checkboxes.length; i++) {
-          if (checkboxes[i].checked) {
-            checked = true;
-            break;
-          }
-        }
-        btn.disabled = !checked;
-      }
-      // 페이지 로드시 버튼 상태 초기화
-      window.onload = updateBulkDeleteBtn;
-      // 일괄 삭제용 JS
-      function bulkDelete() {
-        const checkboxes = document.getElementsByName('postIds');
-        const selectedIds = [];
-        for (let i = 0; i < checkboxes.length; i++) {
-          if (checkboxes[i].checked) {
-            selectedIds.push(checkboxes[i].value);
-          }
-        }
-        if (selectedIds.length === 0) {
-          alert('삭제할 게시글을 선택해주세요.');
-          return;
-        }
-        if (confirm('정말 선택한 게시글을 삭제하시겠습니까?')) {
-          const form = document.createElement('form');
-          form.method = 'post';
-          form.action = '/admin/posts/bulk-delete';
-          // CSRF 토큰 추가 (있는 경우에만)
-          const csrfMeta = document.querySelector('meta[name="_csrf"]');
-          if (csrfMeta) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_csrf';
-            csrfInput.value = csrfMeta.getAttribute('content');
-            form.appendChild(csrfInput);
-          }
-          // 선택된 ID들 추가
-          selectedIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'postIds';
-            input.value = id;
-            form.appendChild(input);
-          });
-          document.body.appendChild(form);
-          form.submit();
-        }
-      }
-      // 개별 삭제용 JS
-      function postDelete(postId) {
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = '/admin/posts/' + postId + '/delete';
-        // CSRF 토큰 추가 (있는 경우에만)
-        const csrfMeta = document.querySelector('meta[name="_csrf"]');
-        if (csrfMeta) {
+      // 페이지 로드 시 meta 태그에서 CSRF 토큰 정보와 파라미터 이름을 읽어 변수에 저장합니다.
+      const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+      const csrfParameterName = document.querySelector('meta[name="_csrf_parameter_name"]').getAttribute('content');
+
+      /**
+       * CSRF 토큰을 담은 hidden input 엘리먼트를 생성하는 헬퍼 함수
+       */
+      function createCsrfInput() {
           const csrfInput = document.createElement('input');
           csrfInput.type = 'hidden';
-          csrfInput.name = '_csrf';
-          csrfInput.value = csrfMeta.getAttribute('content');
-          form.appendChild(csrfInput);
-        }
-        document.body.appendChild(form);
-        form.submit();
+          csrfInput.name = csrfParameterName; // meta 태그에서 읽어온 파라미터 이름 사용
+          csrfInput.value = csrfToken;       // meta 태그에서 읽어온 토큰 값 사용
+          return csrfInput;
+      }
+
+      function toggleAll(source) {
+          document.getElementsByName('postIds').forEach(checkbox => checkbox.checked = source.checked);
+          updateBulkDeleteBtn();
+      }
+
+      function updateBulkDeleteBtn() {
+          const isAnyChecked = document.querySelector('input[name="postIds"]:checked') !== null;
+          document.getElementById('bulkDeleteBtn').disabled = !isAnyChecked;
+      }
+
+      window.onload = updateBulkDeleteBtn;
+
+      function bulkDelete() {
+          const selectedIds = Array.from(document.querySelectorAll('input[name="postIds"]:checked')).map(cb => cb.value);
+          if (selectedIds.length === 0) {
+              alert('삭제할 게시글을 선택해주세요.');
+              return;
+          }
+          if (confirm('정말 선택한 게시글을 삭제하시겠습니까?')) {
+              const form = document.createElement('form');
+              form.method = 'post';
+              form.action = '/admin/posts/bulk-delete';
+
+              // CSRF 토큰 input 추가
+              form.appendChild(createCsrfInput());
+
+              selectedIds.forEach(id => {
+                  const input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'postIds';
+                  input.value = id;
+                  form.appendChild(input);
+              });
+
+              document.body.appendChild(form);
+              form.submit();
+          }
+      }
+
+      function postDelete(postId) {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/posts/' + postId + '/delete';
+
+          // CSRF 토큰 input 추가
+          form.appendChild(createCsrfInput());
+
+          document.body.appendChild(form);
+          form.submit();
       }
     </script>
   </div>

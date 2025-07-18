@@ -33,23 +33,15 @@ CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
     GUBUN       CHAR(1) DEFAULT 'U' NOT NULL CHECK (GUBUN IN ('U', 'A')),
     ID          VARCHAR2(10) NOT NULL UNIQUE CHECK (REGEXP_LIKE(ID, '^[A-Za-z0-9]+$')),
-    PWD       VARCHAR2(15) NOT NULL CHECK (
-              LENGTH(PWD) >= 8 AND
-           REGEXP_LIKE(PWD, '.*[A-Z].*') AND
-           REGEXP_LIKE(PWD, '.*[a-z].*') AND
-           REGEXP_LIKE(PWD, '.*[0-9].*') AND
-           REGEXP_LIKE(PWD, '.*[!@#$%^&*()_+=-].*')
-),
-    EMAIL       VARCHAR2(50) NOT NULL UNIQUE CHECK (REGEXP_LIKE(EMAIL,
-                    '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')),
-    TEL         VARCHAR2(11) NOT NULL UNIQUE,
+    PWD         VARCHAR2(255) NOT NULL,
+    EMAIL       VARCHAR2(255) NOT NULL UNIQUE, -- 제약조건은 DAO에서 암호화 후 처리하므로 여기서는 제거해도 무방합니다.
+    TEL         VARCHAR2(255) NOT NULL UNIQUE, -- 개인정보는 암호화되므로 길이를 늘립니다.
     NICKNAME    VARCHAR2(20) NOT NULL UNIQUE,
     GENDER      VARCHAR2(10) CHECK (GENDER IN ('남', '여')),
     REGION      VARCHAR2(10),
     IS_DEL      CHAR(1) DEFAULT 'N' NOT NULL CHECK (IS_DEL IN ('Y', 'N')),
     DEL_DATE    TIMESTAMP
 );
-
 CREATE SEQUENCE member_member_id_seq
 START WITH 1
 INCREMENT BY 1

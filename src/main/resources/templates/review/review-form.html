@@ -39,6 +39,7 @@
             <h2>리뷰 작성</h2>
 
             <form th:action="@{/reviews/write}" th:object="${reviewForm}" method="post" class="yanolja-review-form" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <input type="hidden" name="campingId" th:value="${camping.contentId}">
 
                 <div class="rating-input-section">

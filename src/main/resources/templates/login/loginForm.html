@@ -4,19 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>로 그 인</title>
+  <title>로그인</title>
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
-<!-- 로그인 영역 -->
 <div class="login-container">
   <img src="/images/모닥불즈로고.png" alt="로고" class="login-logo">
   <div class="login-title">로그인</div>
@@ -24,27 +21,21 @@
     로그인 시 게시글 작성 및 캠핑장 스크랩 기능을 이용하실 수 있습니다.
   </div>
 
-  <form action="" method="post" th:object="${loginForm}">
-    <div th:if="${#fields.hasGlobalErrors()}">
-      <div class="field-err" th:each="err : ${#fields.globalErrors()}">
-        <span th:text="${err}"></span>
-      </div>
+  <form th:action="@{/login}" method="post" th:object="${loginForm}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <div th:if="${param.error}" class="field-err" style="text-align: center; margin-bottom: 10px;">
+      <span>아이디 또는 비밀번호가 올바르지 않습니다.</span>
     </div>
 
     <div class="login-form-group">
       <label th:for="id">아이디</label>
-      <input type="text" th:field="*{id}">
-      <div class="field-err" th:each="err : ${#fields.errors('id')}">
-        <span th:text="${err}"></span>
-      </div>
+      <input type="text" th:field="*{id}" required>
     </div>
 
     <div class="login-form-group">
       <label th:for="pwd">비밀번호</label>
-      <input type="password" th:field="*{pwd}">
-      <div class="field-err" th:each="err : ${#fields.errors('pwd')}">
-        <span th:text="${err}"></span>
-      </div>
+      <input type="password" th:field="*{pwd}" required>
     </div>
 
     <button type="submit" class="login-button">로그인</button>

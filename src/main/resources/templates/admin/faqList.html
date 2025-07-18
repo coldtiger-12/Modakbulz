@@ -44,6 +44,7 @@
         <td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd')}">2025-07-15</td>
         <td>
           <form th:action="@{/admin/inquiry/delete}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <input type="hidden" name="id" th:value="${faq.faqId}" />
             <button type="submit">삭제</button>
           </form>
