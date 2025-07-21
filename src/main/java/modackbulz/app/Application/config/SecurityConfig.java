@@ -72,9 +72,9 @@ public class SecurityConfig {
             .accessDeniedPage("/access-denied")
         )
 
-        // 5. CSRF 보호 설정 (API 및 회원가입 관련 경로는 비활성화)
+        // 5. CSRF 보호 설정 (API 및 회원가입 관련 경로는 비활성화, admin 경로도 비활성화 추가)
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/**", "/member/**")
+            .ignoringRequestMatchers("/api/**", "/member/**", "/admin/**")
         );
 
     return http.build();

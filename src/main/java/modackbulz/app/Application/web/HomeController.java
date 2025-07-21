@@ -47,4 +47,10 @@ public class HomeController {
     System.out.println(">> loginMember = " + loginMember);
     return "index";
   }
+
+  // 👇 [추가된 코드] 접근 거부 페이지를 처리하는 핸들러를 여기에 추가합니다.
+  @GetMapping("/access-denied")
+  public String accessDenied() {
+    return "error/accessDenied";
+  }
 }

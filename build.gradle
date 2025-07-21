@@ -46,7 +46,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
+	implementation 'org.apache.poi:poi:5.2.5'
+	implementation 'org.apache.poi:poi-ooxml:5.2.5'
 }
 
 dependencyManagement {

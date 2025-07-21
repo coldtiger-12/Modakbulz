@@ -27,10 +27,10 @@ public class AdminController {
     return "redirect:/admin/posts";
   }
 
-  @GetMapping("/access-denied")
-  public String accessDenied(){
-    return "error/accessDenied";
-  }
+//  @GetMapping("/access-denied")
+//  public String accessDenied(){
+//    return "error/accessDenied";
+//  }
 
   @PostMapping("/sync-camps")
   public ResponseEntity<String> syncCamps() {
