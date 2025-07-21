@@ -2,19 +2,17 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>마이페이지</title>
+  <title>마이페이지 - 스크랩한 캠핑장</title>
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/mypage.css}">
+  <link rel="stylesheet" th:href="@{/css/camp.css}">
 </head>
 <body>
-<!-- 탑 메뉴 -->
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
 <div class="mypage-container">
-  <!-- 사이드 메뉴 -->
   <aside class="mypage-sidebar">
     <ul>
       <li><a href="/mypage/edit">회원정보 관리</a></li>
@@ -23,6 +21,26 @@
       <li><a href="/mypage/inquiry">문의사항</a></li>
     </ul>
   </aside>
+
+  <div class="mypage-main">
+    <h2>스크랩한 캠핑장</h2>
+    <div class="camping-grid" th:if="${!myScraps.isEmpty()}">
+      <div class="camp-card" th:each="scrap : ${myScraps}">
+        <a th:href="@{/camping/{contentId}(contentId=${scrap.contentId})}">
+          <img th:src="${scrap.firstImageUrl != null ? scrap.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+        </a>
+        <div class="camp-card-body">
+          <a th:href="@{/camping/{contentId}(contentId=${scrap.contentId})}">
+            <h5 class="camp-card-title" th:text="${scrap.facltNm}">캠핑장 이름</h5>
+          </a>
+          <p class="camp-card-text" th:text="${scrap.addr1}">주소</p>
+        </div>
+      </div>
+    </div>
+    <div th:if="${myScraps.isEmpty()}">
+      <p>스크랩한 캠핑장이 없습니다.</p>
+    </div>
+  </div>
 </div>
 </body>
 </html>

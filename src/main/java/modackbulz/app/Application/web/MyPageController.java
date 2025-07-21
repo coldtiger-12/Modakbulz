@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.community.svc.CommunitySVC;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
+import modackbulz.app.Application.domain.scrap.svc.CampScrapService;
+import modackbulz.app.Application.entity.CampScrap;
 import modackbulz.app.Application.entity.Community;
 import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.global.service.EmailService;
@@ -38,6 +40,7 @@ public class MyPageController {
   private final EmailService emailService;
   private final CommunitySVC communitySVC;
   private final PasswordEncoder passwordEncoder;
+  private final CampScrapService campScrapService;
 
   // 👇 [추가된 코드] /mypage 요청을 /mypage/edit으로 리다이렉트합니다.
   @GetMapping
@@ -180,7 +183,12 @@ public class MyPageController {
   }
 
   @GetMapping("/likes")
-  public String likeCampPage() {
+  public String likeCampPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    if (userDetails == null) {
+      return "redirect:/login";
+    }
+    List<CampScrap> myScraps = campScrapService.getMyScraps(userDetails.getMemberId());
+    model.addAttribute("myScraps", myScraps);
     return "member/likeCamp";
   }
 

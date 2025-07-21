@@ -4,36 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- 공통 스타일시트와 캠핑장 상세 페이지 전용 스타일시트 불러오기 -->
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
   <link rel="stylesheet" th:href="@{/css/review-all.css}">
 
-  <!-- 타이틀 설정: 캠핑장 이름이 있으면 이름 + 상세정보, 없으면 기본 문구 -->
   <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
 </head>
 <body>
-<!-- 로그인 전 상단 메뉴 -->
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 
-<!-- 로그인 후 상단 메뉴 -->
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 공통 헤더 영역 -->
 <div th:replace="~{fragments/topmenu :: header}"></div>
 
-<!-- 캠핑장 정보가 존재하는 경우에만 보여지는 상세 정보 페이지 -->
 <div class="camp-detail-container" th:if="${camp}">
 
-  <!-- 캠핑장 이름 및 업종 정보 -->
   <section class="detail-header">
-    <h1 th:text="${camp.facltNm}">하늘 정원 캠핑장</h1>
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <h1 th:text="${camp.facltNm}">하늘 정원 캠핑장</h1>
+      <button class="scrap-btn"
+              th:data-content-id="${camp.contentId}"
+              th:data-scrapped="${camp.scrapped}"
+              th:text="${camp.scrapped} ? '★' : '☆'"
+              style="margin-left: 10px; font-size: 2rem; background: none; border: none; cursor: pointer;">
+      </button>
+    </div>
     <p th:text="${camp.lctCl} + ' | ' + ${camp.induty}">산/숲 | 일반야영장</p>
   </section>
 
-  <!-- 캠핑장 주요 정보: 이미지, 소개, 기본 정보 -->
   <section class="detail-main-info">
-    <!-- 대표 이미지 표시 -->
     <div class="main-image-wrapper">
       <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()
         ? camp.firstImageUrl
@@ -41,13 +40,11 @@
            alt="캠핑장 대표 이미지">
     </div>
 
-    <!-- 텍스트 소개 영역 -->
     <div class="core-info-wrapper">
       <h2>캠핑장 소개</h2>
-      <p class="intro-text" th:text="${camp.intro}">한 줄 소개가 여기에 표시됩니다.</p>
+      <p class="intro-text" th:text="${camp.intro}">캠핑장 소개가 여기에 표시됩니다.</p>
       <p class="feature-text" th:text="${camp.featureNm}">특징이 여기에 표시됩니다.</p>
 
-      <!-- 캠핑장 상세 정보 리스트 -->
       <ul class="info-list">
         <li><strong>주소</strong><span id="camp-address" th:text="${camp.addr1}">주소 정보</span></li>
         <li><strong>연락처</strong><span th:text="${camp.tel}">연락처 정보</span></li>
@@ -68,7 +65,6 @@
     </div>
   </section>
 
-  <!-- 추가 정보: 시설, 부대시설, 테마 -->
   <section class="detail-extra-info">
     <div class="info-box">
       <h3>주요 시설</h3>
@@ -84,7 +80,6 @@
     </div>
   </section>
 
-  <!-- 갤러리 영역 (이미지 슬라이더 형식) -->
   <section class="detail-slider">
     <div class="gallery-header-row">
       <h2>
@@ -98,19 +93,12 @@
       <a th:href="@{/camping/gallery(campingId=${camp.contentId})}" class="all-review-btn gallery-all-review-btn">갤러리 전체보기</a>
     </div>
 
-    <!-- 이미지가 있는 경우 -->
     <div class="slider-wrapper" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
-      <!-- 대표 이미지가 있으면 먼저 표시 -->
-      <!--      <div class="slide-item" th:if="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()}">-->
-      <!--        <img th:src="${camp.firstImageUrl}" alt="캠핑장 대표 이미지">-->
-      <!--      </div>-->
-      <!-- API에서 가져온 추가 이미지들 표시 -->
       <div class="slide-item" th:each="imageUrl : ${campImages}" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
         <img th:src="${imageUrl}" th:alt="'캠핑장 이미지 ' + ${#arrays.length(campImages)}">
       </div>
     </div>
 
-    <!-- 이미지가 없는 경우 안내 메시지 -->
     <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#arrays.isEmpty(campImages) or campImages == null)}">
       <p>📷 이미지 준비 중입니다.</p>
       <p>캠핑장의 아름다운 모습을 곧 만나보실 수 있습니다.</p>
@@ -125,14 +113,11 @@
         <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
       </div>
     </div>
-    <!-- 상단 요약 정보 -->
     <div class="review-summary">
-      <!-- 평균 별점 -->
       <div class="avg-score">
         <span class="score" th:text="${#numbers.formatDecimal(reviewStats.avg, 1, 1)}">5.0</span>
         <span class="slash">/ 5</span>
       </div>
-      <!-- 별점별 분포 -->
       <div class="score-bars">
         <div class="score-bar" th:each="i : ${#numbers.sequence(4,0)}">
           <span class="star-label">★ <span th:text="${i + 1}">5</span></span>
@@ -142,7 +127,6 @@
         </div>
       </div>
 
-      <!-- 키워드 -->
       <div class="review-keywords">
         <h4>연관 키워드</h4>
         <div class="tag-cloud">
@@ -173,7 +157,6 @@
     </div>
   </section>
 
-  <!-- 리뷰 작성/수정 모달 -->
   <div id="reviewModal" class="review-modal">
     <div class="review-modal-content">
       <div class="review-modal-header">
@@ -213,7 +196,6 @@
     </div>
   </div>
 
-  <!-- 지도 표시 영역 -->
   <section class="detail-map">
     <h2>캠핑장 위치</h2>
     <div id="map-placeholder">지도가 표시될 영역입니다.</div>
@@ -221,14 +203,12 @@
 
 </div>
 
-<!-- 캠핑장 정보가 없는 경우에 출력되는 대체 화면 -->
 <div class="camp-detail-container" th:unless="${camp}">
   <h1>캠핑장 정보를 불러올 수 없습니다.</h1>
   <p>요청하신 캠핑장을 찾지 못했거나, 정보를 가져오는 데 실패했습니다.</p>
   <a th:href="@{/}">홈으로 돌아가기</a>
 </div>
 
-<!-- 카카오맵 API 및 지도 표시용 JS 추가 -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
 <script th:inline="javascript">
   var campName = '[[${camp.facltNm}]]';
@@ -239,6 +219,56 @@
   var mapX = /*[[${camp.mapX}]]*/ null;
 </script>
 <script src="/js/camp-map.js"></script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = [[${loginMember != null}]];
+    const scrapButton = document.querySelector('.scrap-btn');
+
+    if (scrapButton) {
+      scrapButton.addEventListener('click', async (event) => {
+        if (!isLoggedIn) {
+          alert('로그인이 필요한 기능입니다.');
+          window.location.href = '/login';
+          return;
+        }
+
+        const campItem = {
+            contentId: /*[[${camp.contentId}]]*/,
+            facltNm: /*[[${camp.facltNm}]]*/,
+            addr1: /*[[${camp.addr1}]]*/,
+            firstImageUrl: /*[[${camp.firstImageUrl}]]*/
+        };
+
+        try {
+          const response = await fetch('/api/scraps/toggle', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(campItem)
+          });
+
+          if (response.status === 401) {
+            alert('세션이 만료되었거나 로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+          }
+
+          const result = await response.json();
+          event.target.textContent = result.isScrapped ? '★' : '☆';
+          if (result.isScrapped) {
+              alert('캠핑장을 스크랩했습니다.');
+          } else {
+              alert('캠핑장 스크랩을 취소했습니다.');
+          }
+
+        } catch (error) {
+          console.error('스크랩 오류:', error);
+          alert('스크랩 처리 중 오류가 발생했습니다.');
+        }
+      });
+    }
+  });
+</script>
 
 </body>
 </html>

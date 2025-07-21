@@ -117,9 +117,15 @@ public class CampingController {
    * 캠핑장 상세 정보 (수정됨: DB 우선 조회)
    */
   @GetMapping("/{contentId}")
-  public String campDetail(@PathVariable("contentId") Long contentId, Model model) {
+  public String campDetail(@PathVariable("contentId") Long contentId, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
     // DB 우선 조회 로직이 이미 GoCampingService에 구현되어 있음
     GoCampingDto.Item camp = goCampingService.getCampDetail(contentId).block();
+
+    if (camp != null && userDetails != null) {
+      boolean scrapped = campScrapDAO.findByMemberIdAndContentId(userDetails.getMemberId(), camp.getContentId()).isPresent();
+      camp.setScrapped(scrapped);
+      model.addAttribute("loginMember", userDetails);
+    }
 
     // 캠핑장 정보를 모델에 추가
     model.addAttribute("camp", camp);
