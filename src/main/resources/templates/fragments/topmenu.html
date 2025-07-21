@@ -3,27 +3,6 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
-  <style>
-    /* [추가] 로그아웃 버튼을 링크처럼 보이게 하는 스타일 */
-    .logout-form {
-        display: inline; /* 다른 텍스트와 같은 줄에 있도록 설정 */
-        margin: 0;
-        padding: 0;
-    }
-    .logout-button {
-        background: none;
-        border: none;
-        padding: 0;
-        font: inherit; /* 부모 요소의 폰트 스타일 상속 */
-        color: #fff;  /* topmenu의 링크 색상과 동일하게 설정 */
-        text-decoration: none; /* 밑줄 제거 */
-        cursor: pointer;
-        margin: 0px 6px;
-    }
-    .logout-button:hover {
-        text-decoration: underline; /* 마우스를 올렸을 때 밑줄 표시 */
-    }
-  </style>
 </head>
 <body>
 
@@ -35,18 +14,15 @@
 
 <th:block th:fragment="afterLoginTop">
   <div class="topmenu" sec:authorize="isAuthenticated()">
-    <p>
-      <span sec:authentication="principal.nickname"></span>님, 환영합니다!
-      <span>||</span>
-      <a sec:authorize="hasRole('U')" th:href="@{/mypage}" id="mypage">마이페이지</a>
-      <a sec:authorize="hasRole('A')" th:href="@{/admin}" id="admin">관리자 대시보드</a>
-      <span>||</span>
-
-    <form th:action="@{/logout}" method="post" class="logout-form">
+    <span sec:authentication="principal.nickname"></span>님, 환영합니다!
+    <span>||</span>
+    <a sec:authorize="hasRole('U')" th:href="@{/mypage}" id="mypage">마이페이지</a>
+    <a sec:authorize="hasRole('A')" th:href="@{/admin}" id="admin">관리자 대시보드</a>
+    <span>||</span>
+    <a href="#" onclick="document.getElementById('logoutForm').submit();" class="logout-button">로그아웃</a>
+    <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-      <button type="submit" class="logout-button">로그아웃</button>
     </form>
-    </p>
   </div>
 </th:block>
 
