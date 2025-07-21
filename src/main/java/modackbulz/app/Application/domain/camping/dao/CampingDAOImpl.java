@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,9 @@ public class CampingDAOImpl implements CampingDAO {
   private final NamedParameterJdbcTemplate template;
 
   @Override
+  @Transactional
   public void saveOrUpdate(GoCampingDto.Item item) {
+    // 1. 기존 CAMPING_INFO 테이블 MERGE 구문 (변경 없음)
     String sql = """
             MERGE INTO CAMPING_INFO T
             USING (SELECT :contentId AS contentId FROM DUAL) S
@@ -39,6 +42,17 @@ public class CampingDAOImpl implements CampingDAO {
                 VALUES (:contentId, :facltNm, :addr1, :firstImageUrl, :lineIntro, :intro, :tel, :homepage, :sbrsCl, :themaEnvrnCl, :featureNm, :induty, :lctCl, :operPdCl, :gnrlSiteCo, :autoSiteCo, :glampSiteCo, :caravSiteCo)
         """;
     template.update(sql, new BeanPropertySqlParameterSource(item));
+
+    // 2. ✨ [추가] CAMPSITES 테이블에 자동으로 데이터를 추가하는 MERGE 구문
+    String campsitesSql = """
+            MERGE INTO CAMPSITES T
+            USING (SELECT :contentId AS contentId FROM DUAL) S
+            ON (T.CONTENT_ID = S.contentId)
+            WHEN NOT MATCHED THEN
+                INSERT (CONTENT_ID, SC_C, VIEW_C, SCORE)
+                VALUES (:contentId, 0, 0, 0)
+        """;
+    template.update(campsitesSql, new BeanPropertySqlParameterSource(item));
   }
 
   @Override
