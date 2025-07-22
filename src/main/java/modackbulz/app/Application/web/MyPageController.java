@@ -200,11 +200,19 @@ public class MyPageController {
     return "member/myPosts";
   }
 
+//  @PostMapping("/delete")
+//  public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+//    if (userDetails == null) return "redirect:/login";
+//    memberSVC.deleteMember(userDetails.getMemberId());
+//    return "redirect:/logout"; // 탈퇴 성공 시 로그아웃 처리
+//  }
+
   @PostMapping("/delete")
-  public String delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+  public String delete(@AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes redirectAttributes) {
     if (userDetails == null) return "redirect:/login";
     memberSVC.deleteMember(userDetails.getMemberId());
-    return "redirect:/logout"; // 탈퇴 성공 시 로그아웃 처리
+    redirectAttributes.addFlashAttribute("message", "회원 탈퇴가 정상적으로 처리되었습니다.");
+    return "redirect:/member/processLogoutAfterAction"; // 👈 이 경로로 이동해야 합니다.
   }
 
   private String createAuthCode() {

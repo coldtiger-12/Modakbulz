@@ -325,7 +325,7 @@ header {
 
 /* 추천 캠핑장 영역 */
 .recommend {
-    max-widthL 500px;
+    max-width: 1190px;
     background-color: #fff;
     border-radius: 20px;
     padding: 5px 25px;
@@ -378,4 +378,22 @@ header {
     display: block;
 }
 
+/* 지도 영역 */
+.map-section {
+  margin-top: 20px;
+}
 
+.map-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.map-container {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
