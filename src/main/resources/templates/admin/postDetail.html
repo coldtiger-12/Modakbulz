@@ -4,36 +4,38 @@
   <meta charset="UTF-8">
   <title>게시글 상세</title>
   <link rel="stylesheet" th:href="@{/css/common.css}">
-  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+  <link rel="stylesheet" th:href="@{/css/admin_theme.css}">
 </head>
 <body>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: header}"></div>
-<div class="mypage-container">
-  <aside class="mypage-sidebar">
+
+<div class="admin-container">
+  <aside class="admin-sidebar">
     <ul>
       <li class="now"><a href="/admin/posts">게시글 관리</a></li>
-      <li><a href="/admin/reviews">리뷰 관리</a></li>
     </ul>
   </aside>
-  <div class="mypage-content">
+
+  <div class="admin-content">
     <h2>게시글 상세</h2>
-    <table>
+    <table class="detail-table">
       <tr><th>글 번호</th><td th:text="${post.coId}"></td></tr>
       <tr><th>제목</th><td th:text="${post.title}"></td></tr>
       <tr><th>작성자</th><td th:text="${post.writer}"></td></tr>
       <tr><th>작성일</th><td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td></tr>
       <tr><th>조회수</th><td th:text="${post.viewC}"></td></tr>
-      <tr><th>내용</th><td th:text="${post.content}"></td></tr>
+      <tr><th>내용</th><td class="content-cell" th:text="${post.content}"></td></tr>
     </table>
-    <div class="button-group" style="margin-top:20px;">
-      <a th:href="@{'/admin/posts'}"><button type="button">목록</button></a>
-      <a th:href="@{'/admin/posts/' + ${post.coId} + '/edit'}"><button type="button">수정</button></a>
+
+    <div class="button-group">
+      <a th:href="@{'/admin/posts'}"><button type="button" class="btn btn-secondary">목록</button></a>
+      <a th:href="@{'/admin/posts/' + ${post.coId} + '/edit'}"><button type="button" class="btn btn-primary">수정</button></a>
       <form th:action="@{'/admin/posts/' + ${post.coId} + '/delete'}" method="post" style="display:inline" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-        <button type="submit">삭제</button>
+        <button type="submit" class="btn btn-danger">삭제</button>
       </form>
     </div>
   </div>
 </div>
 </body>
-</html> 
+</html>

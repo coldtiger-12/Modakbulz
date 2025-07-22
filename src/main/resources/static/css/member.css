@@ -59,6 +59,33 @@ body {
     box-sizing: border-box;
 }
 
+.join-flex-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.join-flex-row input[type="text"],
+.join-flex-row input[type="email"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.join-flex-row .join-button {
+    padding: 6px 12px;
+    font-size: 1rem;
+    flex: 0 0 auto;
+    width: 90px;
+    height: auto;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .field-err {
     color: red;
     font-size: 0.8rem;

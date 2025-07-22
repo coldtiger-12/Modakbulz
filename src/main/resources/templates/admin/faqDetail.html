@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>문의 상세</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/admin_theme.css}">
 </head>
 <body>
-  <h1>문의 상세 보기</h1>
-  <p><strong>번호:</strong> <span th:text="${faq.faqId}"></span></p>
-  <p><strong>작성자:</strong> <span th:text="${faq.writer}"></span></p>
-  <p><strong>작성일:</strong> <span th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
-  <hr>
-  <p th:text="${faq.content}">문의 내용</p>
-  <hr>
-  <a href="/admin/inquiry">← 목록으로</a>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<div class="admin-container" style="display: block;"> <div class="admin-content">
+  <h2>문의 상세 보기</h2>
+  <table class="detail-table">
+    <tr><th>번호</th><td th:text="${faq.faqId}"></td></tr>
+    <tr><th>작성자</th><td th:text="${faq.writer}"></td></tr>
+    <tr><th>작성일</th><td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd HH:mm')}"></td></tr>
+    <tr><th>내용</th><td class="content-cell" th:text="${faq.content}"></td></tr>
+  </table>
+  <div class="button-group">
+    <a th:href="@{/admin/inquiry}"><button class="btn btn-secondary">← 목록으로</button></a>
+  </div>
+</div>
+</div>
 </body>
 </html>

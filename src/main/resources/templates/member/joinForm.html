@@ -52,11 +52,11 @@
 
     <div class="join-form-group">
       <label for="email-join">이메일 주소 :</label>
-      <div style="display: flex; gap: 10px;">
+      <div class="join-flex-row">
         <input type="email" th:field="*{email}" id="email-join" placeholder="이메일 주소를 입력하세요">
         <button type="button" class="join-button" id="send-auth-btn" onclick="sendAuthEmailForJoin()">인증번호 발송</button>
       </div>
-      <div id="auth-code-section-join" class="hidden" style="margin-top:10px;">
+      <div id="auth-code-section-join" class="join-flex-row hidden" style="margin-top:10px;">
         <input type="text" id="authCodeInput-join" placeholder="인증번호 6자리를 입력하세요">
         <button type="button" class="join-button" onclick="verifyAuthCodeForJoin()">인증 확인</button>
       </div>
@@ -94,7 +94,7 @@
 
     <div class="join-form-group">
       <label for="nickname-join">닉네임 :</label>
-      <div style="display: flex; gap: 10px;">
+      <div class="join-flex-row">
         <input type="text" th:field="*{nickname}" id="nickname-join">
         <button type="button" class="join-button" onclick="checkNicknameJoin()">중복 확인</button>
       </div>
