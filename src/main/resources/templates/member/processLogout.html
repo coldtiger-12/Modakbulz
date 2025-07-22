@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>비밀번호 변경 완료</title>
+  <title>요청 사항 완료</title>
 </head>
 <body>
 <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
@@ -12,10 +12,18 @@
 <script>
   // 페이지가 열리자마자 실행됩니다.
   window.onload = function() {
-      // 1. 먼저 사용자에게 성공 메시지를 보여줍니다.
-      alert("비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.");
+      // Thymeleaf를 통해 전달받은 메세지를 변수에 저장
+      const message = /*[[${message}}*/ null;
 
-      // 2. 사용자가 '확인' 버튼을 누르면, 숨겨진 폼을 이용해 로그아웃을 요청합니다.
+      // 메시지가 있는지 확인 후 , 있다면 alert 창을 띄움
+      if (message && message.trim() !== ''){
+          alert(message);
+      } else {
+          // 메시지가 없으면 기본 메시지를 띄웁니다. (비밀번호 변경 시)
+          alert("변경이 완료되었습니다. 다시 로그인 해주세요.");
+      }
+
+      // alert 창 확인 후 로그아웃 폼 제출
       document.getElementById('logoutForm').submit();
   };
 </script>
