@@ -34,4 +34,11 @@ public interface CampingDAO {
    * @return Page<GoCampingDto.Item>
    */
   Page<GoCampingDto.Item> search(String keyword, Pageable pageable);
+
+  /**
+   * 스크랩 카운트
+   * @param pageable 페이징 정보
+   * @return
+   */
+  Page<GoCampingDto.Item> findAllOrderByScrapCountDesc(Pageable pageable);
 }

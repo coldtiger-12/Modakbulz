@@ -5,6 +5,7 @@ import modackbulz.app.Application.entity.CampScrap;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
@@ -52,5 +53,14 @@ public class CampScrapDAOImpl implements CampScrapDAO {
     } catch (EmptyResultDataAccessException e) {
       return Optional.empty();
     }
+  }
+
+  @Override
+  public void updateScrapCount(long contentId, int amount) {
+    String sql = "UPDATE CAMPSITES SET SC_C = SC_C + :amount WHERE CONTENT_ID = :contentId";
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("amount", amount);
+    params.addValue("contentId", contentId);
+    template.update(sql, params);
   }
 }

@@ -16,4 +16,7 @@ public interface CampScrapDAO {
 
   // 특정 회원이 특정 캠핑장을 스크랩했는지 확인
   Optional<CampScrap> findByMemberIdAndContentId(Long memberId, Long contentId);
+
+  // 스크랩 수 카운트
+  void updateScrapCount(long contentId, int amount);
 }

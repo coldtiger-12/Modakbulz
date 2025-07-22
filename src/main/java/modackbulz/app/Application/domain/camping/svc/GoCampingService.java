@@ -356,4 +356,23 @@ public class GoCampingService {
         error -> log.error("스케줄된 동기화 작업 중 오류 발생", error)
     );
   }
+
+  /**
+   * 메인 추천 항목에 스크랩 수가 많은 순서대로 추천
+   * @param numOfRows
+   * @return
+   */
+  public Mono<List<GoCampingDto.Item>> getRecommendedList(int numOfRows) {
+    // DB에서 스크랩 수가 많은 순서대로 조회
+    Page<GoCampingDto.Item> dbPage = campingDAO.findAllOrderByScrapCountDesc(Pageable.ofSize(numOfRows));
+
+    if (dbPage != null && !dbPage.getContent().isEmpty()) {
+      log.info("DB에서 스크랩 순 추천 캠핑장 목록을 조회합니다. (개수: {})", dbPage.getContent().size());
+      return Mono.just(dbPage.getContent());
+    } else {
+      // 스크랩 정보가 없을 경우, 그냥 최신순으로 반환 (Fallback)
+      log.warn("스크랩된 캠핑장이 없어 최신순으로 목록을 반환합니다.");
+      return getBasedList(numOfRows);
+    }
+  }
 }

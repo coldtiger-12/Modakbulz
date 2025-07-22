@@ -124,42 +124,33 @@ a {
   border-collapse: collapse;
 }
 
-.post-table th, .post-table td {
-  padding: 12px;
-  border: 1px solid #ddd;
-  text-align: center;
+.post-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .post-table th {
-  background-color: #f0f0f0;
-  font-weight: 600;
+    background-color: #6a794f;
+    color: #fff;
+    padding: 12px 8px;
+    font-weight: 600;
+    border-bottom: 2px solid #5a6b3f;
 }
 
-/* 문의사항 */
+/* 문의 목록 테이블 */
 
 .inquiry-write-wrap {
     text-align: right;
     margin-bottom: 10px;
 }
 
-.btn-inquiry-write {
-    background-color: #6a794f;
-    color: #fff;
-    padding: 10px 16px;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-/* 문의 목록 테이블 */
 .inquiry-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
 }
-
 
 .inquiry-table td {
     padding: 12px 8px;
@@ -179,8 +170,20 @@ a {
   text-align: center;
 }
 
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
 /* 버튼 영역 */
 .button-group {
+    display: flex;
+    gap: 5px;
+    justify-content: right;
     text-align: right;
 }
 
@@ -216,4 +219,28 @@ a {
     transition: background-color 0.2s;
     white-space: nowrap; /* 버튼 내 텍스트가 줄바꿈되지 않도록 설정 */
     flex-shrink: 0;      /* flex container 안에서 버튼 크기가 줄어들지 않도록 설정 */
+}
+
+.btn-inquiry-write {
+    background-color: #6a794f;
+    color: #fff;
+    padding: 10px 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button-group a {
+    display: inline-block;
+    height: 16px;
+    background-color: #ccc;
+    color: #fff;
+    padding: 10px 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }

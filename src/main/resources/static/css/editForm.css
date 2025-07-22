@@ -1,0 +1,387 @@
+/* EditForm.css - 네이버 블로그 스타일 게시글 수정 폼 */
+
+/* 전체 컨테이너 */
+.edit-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+/* 제목 스타일 */
+.edit-form-container h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #03c75a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+/* 폼 스타일 */
+.edit-form {
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* 폼 그룹 */
+.form-group {
+  margin-bottom: 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-group:last-child {
+  border-bottom: none;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+/* 입력 필드 스타일 */
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 0;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+  background: #ffffff;
+  color: #222;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #03c75a;
+  border-width: 2px;
+}
+
+/* readonly 입력 필드 */
+.form-group input[readonly] {
+  background: #f8f9fa;
+  color: #666;
+  cursor: not-allowed;
+  border-color: #e1e1e1;
+}
+
+/* 텍스트 영역 */
+.form-group textarea {
+  min-height: 300px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* 에러 메시지 */
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  font-weight: 400;
+}
+
+/* 버튼 컨테이너 */
+.button-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 20px 0;
+  background: #f8f9fa;
+  border-top: 1px solid #e1e1e1;
+  margin: 0;
+}
+
+/* 버튼 스타일 */
+.btn {
+  padding: 12px 24px;
+  border: 1px solid #ddd;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+.btn-primary {
+  background: #A4B465;
+  color: #ffffff;
+  border-color: #A4B465;
+}
+
+.btn-primary:hover {
+  background: #A4B465;
+  border-color: #A4B465;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #666;
+  border-color: #ddd;
+}
+
+.btn-secondary:hover {
+  background: #f8f9fa;
+  border-color: #03c75a;
+  color: #03c75a;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .edit-form-container {
+    padding: 15px;
+  }
+
+  .edit-form-container h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    padding: 15px 0;
+  }
+
+  .button-container {
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+}
+
+/* 네이버 스타일 헤더 */
+.edit-header {
+  background: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #e1e1e1;
+  margin-bottom: 0;
+}
+
+.edit-header h1 {
+  margin: 0;
+  border: none;
+  padding: 0;
+  font-size: 20px;
+  color: #222;
+}
+
+/* 폼 내부 패딩 */
+.form-content {
+  padding: 0 20px;
+}
+
+/* 입력 필드 그룹 */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: inline-block;
+  width: 80px;
+  font-size: 15px;
+  color: #666;
+  margin-right: 10px;
+  text-align: left;
+}
+
+.input-group input,
+.input-group textarea {
+  width: calc(100% - 90px);
+  display: inline-block;
+  vertical-align: top;
+}
+
+/* 전체 너비 입력 필드 */
+.full-width-group {
+  margin-bottom: 20px;
+}
+
+.full-width-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #666666;
+}
+
+.full-width-group input,
+.full-width-group textarea {
+  width: 100%;
+}
+
+/* 에디터 툴바 */
+.editor-toolbar {
+  background: #f8f9fa;
+  border: 1px solid #e1e1e1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  border-right: 1px solid #ddd;
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+}
+
+.toolbar-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  margin: 0;
+}
+
+.toolbar-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.toolbar-btn.active {
+  background: #A4B465;
+  color: white;
+}
+
+.toolbar-btn i {
+  font-size: 16px;
+}
+
+/* 텍스트 서식 버튼 */
+.format-btn {
+  font-weight: bold;
+  font-family: 'Malgun Gothic', sans-serif;
+}
+
+.format-btn.bold {
+  font-weight: bold;
+}
+
+.format-btn.italic {
+  font-style: italic;
+}
+
+.format-btn.underline {
+  text-decoration: underline;
+}
+
+/* 색상 선택기 */
+.color-picker {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  cursor: pointer;
+  background: #000;
+}
+
+/* 텍스트 영역 (툴바와 연결) */
+.editor-textarea {
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+/* 드롭다운 메뉴 */
+.toolbar-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: white;
+  min-width: 120px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  z-index: 1000;
+  top: 100%;
+  left: 0;
+}
+
+.toolbar-dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+/* 파일 업로드 버튼 */
+.file-upload-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-upload-btn input[type=file] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* 반응형 툴바 */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 6px 8px;
+    gap: 2px;
+  }
+
+  .toolbar-group {
+    padding: 0 4px;
+  }
+
+  .toolbar-btn {
+    padding: 4px 6px;
+    min-width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .toolbar-btn i {
+    font-size: 14px;
+  }
+}

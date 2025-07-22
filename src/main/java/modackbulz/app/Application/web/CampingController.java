@@ -1,6 +1,5 @@
 package modackbulz.app.Application.web;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
@@ -13,9 +12,7 @@ import java.util.stream.Collectors;
 import modackbulz.app.Application.domain.review.svc.ReviewSVC;
 import modackbulz.app.Application.domain.scrap.dao.CampScrapDAO;
 import modackbulz.app.Application.entity.Review;
-import modackbulz.app.Application.web.form.login.LoginMember;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -28,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.MessageDigest;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequiredArgsConstructor
@@ -290,5 +288,13 @@ public class CampingController {
     // Page 객체를 모델에 추가합니다.
     model.addAttribute("campPage", campPage);
     return "camping/list";
+  }
+
+  @GetMapping("/recommendations") // 클래스의 /camping 과 합쳐져 /camping/recommendations 가 됨
+  @ResponseBody // JSON 데이터를 반환하기 위해 필수
+  public Mono<List<GoCampingDto.Item>> getCampingRecommendations() {
+    int numberOfRecommendations = 8; // 메인에 보여줄 추천 개수
+    // 이전에 만든 '스크랩순 정렬' 서비스 메소드를 호출하도록 변경
+    return goCampingService.getRecommendedList(numberOfRecommendations);
   }
 }

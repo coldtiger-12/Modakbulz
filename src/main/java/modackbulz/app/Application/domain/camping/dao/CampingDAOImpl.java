@@ -113,4 +113,30 @@ public class CampingDAOImpl implements CampingDAO {
     List<GoCampingDto.Item> content = template.query(sql, params, new BeanPropertyRowMapper<>(GoCampingDto.Item.class));
     return new PageImpl<>(content, pageable, total);
   }
+
+  @Override
+  public Page<GoCampingDto.Item> findAllOrderByScrapCountDesc(Pageable pageable) {
+    String countSql = """
+        SELECT count(*) FROM CAMPING_INFO
+    """;
+    int total = template.getJdbcTemplate().queryForObject(countSql, Integer.class);
+    String sql = """
+        SELECT * FROM (
+            SELECT ROWNUM AS rnum, c.* FROM (
+                SELECT ci.*
+                FROM CAMPING_INFO ci
+                LEFT JOIN CAMPSITES cs ON ci.contentId = cs.CONTENT_ID -- INNER JOIN -> LEFT JOIN
+                ORDER BY NVL(cs.SC_C, 0) DESC, ci.contentId DESC -- 스크랩 수가 없으면(NULL) 0으로 처리
+            ) c
+        ) WHERE rnum BETWEEN :startRow AND :endRow
+    """;
+
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("startRow", pageable.getOffset() + 1);
+    params.addValue("endRow", pageable.getOffset() + pageable.getPageSize());
+
+    List<GoCampingDto.Item> content = template.query(sql, params, new BeanPropertyRowMapper<>(GoCampingDto.Item.class));
+
+    return new PageImpl<>(content, pageable, total);
+  }
 }

@@ -27,21 +27,26 @@
     <div class="mypage-content">
       <h2>내가 쓴 게시글</h2>
       <table class="post-table">
+        <colgroup>
+          <col style="width: 65%;">
+          <col style="width: 25%;">
+          <col style="width: 10%;">
+        </colgroup>
         <thead>
-          <tr>
-            <th>제목</th>
-            <th>작성일</th>
-            <th>조회수</th>
-          </tr>
+        <tr>
+          <th>제목</th>
+          <th>작성일</th>
+          <th>조회수</th>
+        </tr>
         </thead>
         <tbody>
-          <tr th:each="post : ${myPosts}">
-            <td>
-              <a th:href="@{'/posts/community/' + ${post.coId}}" th:text="${post.title}">제목</a>
-            </td>
-            <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</td>
-            <td th:text="${post.viewC}">0</td>
-          </tr>
+        <tr th:each="post : ${myPosts}">
+          <td>
+            <a th:href="@{'/posts/community/' + ${post.coId}}" th:text="${post.title}">제목</a>
+          </td>
+          <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</td>
+          <td th:text="${post.viewC}">0</td>
+        </tr>
         </tbody>
       </table>
     </div>
