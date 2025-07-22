@@ -41,13 +41,13 @@
     <div class="join-form-group">
       <label for="pwd">비밀번호 :</label>
       <input type="password" th:field="*{pwd}">
-      <div class="field-err" th:errors="*{pwd}"></div>
+      <div id="pwd-validation-msg"></div> <div class="field-err" th:errors="*{pwd}"></div>
     </div>
 
     <div class="join-form-group">
       <label for="pwdChk">비밀번호 확인 :</label>
       <input type="password" th:field="*{pwdChk}">
-      <div class="field-err" th:errors="*{pwdChk}"></div>
+      <div id="pwdChk-validation-msg"></div> <div class="field-err" th:errors="*{pwdChk}"></div>
     </div>
 
     <div class="join-form-group">
@@ -109,6 +109,49 @@
 </div>
 
 <script>
+  // --- 비밀번호 유효성 검사 스크립트 ---
+  const pwdInput = document.getElementById('pwd');
+  const pwdChkInput = document.getElementById('pwdChk');
+
+  const pwdValidationMsg = document.getElementById('pwd-validation-msg');
+  const pwdChkValidationMsg = document.getElementById('pwdChk-validation-msg');
+
+  const pwdRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+=-]).{8,13}$/;
+
+  pwdInput.addEventListener('blur', () => {
+    const password = pwdInput.value;
+    if (!password) {
+        pwdValidationMsg.textContent = '';
+        pwdValidationMsg.className = '';
+        return;
+    }
+    if (pwdRegex.test(password)) {
+      pwdValidationMsg.textContent = '사용 가능한 비밀번호입니다.';
+      pwdValidationMsg.className = 'field-ok';
+    } else {
+      pwdValidationMsg.textContent = '비밀번호는 8~13자이며, 대/소문자, 숫자, 특수문자를 포함해야 합니다.';
+      pwdValidationMsg.className = 'field-err';
+    }
+  });
+
+  pwdChkInput.addEventListener('blur', () => {
+    const password = pwdInput.value;
+    const passwordCheck = pwdChkInput.value;
+    if (!passwordCheck) {
+        pwdChkValidationMsg.textContent = '';
+        pwdChkValidationMsg.className = '';
+        return;
+    }
+    if (password === passwordCheck) {
+      pwdChkValidationMsg.textContent = '비밀번호가 일치합니다.';
+      pwdChkValidationMsg.className = 'field-ok';
+    } else {
+      pwdChkValidationMsg.textContent = '비밀번호가 일치하지 않습니다.';
+      pwdChkValidationMsg.className = 'field-err';
+    }
+  });
+
+  // --- 기존 스크립트 (이메일, 닉네임 등) ---
   const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
   const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
   let isEmailVerified = false;
@@ -123,10 +166,8 @@
           isNicknameAvailable = false;
           return;
       }
-
       const headers = { 'Content-Type': 'application/json' };
       headers[csrfHeader] = csrfToken;
-
       fetch('/member/check-nickname', {
           method: 'POST',
           headers: headers,
@@ -146,6 +187,7 @@
   }
 
   function sendAuthEmailForJoin() {
+      // (기존 코드와 동일)
       const emailInput = document.getElementById('email-join');
       const email = emailInput.value;
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -172,6 +214,7 @@
   }
 
   function verifyAuthCodeForJoin() {
+      // (기존 코드와 동일)
       const authCode = document.getElementById('authCodeInput-join').value;
       if (!authCode) {
           alert('인증번호를 입력해주세요.');
