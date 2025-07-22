@@ -250,15 +250,12 @@ public class CampingController {
     return result;
   }
 
-  /**
-   * [추가] 메인 페이지 추천 캠핑장 목록을 비동기로 제공하는 API
-   */
-  @GetMapping("/recommendations")
-  @ResponseBody // HTML 뷰가 아닌 JSON 데이터를 직접 반환하도록 설정
-  public ResponseEntity<List<GoCampingDto.Item>> getRecommendations() {
-    Pageable pageable = PageRequest.of(0, 8); // 8개 항목 조회
-    List<GoCampingDto.Item> campList = goCampingService.getCampListPageWithImageFallback(pageable).block().getContent();
-    return ResponseEntity.ok(campList); // 조회된 데이터를 JSON 형태로 반환
+  @GetMapping("/recommendations") // 클래스의 /camping 과 합쳐져 /camping/recommendations 가 됨
+  @ResponseBody // JSON 데이터를 반환하기 위해 필수
+  public Mono<List<GoCampingDto.Item>> getCampingRecommendations() {
+    int numberOfRecommendations = 8; // 메인에 보여줄 추천 개수
+    // 이전에 만든 '스크랩순 정렬' 서비스 메소드를 호출하도록 변경
+    return goCampingService.getRecommendedList(numberOfRecommendations);
   }
 
   /**
@@ -288,13 +285,5 @@ public class CampingController {
     // Page 객체를 모델에 추가합니다.
     model.addAttribute("campPage", campPage);
     return "camping/list";
-  }
-
-  @GetMapping("/recommendations") // 클래스의 /camping 과 합쳐져 /camping/recommendations 가 됨
-  @ResponseBody // JSON 데이터를 반환하기 위해 필수
-  public Mono<List<GoCampingDto.Item>> getCampingRecommendations() {
-    int numberOfRecommendations = 8; // 메인에 보여줄 추천 개수
-    // 이전에 만든 '스크랩순 정렬' 서비스 메소드를 호출하도록 변경
-    return goCampingService.getRecommendedList(numberOfRecommendations);
   }
 }
