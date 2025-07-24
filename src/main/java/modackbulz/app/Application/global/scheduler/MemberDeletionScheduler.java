@@ -23,7 +23,7 @@ public class MemberDeletionScheduler {
   @Scheduled(cron = "0 0 4 * * *")
   @Transactional
   public void hardDeleteMembers(){
-    log.info("탈퇴 처리 테스트 진행합니다.");
+    log.info("탈퇴 신청 후 7일이 지난 회원 정보 삭제 작업을 시작합니다.");
 
     // 현재 시간을 기준으로 탈퇴 날짜에 도달한 멤버 정보를 찾음
     LocalDateTime now = LocalDateTime.now();
