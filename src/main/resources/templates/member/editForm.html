@@ -72,8 +72,8 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="email-edit-info">이메일</label>
-        <input type="email" th:field="*{email}" id="email-edit-info">
+        <label for="email-edit-info">이메일(수정 불가)</label>
+        <input type="email" th:field="*{email}" id="email-edit-info" readonly class="readonly-input">
         <div class="field-err" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
       </div>
       <div class="button-group">
