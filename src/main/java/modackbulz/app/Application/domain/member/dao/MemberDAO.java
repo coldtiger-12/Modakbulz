@@ -1,6 +1,9 @@
 package modackbulz.app.Application.domain.member.dao;
 
 import modackbulz.app.Application.entity.Member;
+
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberDAO {
@@ -11,6 +14,12 @@ public interface MemberDAO {
    * @return 가입후 정보
    */
   Member insertMember(Member member);
+
+  /**
+   * 모든 회원 정보 조회
+   * @return 모든 회원 정보
+   */
+  List<Member> findAll();
 
   /**
    * 아이디로 회원 유무 확인
@@ -48,12 +57,28 @@ public interface MemberDAO {
    */
   boolean changePassword(Long memberId, String newPwd);
 
+//  // 회원 탈퇴 메서드 (임시)
+//  boolean deleteMember(Long memberId);
+
   /**
-   * 탈퇴 처리 (IS_DEL = 'Y')
+   * 회원 탈퇴 요청
    * @param memberId
    * @return 변경 성공 여부
    */
-  boolean deleteMember(Long memberId);
+  boolean requestDeletion(Long memberId);
+
+  /**
+   * 회원 탈퇴 취소
+   * @param memberId
+   * @return 탈퇴 취소 성공 여부
+   */
+  boolean cancelDeletion(Long memberId);
+
+  // 스케쥴러가 사용할 메서드
+  List<Member> findMembersForHard(LocalDateTime criteriaDate);
+
+  // 스케쥴러가 사용할 실제 삭제 메서드
+  void hardDeleteMembers(List<Long> memberIds);
 
   /**
    * 회원 정보 수정

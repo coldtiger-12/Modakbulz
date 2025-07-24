@@ -41,7 +41,6 @@ public class GoCampingService {
     this.campingDAO = campingDAO;
 
     DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://apis.data.go.kr/B551011/GoCamping");
-    factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
     // WebClient가 더 큰 응답을 처리할 수 있도록 버퍼 크기 설정
     ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()

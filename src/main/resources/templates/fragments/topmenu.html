@@ -6,14 +6,24 @@
 </head>
 <body>
 
+<th:block th:fragment="withdrawalCancelTop">
+  <div class="topmenu">
+    <p>
+      <span>현재 탈퇴 대기중입니다.</span>
+    </p>
+  </div>
+</th:block>
+
 <th:block th:fragment="beforeLoginTop">
-  <div class="topmenu" sec:authorize="isAnonymous()">
+  <div class="topmenu"
+       sec:authorize="isAnonymous() or (isAuthenticated() and #authentication.principal.member.status.name() == 'PENDING_DELETION')">
     <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{/member/join-type}">회원가입</a></p>
   </div>
 </th:block>
 
 <th:block th:fragment="afterLoginTop">
-  <div class="topmenu" sec:authorize="isAuthenticated()">
+  <div class="topmenu"
+       sec:authorize=" isAuthenticated() and #authentication.principal.member.status.name() == 'ACTIVE' ">
     <span sec:authentication="principal.nickname"></span>님, 환영합니다!
     <span>||</span>
     <a sec:authorize="hasRole('U')" th:href="@{/mypage}" id="mypage">마이페이지</a>

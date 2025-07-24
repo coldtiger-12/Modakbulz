@@ -5,27 +5,23 @@ import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import modackbulz.app.Application.domain.review.svc.ReviewSVC;
 import modackbulz.app.Application.domain.scrap.dao.CampScrapDAO;
 import modackbulz.app.Application.entity.Review;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.MessageDigest;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
+
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -256,34 +252,5 @@ public class CampingController {
     int numberOfRecommendations = 8; // 메인에 보여줄 추천 개수
     // 이전에 만든 '스크랩순 정렬' 서비스 메소드를 호출하도록 변경
     return goCampingService.getRecommendedList(numberOfRecommendations);
-  }
-
-  /**
-   * 캠핑장 스크랩 (이 메소드는 더 이상 사용되지 않으므로 삭제하거나 아래와 같이 수정합니다)
-   */
-  @GetMapping("/list")
-  public String campingList(
-      Model model,
-      @AuthenticationPrincipal CustomUserDetails userDetails // <-- 수정: HttpSession 대신 사용
-  ) {
-    if (userDetails != null) {
-      model.addAttribute("loginMember", userDetails);
-    }
-
-    Pageable pageable = PageRequest.of(0, 10);
-    Page<GoCampingDto.Item> campPage = goCampingService
-        .getCampListPageWithImageFallback(pageable)
-        .block();
-
-    if (userDetails != null) {
-      Long memberId = userDetails.getMemberId();
-      for (GoCampingDto.Item item : campPage) {
-        boolean scrapped = campScrapDAO.findByMemberIdAndContentId(memberId, item.getContentId()).isPresent();
-        item.setScrapped(scrapped);
-      }
-    }
-    // Page 객체를 모델에 추가합니다.
-    model.addAttribute("campPage", campPage);
-    return "camping/list";
   }
 }

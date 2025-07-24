@@ -23,9 +23,18 @@ public interface MemberSVC {
   // 비밀번호 변경
   boolean changePassword(Long memberId, String newPwd);
 
-  // 탈퇴 처리 (IS_DEL = 'Y')
-  boolean deleteMember(Long memberId);
+  // 탈퇴 처리 요청
+  boolean requestDeletion(Long memberId);
+
+  // [추가] 탈퇴 취소 서비스 인터페이스
+  boolean cancelDeletion(Long memberId);
 
   // 회원 정보 수정
   boolean updateMember(Member member);
+
+  //이메일로 회원 아이디 찾기
+  Optional<String> findIdByEmail(String email);
+
+  // 임시 비밀번호 발급 및 이메일 전송
+  boolean issueTempPassword(String id, String email);
 }

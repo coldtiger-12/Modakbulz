@@ -3,22 +3,14 @@ package modackbulz.app.Application.web;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
-import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.community.dao.CommunityDAO;
 import modackbulz.app.Application.entity.Community;
 import modackbulz.app.Application.web.form.login.LoginMember;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 @Controller
 @RequiredArgsConstructor

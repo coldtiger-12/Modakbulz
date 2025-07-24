@@ -14,6 +14,7 @@ public class CommunitySVCImpl implements CommunitySVC {
 
   private final CommunityDAO communityDao;
 
+  
   @Override
   public List<Community> getAllPosts() {
     return communityDao.findAll();

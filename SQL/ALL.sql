@@ -39,9 +39,10 @@ CREATE TABLE MEMBER (
     NICKNAME    VARCHAR2(20) NOT NULL UNIQUE,
     GENDER      VARCHAR2(10) CHECK (GENDER IN ('남', '여')),
     REGION      VARCHAR2(10),
-    IS_DEL      CHAR(1) DEFAULT 'N' NOT NULL CHECK (IS_DEL IN ('Y', 'N')),
+    IS_DEL      VARCHAR2(20) DEFAULT 'ACTIVE' NOT NULL CHECK (IS_DEL IN ('ACTIVE', 'PENDING_DELETION')),
     DEL_DATE    TIMESTAMP
 );
+
 CREATE SEQUENCE member_member_id_seq
 START WITH 1
 INCREMENT BY 1
@@ -49,27 +50,16 @@ NOCACHE
 NOCYCLE;
 
 UPDATE MEMBER
-SET IS_DEL = 'Y',
-    DEL_DATE = SYSTIMESTAMP + INTERVAL '7' DAY
-WHERE ID = 'user123' AND IS_DEL = 'N';
+SET IS_DEL = 'PENDING_DELETION', -- 'Y' 대신 새로운 상태 값으로 변경
+    DEL_DATE = SYSTIMESTAMP + INTERVAL '7' DAY -- SQL 테스트용 (실제로는 자바문에서 7일 자동 추가 처리 해놓음)
+WHERE ID = 'user123' AND IS_DEL = 'ACTIVE';	-- 회원 상태의 사용자를 변경 (스프링 부트 안에선 :status로 enum으로 처리되도록 해놓음)
 
-BEGIN
-  DBMS_SCHEDULER.CREATE_JOB (
-    job_name        => 'JOB_DELETE_EXPIRED_MEMBERS',
-    job_type        => 'PLSQL_BLOCK',
-    job_action      => '
-      BEGIN
-        DELETE FROM MEMBER
-        WHERE IS_DEL = ''Y''
-          AND DEL_DATE <= SYSTIMESTAMP;
-        COMMIT;
-      END;',
-    start_date      => SYSTIMESTAMP,
-    repeat_interval => 'FREQ=DAILY; BYHOUR=2; BYMINUTE=0; BYSECOND=0',
-    enabled         => TRUE,
-    comments        => '삭제 예정일이 지난 회원 자동 삭제'
-  );
-END;
+UPDATE MEMBER
+SET
+  IS_DEL = 'ACTIVE', -- 'N' 대신 새로운 상태 값으로 변경
+  DEL_DATE = NULL      -- 삭제 예정일 초기화
+WHERE
+  MEMBER_ID = 1 AND IS_DEL = 'PENDING_DELETION' -- 탈퇴 요청 상태의 사용자만 변경 (스프링 부트 안에선 :status로 enum으로 처리되도록 해놓음)
 
 SELECT * FROM MEMBER;
 -------------------------------------------------------------------------------------------
@@ -126,6 +116,18 @@ CREATE TABLE CAMPING_INFO (
 );
 
 SELECT * FROM CAMPING_INFO;
+
+CREATE OR REPLACE TRIGGER TRG_SET_DEFAULT_INDUTY
+BEFORE INSERT OR UPDATE ON CAMPING_INFO
+FOR EACH ROW
+BEGIN
+    -- 새로 추가되거나 수정되는 데이터의 induty 값이 NULL이라면
+    IF :NEW.induty IS NULL THEN
+        -- '일반야영장'으로 값을 설정합니다.
+        :NEW.induty := '일반야영장';
+    END IF;
+END;
+/
 -------------------------------------------------------------------------------------------
 -- 3. 캠핑장 정보 DB -------------------------------------------------------------------------
 

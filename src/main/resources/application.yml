@@ -52,6 +52,7 @@ logging:
   level:
     root: info
     org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
 
 # [추가] Jasypt 암호화 설정
 jasypt:

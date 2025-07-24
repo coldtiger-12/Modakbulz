@@ -20,7 +20,6 @@ public class CustomUserDetailsService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     // memberDAO를 통해 DB에서 사용자 정보를 조회합니다.
     Optional<Member> memberOptional = memberDAO.findById(username);
-
     // 사용자가 존재하지 않으면 예외를 발생시킵니다.
     Member member = memberOptional.orElseThrow(() ->
         new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));

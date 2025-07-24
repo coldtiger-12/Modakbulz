@@ -4,16 +4,19 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
 import modackbulz.app.Application.entity.Member;
 import modackbulz.app.Application.global.service.EmailService;
 import modackbulz.app.Application.web.form.member.JoinForm;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -137,6 +140,48 @@ public class MemberController {
     }
   }
 
+  @GetMapping("/processLogoutAfterAction")
+  public String processLogoutAfterAction(
+      @ModelAttribute("message") String message,
+      Model model){
+    model.addAttribute("message", message);
+    return "member/processLogout";
+  }
+
+  // 탈퇴 취소 '확인 페이지' 보여주는 메서드
+  @GetMapping("/confirm-cancel-withdrawal")
+  public String confirmCancelWithdrawalPage(){
+    return "member/confirmCancelWithdrawal";
+  }
+
+  /**
+   * 회원 탈퇴 취소 처리 요청
+   * @param userDetails
+   * @param redirectAttributes
+   * @return 취소 처리 성공 여부
+   */
+  @PostMapping("/cancel-withdrawal")
+  public String cancelWithdrawal(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      RedirectAttributes redirectAttributes){
+
+    // 현재 로그인한 사용자 id 가져오기
+    Long memberId = userDetails.getMemberId();
+
+    boolean result = memberSVC.cancelDeletion(memberId);
+    if (result){
+      redirectAttributes.addFlashAttribute("message", "탈퇴요청이 성공적으로 취소되었습니다,");
+      return "redirect:/";
+    } else {
+      redirectAttributes.addFlashAttribute("message", "탈퇴 취소 처리에 실패했습니다.");
+      return "redirect:/";
+    }
+  }
+
+  /**
+   * 랜덤 인증번호 생성기
+   * @return 랜덤 번호
+   */
   private String createAuthCode() {
     Random random = new Random();
     return String.valueOf(100000 + random.nextInt(900000));

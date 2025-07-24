@@ -1,7 +1,5 @@
 package modackbulz.app.Application.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +21,18 @@ public class Member {
   private String nickname;       // NICKNAME 별명
   private String gender;         // GENDER 성별 (남, 여)
   private String region;         // REGION 지역
-  private String isDel;          // IS_DEL 탈퇴 여부 ('Y' / 'N')
-  private LocalDateTime delDate; // DEL_DATE 삭제 예정 시각
+
+  // [수정] isDel 필드를 status 필드로 변경
+  // DB의 IS_DEL 컬럼과 매핑됨 'N' 대신 'ACTIVE', 'Y' 대신 'PENDING_DELETION'을 사용
+  private MemberStatus status;
+
+  // [수정] delDate 필드의 이름을 명확하게 변경
+  // DB의 DEL_DATE 컬럼과 매핑됨
+  private LocalDateTime deletionRequestedAt;
+
+  // Lombok의 @Builder가 생성자 기반으로 동작하므로,
+  // 기본 상태를 ACTIVE로 설정하기 위해 아래와 같은 메소드를 추가 가능
+  public static class MemberBuilder{
+    private MemberStatus status = MemberStatus.ACTIVE;
+  }
 }

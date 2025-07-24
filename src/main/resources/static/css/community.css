@@ -1,5 +1,5 @@
 .container {
-    background-color: white;
+    background-color: #fdfaf2;
     margin: 30px auto;
     padding: 30px;
     border-radius: 15px;
@@ -17,9 +17,9 @@ a {
     text-decoration: none;
 }
 
-/* 글쓰기 폼 스타일 */
+/* 글쓰기 폼 스타일 - admin_theme.css와 통합 */
 .post-detail {
-    background-color: white;      /* 배경 없앰 */
+    background-color: white;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 24px 28px;
@@ -33,6 +33,49 @@ a {
   color: #333;
 }
 
+/* 통합된 폼 스타일 */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #5a4b3a;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #eaddc0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    background-color: #fff;
+}
+
+.form-group input[type="text"]:read-only {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    height: 200px;
+    resize: vertical;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6a794f;
+}
+
+/* 기존 label 스타일 유지 (하위 호환성) */
 label {
     display: block;
     margin-top: 15px;
@@ -40,6 +83,7 @@ label {
     font-size: 0.95rem;
 }
 
+/* 기존 input, textarea 스타일 유지 (하위 호환성) */
 input[type="text"], textarea {
     width: 100%;
     box-sizing: border-box;
@@ -60,7 +104,54 @@ input[type="text"], textarea {
   border-radius: 6px;
 }
 
-/* 버튼 스타일 */
+/* 통합된 버튼 스타일 */
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.button-group button, .button-group a {
+    text-decoration: none;
+}
+
+.btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #6a794f;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #a4b465;
+}
+
+.btn-secondary {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+.btn-secondary:hover {
+    background-color: #e9ecef;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* 기존 버튼 스타일 유지 (하위 호환성) */
 button {
     margin-top: 20px;
     padding: 10px 20px;
@@ -87,6 +178,61 @@ button + button {
     cursor: pointer;
     transition: background-color 0.2s ease;
     text-decoration: none;
+}
+
+/* 에러 메시지 */
+.form-group div {
+    color: #e53e3e;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+/* 상세 페이지 스타일 - admin_theme.css와 통합 */
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+.detail-table th, .detail-table td {
+    padding: 18px 15px;
+    border-bottom: 1px solid #eaddc0;
+    text-align: left;
+}
+
+.detail-table th {
+    width: 120px;
+    background-color: #f8f5ed;
+    color: #5a4b3a;
+    font-weight: 600;
+}
+
+.detail-table td {
+    color: #555;
+}
+
+/* 내용(content) 셀의 줄바꿈 처리 */
+.detail-table td.content-cell {
+    white-space: pre-wrap; /* 공백과 줄바꿈을 그대로 표시 */
+    line-height: 1.6;
+}
+
+/* 기존 post-detail 스타일 유지 (하위 호환성) */
+.post-detail {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px 28px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.post-detail h2 {
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #333;
 }
 
 .table {

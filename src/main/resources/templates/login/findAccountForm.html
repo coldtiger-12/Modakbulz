@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아이디/비밀번호 찾기</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div th:replace=" ~{fragments/topmenu :: beforeLoginTop} "></div>
+<div th:replace=" ~{fragments/topmenu :: header} "></div>
+
+<div class="login-container" style="max-width: 600px">
+  <h2 class="login-title">아이디/비밀번호 찾기</h2>
+
+  <div class="find-section">
+    <h3 style="margin-bottom: 20px;">아이디 찾기</h3>
+    <form th:action="@{/find/id}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <div class="login-form-group">
+        <label th:for="email_id">이메일 주소</label>
+        <input type="email" id="email_id" name="email" placeholder="가입 시 등록한 이메일" required>
+      </div>
+      <button type="submit" class="login-button">아이디 찾기</button>
+    </form>
+  </div>
+
+  <hr style="margin : 30px 0;">
+
+  <div class="find-section">
+    <h3 style="margin-bottom: 20px;">비밀번호 찾기</h3>
+    <form th:action="@{/find/password}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <div class="login-form-group">
+        <label th:for="id_pwd">아이디</label>
+        <input type="text" id="id_pwd" name="id" placeholder="회원 아이디" required>
+      </div>
+      <div class="login-form-group">
+        <label th:for="email_pwd">이메일 주소</label>
+        <input type="email" id="email_pwd" name="email" placeholder="가입 시 등록한 이메일" required>
+      </div>
+      <button type="submit" class="login-button">임시 비밀번호 발급</button>
+    </form>
+  </div>
+
+</div>
+</body>
+</html>

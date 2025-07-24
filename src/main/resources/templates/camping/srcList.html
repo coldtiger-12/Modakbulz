@@ -88,7 +88,7 @@
        th:classappend="${campPage.last} ? 'disabled'">끝</a>
   </div>
 </div>
-<p th:text="${loginMember != null}">로그인 상태</p>
+<p class="hidden" th:text="${loginMember != null}">로그인 상태</p>
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = [[${loginMember != null}]];

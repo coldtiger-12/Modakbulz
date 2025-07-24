@@ -1,6 +1,8 @@
 package modackbulz.app.Application.config;
 
 import lombok.RequiredArgsConstructor;
+import modackbulz.app.Application.config.auth.CustomLoginFailureHandler;
+import modackbulz.app.Application.config.auth.CustomLoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+  private final CustomLoginSuccessHandler customLoginSuccessHandler;
+  private final CustomLoginFailureHandler customLoginFailureHandler;
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -25,6 +30,13 @@ public class SecurityConfig {
     http
         // 1. 인가(Authorization) 설정
         .authorizeHttpRequests(auth -> auth
+
+            // '로그인 페이지'와 '탈퇴 취소 확인 페이지'는 인증 상태와 상관없이 누구나 접근 가능해야 합니다.
+            .requestMatchers("/login", "/member/confirm-cancel-withdrawal").permitAll()
+
+            // "탈퇴 취소" POST 요청은 인증된 사용자라면 누구나 허용
+            .requestMatchers(HttpMethod.POST, "/member/cancel-withdrawal").authenticated()
+
             // POST: 닉네임 중복 체크 허용
             .requestMatchers(HttpMethod.POST, "/member/check-nickname").permitAll()
 
@@ -54,7 +66,8 @@ public class SecurityConfig {
             .loginProcessingUrl("/login")
             .usernameParameter("id")
             .passwordParameter("pwd")
-            .defaultSuccessUrl("/", true)
+            .successHandler(customLoginSuccessHandler) //⭐️ 제작한 성공 핸들러를 사용하도록 설정
+            .failureHandler(customLoginFailureHandler) // 실패 핸들러 등록
             .permitAll()
         )
 
@@ -74,9 +87,11 @@ public class SecurityConfig {
 
         // 5. CSRF 보호 설정 (API 및 회원가입 관련 경로는 비활성화, admin 경로도 비활성화 추가)
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/api/**", "/member/**", "/admin/**")
+            .ignoringRequestMatchers("/api/**", "/member/**", "/admin/**", "/member/cancel-withdrawal")
         );
 
     return http.build();
   }
 }
+
+//        .defaultSuccessUrl("/", true) -> 이전 기본 로그인 성공시 가는 페이징 설정 (login 부분)

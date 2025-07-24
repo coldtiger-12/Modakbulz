@@ -207,12 +207,33 @@ public class MyPageController {
 //    return "redirect:/logout"; // 탈퇴 성공 시 로그아웃 처리
 //  }
 
-  @PostMapping("/delete")
-  public String delete(@AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes redirectAttributes) {
-    if (userDetails == null) return "redirect:/login";
-    memberSVC.deleteMember(userDetails.getMemberId());
-    redirectAttributes.addFlashAttribute("message", "회원 탈퇴가 정상적으로 처리되었습니다.");
-    return "redirect:/member/processLogoutAfterAction"; // 👈 이 경로로 이동해야 합니다.
+  /**
+   * 회원 탈퇴 요청 처리
+   * @param userDetails
+   * @param redirectAttributes
+   * @return 탈퇴 요청 처리 성공 여부
+   */
+  @PostMapping("/withdraw")
+  public String withdraw(
+      @AuthenticationPrincipal CustomUserDetails userDetails,
+      RedirectAttributes redirectAttributes){
+    // 로그인 상태 확인
+    if (userDetails == null){
+      redirectAttributes.addAttribute("message", "로그인이 필요한 기능입니다.");
+      return "redirect:/login";
+    }
+
+    // 현재 로그인한 사용자 id 가져오기
+    Long memberId = userDetails.getMemberId();
+
+    boolean result = memberSVC.requestDeletion(memberId);
+    if (result){
+      redirectAttributes.addFlashAttribute("message", "탈퇴 요청이 정상적으로 처리되었습니다.");
+      return "redirect:/member/processLogoutAfterAction"; // processLogout 페이지 거치고 안전하게 로그아웃
+    } else {
+      redirectAttributes.addFlashAttribute("message", "탈퇴 요청 처리에 실패했습니다.");
+      return "redirect:/mypage";  // 실패 시 마이페이지로 이동
+    }
   }
 
   private String createAuthCode() {
