@@ -22,7 +22,7 @@ public class MemberDeletionScheduler {
   // 매일 새벽 4시에 실행
   //  @Scheduled(cron = "0 0 4 * * *")
   // 테스트를 위해 10초마다 확인
-  @Scheduled(cron = "*/10 * * * * *")
+  @Scheduled(cron = "0 0 4 * * *")
   @Transactional
   public void hardDeleteMembers(){
     log.info("탈퇴 신청 후 7일이 지난 회원 정보 삭제 작업을 시작합니다.");
