@@ -235,7 +235,7 @@ public class MemberDAOImpl implements MemberDAO {
   @Override
   public boolean requestDeletion(Long memberId){
 //    LocalDateTime deletionDate = LocalDateTime.now().plusDays(7);
-    LocalDateTime deletionDate = LocalDateTime.now().plusMinutes(5);
+    LocalDateTime deletionDate = LocalDateTime.now().plusSeconds(30);
 
     String sql = "UPDATE MEMBER SET IS_DEL = :status, DEL_DATE = :delDate WHERE MEMBER_ID = :memberId ";
     MapSqlParameterSource param = new MapSqlParameterSource()
