@@ -89,30 +89,65 @@ public class CampingDAOImpl implements CampingDAO {
     return new PageImpl<>(content, pageable, total);
   }
 
+  /**
+   * 동적으로 검색 쿼리를 생성한다.
+   * @param keyword 검색 키워드
+   * @param pageable 페이징 정보
+   * @return
+   */
   @Override
   public Page<GoCampingDto.Item> search(String keyword, Pageable pageable) {
-    String countSql = "SELECT count(*) FROM CAMPING_INFO WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword";
-    MapSqlParameterSource countParams = new MapSqlParameterSource("keyword", "%" + keyword + "%");
-    int total = template.queryForObject(countSql, countParams, Integer.class);
+    // 1. 검색어를 공백 기준으로 단어별로 나눕니다.
+    //    trim()으로 양 끝 공백 제거, split("\\s+")으로 여러 공백도 하나로 처리
+    String[] keywords = keyword.trim().split("\\s+");
+    MapSqlParameterSource params = new MapSqlParameterSource();
+
+    // 2. 동적으로 WHERE 절을 생성합니다.
+    StringBuilder whereClause = new StringBuilder();
+    for (int i = 0; i < keywords.length; i++) {
+      String currentKeyword = keywords[i];
+      if (currentKeyword == null || currentKeyword.isBlank()) {
+        continue; // 비어있는 키워드는 무시
+      }
+
+      // 각 키워드를 위한 파라미터 이름을 만듭니다 (예: keyword0, keyword1)
+      String paramName = "keyword" + i;
+
+      whereClause.append(" AND (LOWER(facltNm) LIKE LOWER(:" + paramName + ") ");
+      whereClause.append(" OR LOWER(addr1) LIKE LOWER(:" + paramName + ") ");
+      whereClause.append(" OR LOWER(sbrsCl) LIKE LOWER(:" + paramName + ") ");
+      whereClause.append(" OR LOWER(themaEnvrnCl) LIKE LOWER(:" + paramName + ") ");
+      whereClause.append(" OR LOWER(induty) LIKE LOWER(:" + paramName + ") ");
+      whereClause.append(" OR LOWER(lctCl) LIKE LOWER(:" + paramName + ")) ");
+
+      // 파라미터 값을 추가합니다. (예: keyword0 -> %가을단풍명소%)
+      params.addValue(paramName, "%" + currentKeyword + "%");
+    }
+
+    // 3. 전체 개수를 세는 쿼리와 데이터를 가져오는 쿼리를 동적으로 완성합니다.
+    String countSql = "SELECT count(*) FROM CAMPING_INFO WHERE 1=1 " + whereClause.toString();
 
     String sql = """
             SELECT * FROM (
                 SELECT ROWNUM AS rnum, c.* FROM (
                     SELECT * FROM CAMPING_INFO
-                    WHERE facltNm LIKE :keyword OR addr1 LIKE :keyword OR sbrsCl LIKE :keyword OR themaEnvrnCl LIKE :keyword
+                    WHERE 1=1 %s
                     ORDER BY CASE WHEN firstImageUrl IS NOT NULL THEN 0 ELSE 1 END, contentId DESC
                 ) c
             ) WHERE rnum BETWEEN :startRow AND :endRow
-        """;
+        """.formatted(whereClause.toString());
 
-    MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("keyword", "%" + keyword + "%");
+    // 4. 쿼리를 실행합니다.
+    int total = template.queryForObject(countSql, params, Integer.class);
+
     params.addValue("startRow", pageable.getOffset() + 1);
     params.addValue("endRow", pageable.getOffset() + pageable.getPageSize());
 
     List<GoCampingDto.Item> content = template.query(sql, params, new BeanPropertyRowMapper<>(GoCampingDto.Item.class));
+
     return new PageImpl<>(content, pageable, total);
   }
+
 
   @Override
   public Page<GoCampingDto.Item> findAllOrderByScrapCountDesc(Pageable pageable) {
