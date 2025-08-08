@@ -46,6 +46,7 @@ public class SecurityConfig {
             // 나머지 공개 API
             .requestMatchers(
                 "/", "/login", "/logout",
+                "/find/**",
                 "/member/**",
                 "/camping/**",
                 "/posts/community/**",

@@ -8,182 +8,270 @@
   <title>모닥불즈</title>
   <link rel="stylesheet" href="" th:href="@{/css/common.css}">
 </head>
+
 <body>
-<!-- 탑 메뉴 -->
-<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
-<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+  <!-- 탑 메뉴 -->
+  <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+  <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 
-<!-- 헤더 영역 -->
-<div th:replace="~{fragments/topmenu :: header}"></div>
+  <!-- 헤더 영역 -->
+  <div th:replace="~{fragments/topmenu :: header}"></div>
 
-<!-- 메인 페이지 -->
-<div class="main-container">
+  <!-- 메인 페이지 -->
+  <div class="main-container">
 
-  <!-- 상단 -->
-  <div class="top-area">
+    <!-- 상단 -->
+    <div class="top-area">
 
-    <!-- 검색 + 커뮤니티 -->
-    <div class="left-area">
-      <section class="search-area">
-        <h2>캠핑장 & 글램핑장 검색</h2>
-        <form th:action="@{/camping/search}" method="get">
-          <div class="search-box">
-            <div class="form-fields">
-              <div class="form-row">
-                <label>키워드</label>
-                <input type="text" name="keyword" />
+      <!-- 검색 + 커뮤니티 -->
+      <div class="left-area">
+        <section class="search-area">
+          <h2>캠핑장 & 글램핑장 검색</h2>
+          <form th:action="@{/camping/search}" method="get">
+            <div class="search-box">
+              <div class="form-fields">
+                <div class="form-row">
+                  <label>키워드</label>
+                  <input type="text" name="keyword" />
+                </div>
+                <div class="form-row search-container">
+                  <label>지역</label>
+                  <input type="text" name="region" id="search-keyword" autocomplete="off" />
+                  <div id="autocomplete-suggestions"></div>
+                </div>
+                <div class="form-row">
+                  <label>테마</label>
+                  <input type="text" name="theme" />
+                </div>
               </div>
-              <div class="form-row">
-                <label>지역</label>
-                <input type="text" name="region" />
-              </div>
-              <div class="form-row">
-                <label>테마</label>
-                <input type="text" name="theme" />
-              </div>
+
+              <button type="submit" class="search-btn"></button>
             </div>
 
-            <button type="submit" class="search-btn"></button>
+
+          </form>
+          <div class="tags">
+            <a th:href="@{/camping/search(theme='여름물놀이')}" class="tag-link">#여름물놀이</a>
+            <a th:href="@{/camping/search(theme='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
+            <a th:href="@{/camping/search(theme='걷기길')}" class="tag-link">#걷기길</a>
+            <a th:href="@{/camping/search(theme='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
+            <a th:href="@{/camping/search(theme='낚시')}" class="tag-link">#낚시</a>
+            <a th:href="@{/camping/search(theme='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
+            <a th:href="@{/camping/search(theme='일몰명소')}" class="tag-link">#일몰명소</a>
+            <a th:href="@{/camping/search(theme='수상레저')}" class="tag-link">#수상레저</a>
+            <a th:href="@{/camping/search(theme='액티비티')}" class="tag-link">#액티비티</a>
+            <a th:href="@{/camping/search(theme='일출명소')}" class="tag-link">#일출명소</a>
+            <a th:href="@{/camping/search(theme='스키')}" class="tag-link">#스키</a>
+            <a th:href="@{/camping/search(theme='항공레저')}" class="tag-link">#항공레저</a>
           </div>
-        </form>
-        <div class="tags">
-          <a th:href="@{/camping/search(theme='여름물놀이')}" class="tag-link">#여름물놀이</a>
-          <a th:href="@{/camping/search(theme='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
-          <a th:href="@{/camping/search(theme='걷기길')}" class="tag-link">#걷기길</a>
-          <a th:href="@{/camping/search(theme='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
-          <a th:href="@{/camping/search(theme='낚시')}" class="tag-link">#낚시</a>
-          <a th:href="@{/camping/search(theme='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
-          <a th:href="@{/camping/search(theme='일몰명소')}" class="tag-link">#일몰명소</a>
-          <a th:href="@{/camping/search(theme='수상레저')}" class="tag-link">#수상레저</a>
-          <a th:href="@{/camping/search(theme='액티비티')}" class="tag-link">#액티비티</a>
-          <a th:href="@{/camping/search(theme='일출명소')}" class="tag-link">#일출명소</a>
-          <a th:href="@{/camping/search(theme='스키')}" class="tag-link">#스키</a>
-          <a th:href="@{/camping/search(theme='항공레저')}" class="tag-link">#항공레저</a>
-        </div>
-      </section>
+        </section>
+      </div>
+
+      <div class="community box">
+        <h3>
+          커뮤니티
+          <a class="more" href="/posts/community">더보기</a>
+        </h3>
+        <ul class="community-list">
+          <li th:each="post : ${recentPosts}">
+            <a th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
+            <span class="post-meta">
+              <span class="post-writer" th:text="${post.writer}">작성자</span> |
+              <span class="post-date" th:text="${#temporals.format(post.createdAt, 'MM-dd')}">07-02</span> |
+              <span class="post-views">조회수 <span th:text="${post.viewC}">0</span></span>
+            </span>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="community box">
+    <!-- 하단 추천 캠핑장 -->
+
+    <section class="recommend box">
       <h3>
-        커뮤니티
-        <a class="more" href="/posts/community">더보기</a>
+        추천 캠핑장
+        <a th:href="@{/camping}" class="more">더보기</a>
       </h3>
-      <ul class="community-list">
-        <li th:each="post : ${recentPosts}">
-          <a th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
-          <span class="post-meta">
-            <span class="post-writer" th:text="${post.writer}">작성자</span> |
-            <span class="post-date" th:text="${#temporals.format(post.createdAt, 'MM-dd')}">07-02</span> |
-            <span class="post-views">조회수 <span th:text="${post.viewC}">0</span></span>
-          </span>
-        </li>
-      </ul>
-    </div>
+      <div class="recommend-scroll">
+        <div class="recommend-camps" id="recommend-camps-container">
+          <p>추천 캠핑장 정보를 불러오는 중입니다...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 카카오맵 지도 영역 -->
+    <section class="map-section box">
+      <h2>캠핑장 지도</h2>
+      <div class="map-container" style="position: relative;">
+        <!-- 지역 선택 드롭다운 -->
+        <div class="region-selector"
+          style="position: absolute; top: 10px; left: 10px; z-index: 10; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <label for="region-select" style="font-size: 12px; color: #666; margin-right: 8px;">지역 선택:</label>
+          <select id="region-select"
+            style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+            <option value="recommended">추천 캠핑장</option>
+            <option value="all">전국</option>
+            <option value="서울">서울특별시</option>
+            <option value="부산">부산광역시</option>
+            <option value="대구">대구광역시</option>
+            <option value="인천">인천광역시</option>
+            <option value="광주">광주광역시</option>
+            <option value="대전">대전광역시</option>
+            <option value="울산">울산광역시</option>
+            <option value="세종">세종특별자치시</option>
+            <option value="경기">경기도</option>
+            <option value="강원">강원도</option>
+            <option value="충북">충청북도</option>
+            <option value="충남">충청남도</option>
+            <option value="전북">전라북도</option>
+            <option value="전남">전라남도</option>
+            <option value="경북">경상북도</option>
+            <option value="경남">경상남도</option>
+            <option value="제주">제주특별자치도</option>
+          </select>
+        </div>
+
+        <div id="main-map" style="width: 100%; height: 500px;"></div>
+        <div id="roadview-container" style="width:100%; height:400px; display:none;"></div>
+        <div class="map-controls"
+          style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 8px;">
+          <button id="map-btn" class="map-mode-btn active"
+            style="background: #ff9800; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">지도</button>
+          <button id="roadview-btn" class="map-mode-btn"
+            style="background: #4CAF50; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">로드뷰</button>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <!-- 하단 추천 캠핑장 -->
+  <script>
+    // 페이지 로딩이 완료되면 자동으로 실행됩니다.
+    document.addEventListener('DOMContentLoaded', () => {
+      // 추천 캠핑장 데이터를 비동기로 요청합니다.
+      fetch('/camping/recommendations')
+        .then(response => response.json())
+        .then(camps => {
+          const container = document.getElementById('recommend-camps-container');
+          container.innerHTML = ''; // "불러오는 중" 메시지 제거
 
-  <section class="recommend box">
-    <h3>
-      추천 캠핑장
-      <a th:href="@{/camping}" class="more">더보기</a>
-    </h3>
-    <div class="recommend-scroll">
-      <div class="recommend-camps" id="recommend-camps-container">
-        <p>추천 캠핑장 정보를 불러오는 중입니다...</p>
-      </div>
-    </div>
-  </section>
+          if (camps && camps.length > 0) {
+            camps.forEach(camp => {
+              // 각 캠핑장 정보를 바탕으로 HTML 요소를 생성합니다.
+              const campLink = document.createElement('a');
+              campLink.className = 'camp';
+              campLink.href = `/camping/${camp.contentId}`;
 
-  <!-- 카카오맵 지도 영역 -->
-  <section class="map-section box">
-    <h2>캠핑장 지도</h2>
-    <div class="map-container" style="position: relative;">
-      <!-- 지역 선택 드롭다운 -->
-      <div class="region-selector" style="position: absolute; top: 10px; left: 10px; z-index: 10; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <label for="region-select" style="font-size: 12px; color: #666; margin-right: 8px;">지역 선택:</label>
-        <select id="region-select" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
-          <option value="recommended">추천 캠핑장</option>
-          <option value="all">전국</option>
-          <option value="서울">서울특별시</option>
-          <option value="부산">부산광역시</option>
-          <option value="대구">대구광역시</option>
-          <option value="인천">인천광역시</option>
-          <option value="광주">광주광역시</option>
-          <option value="대전">대전광역시</option>
-          <option value="울산">울산광역시</option>
-          <option value="세종">세종특별자치시</option>
-          <option value="경기">경기도</option>
-          <option value="강원">강원도</option>
-          <option value="충북">충청북도</option>
-          <option value="충남">충청남도</option>
-          <option value="전북">전라북도</option>
-          <option value="전남">전라남도</option>
-          <option value="경북">경상북도</option>
-          <option value="경남">경상남도</option>
-          <option value="제주">제주특별자치도</option>
-        </select>
-      </div>
+              const defaultImageUrl = '/images/임시사진.png';
+              const imageUrl = camp.firstImageUrl ? camp.firstImageUrl : defaultImageUrl;
 
-      <div id="main-map" style="width: 100%; height: 500px;"></div>
-      <div id="roadview-container" style="width:100%; height:400px; display:none;"></div>
-      <div class="map-controls" style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 8px;">
-        <button id="map-btn" class="map-mode-btn active" style="background: #ff9800; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">지도</button>
-        <button id="roadview-btn" class="map-mode-btn" style="background: #4CAF50; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">로드뷰</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<script>
-  // 페이지 로딩이 완료되면 자동으로 실행됩니다.
-  document.addEventListener('DOMContentLoaded', () => {
-    // 추천 캠핑장 데이터를 비동기로 요청합니다.
-    fetch('/camping/recommendations')
-      .then(response => response.json())
-      .then(camps => {
-        const container = document.getElementById('recommend-camps-container');
-        container.innerHTML = ''; // "불러오는 중" 메시지 제거
-
-        if (camps && camps.length > 0) {
-          camps.forEach(camp => {
-            // 각 캠핑장 정보를 바탕으로 HTML 요소를 생성합니다.
-            const campLink = document.createElement('a');
-            campLink.className = 'camp';
-            campLink.href = `/camping/${camp.contentId}`;
-
-            const defaultImageUrl = '/images/임시사진.png';
-            const imageUrl = camp.firstImageUrl ? camp.firstImageUrl : defaultImageUrl;
-
-            campLink.innerHTML = `
+              campLink.innerHTML = `
               <img src="${imageUrl}" alt="캠핑장 이미지">
               <div class="camp-name">${camp.facltNm}</div>
               <p>${camp.lineIntro || ''}</p>
             `;
-            container.appendChild(campLink);
-          });
-        } else {
-          container.innerHTML = '<p>추천 캠핑장 정보가 없습니다.</p>';
-        }
-      })
-      .catch(error => {
-        console.error('추천 캠핑장 정보를 불러오는 데 실패했습니다:', error);
-        const container = document.getElementById('recommend-camps-container');
-        container.innerHTML = '<p>정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
-      });
-  });
-</script>
+              container.appendChild(campLink);
+            });
+          } else {
+            container.innerHTML = '<p>추천 캠핑장 정보가 없습니다.</p>';
+          }
+        })
+        .catch(error => {
+          console.error('추천 캠핑장 정보를 불러오는 데 실패했습니다:', error);
+          const container = document.getElementById('recommend-camps-container');
+          container.innerHTML = '<p>정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
+        });
+    });
 
-<!-- 카카오맵 API: detail.html과 별개로 동작하는 지도 -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
-<script src="/js/main-map.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.initMainMap) {
-      window.initMainMap();
-    }
+    // 자동 완성 기능을 위한 JS
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const searchInput = document.getElementById('search-keyword');
+      const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+
+      // 검색창이 없는 페이지도 있을수 있으므로 , 요소가 있을 경우에만 이벤트를 추가
+      if (searchInput && suggestionsContainer) {
+
+        // 검색 로직을 별도의 함수로 분리 (재사용을 위함)
+        const performAutocompleteSearch = async () => {
+          const keyword = searchInput.value;
+
+          if (keyword.length == 0) {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none'; // 창 숨기기
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/search/autocomplete?keyword=${encodeURIComponent(keyword)}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const suggestions = await response.json();
+
+            suggestionsContainer.innerHTML = '';
+
+            if (suggestions.length == 0) {
+              suggestionsContainer.style.display = 'none'; // 결과없으면 창 숨기기
+              return;
+            }
+            suggestionsContainer.style.display = 'block'; // 결과있으면 보여주기
+
+            suggestions.forEach(suggestion => {
+              const item = document.createElement('div');
+              item.textContent = `${suggestion.doNm}`;
+              item.className = 'suggestion-item';
+
+              item.onclick = () => {
+                // 클릭 시 검색창에 캠핑장 이름을 넣고 검색을 실행 혹은 상세페이지로 이동
+                searchInput.value = suggestion.doNm;
+                suggestionsContainer.innerHTML = '';
+                suggestionsContainer.style.display = 'none';
+                // alert(`'${suggestion.facltNm}' 을 선택했습니다. 실제로는 이 값으로 검색을 실행합니다.`)
+                //document.getElementsByClassName('search-btn').click() // 검색 버튼 클릭 효과
+              };
+
+              suggestionsContainer.appendChild(item);
+
+            });
+          } catch (error) {
+            console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
+            suggestionsContainer.style.display = 'none';
+          }
+        };
+
+        // 이벤트 리스너들 등록
+
+        // 키를 입력시 마다 검색을 진행
+        searchInput.addEventListener('keyup', performAutocompleteSearch);
+
+        // input 창을 다시 클릭(포커스) 했을때, 내용이 있다면 검색을 다시 실행
+        searchInput.addEventListener('focus', performAutocompleteSearch);
+
+        // 검색창에서 포커스가 벗어나면 결과창 숨기기
+        searchInput.addEventListener('blur', function () {
+          // 약간의 딜레이를 줘서 클릭 이벤트 처리 할 시간 확보
+          setTimeout(() => {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+          }, 200);
+        });
+      }
   });
-</script>
+
+  </script>
+
+  <!-- 카카오맵 API: detail.html과 별개로 동작하는 지도 -->
+  <script
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
+  <script src="/js/main-map.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.initMainMap) {
+        window.initMainMap();
+      }
+    });
+  </script>
 
 </body>
+
 </html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>자동완성 기능 테스트</title>
+  <style>
+    body {
+        font-family: sans-serif;
+        padding: 2em;
+    }
+    #search-container {
+        width: 500px;
+        margin: 0 auto;
+    }
+    #searchInput {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    #suggestions {
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+    }
+    .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+    }
+    .suggestion-item:hover {
+        background-color: #f0f0f0;
+    }
+    h1, p {
+        text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="search-container">
+  <h1>자동완성 테스트 페이지 </h1>
+  <p>검색창에 지역(doNm)의 일부를 입력해 보세요.</p>
+  <input type="text" id="searchInput" placeholder="예: 강원, 부산...">
+
+  <div id="suggestions"></div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const suggestionsContainer = document.getElementById('suggestions');
+
+  // 사용자가 키보드를 누르고 뗄 때마다 함수 실행
+  searchInput.addEventListener('keyup', async (e) => {
+      const keyword = e.target.value;
+
+      // 검색어가 없으면 결과창을 비웁니다.
+      if (keyword.length === 0) {
+          suggestionsContainer.innerHTML = '';
+          return;
+      }
+
+      try {
+          // Step 4에서 만든 API를 호출합니다.
+          const response = await fetch(`/api/search/autocomplete?keyword=${encodeURIComponent(keyword)}`);
+
+          // HTTP 응답이 성공적이지 않으면 에러를 던집니다.
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const suggestions = await response.json();
+
+          // 기존 결과 목록을 초기화합니다.
+          suggestionsContainer.innerHTML = '';
+
+          // 받은 결과가 없을 경우 메시지를 표시합니다.
+          if (suggestions.length === 0) {
+              const noResultItem = document.createElement('div');
+              noResultItem.textContent = '일치하는 결과가 없습니다.';
+              noResultItem.style.padding = '10px';
+              noResultItem.style.color = '#888';
+              suggestionsContainer.appendChild(noResultItem);
+              return;
+          }
+
+          // 받은 결과(suggestions)를 하나씩 화면에 추가합니다.
+          suggestions.forEach(suggestion => {
+              const item = document.createElement('div');
+              // DTO에 맞게 캠핑장 이름(facltNm)과 지역(doNm)을 함께 표시
+              item.textContent = `${suggestion.facltNm} (${suggestion.doNm})`;
+              item.className = 'suggestion-item';
+
+              // 항목을 클릭했을 때의 동작 정의
+              item.onclick = () => {
+                  // 테스트용 알림창 :
+                  alert(`'${suggestion.facltNm}' (ID: ${suggestion.facltNm}) 항목을 선택했습니다. 실제 서비스에서는 이 ID를 사용해 상세 페이지로 이동합니다.`);
+                  //window.location.href = `/review/${suggestion.facltNm}`;
+                  // 실제 이동 로직 예시: window.location.href = `/review/${suggestion.facltNm}`;
+              };
+
+              suggestionsContainer.appendChild(item);
+          });
+
+      } catch (error) {
+          console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
+          suggestionsContainer.innerHTML = '<div style="color: red; padding: 10px;">데이터 로딩 실패!</div>';
+      }
+  });
+</script>
+
+</body>
+</html>

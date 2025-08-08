@@ -1,12 +1,13 @@
 package modackbulz.app.Application.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Review {
   private Long revId;         // REV_ID
   private Long contentId;     // CONTENT_ID

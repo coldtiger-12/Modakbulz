@@ -25,9 +25,6 @@ DROP SEQUENCE camp_scrap_id_seq;
 DROP SEQUENCE FILES_SEQ;
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
 
--- 회원 정보 DB 삭제(기존) - 외래키 묶인것들 무시하고 강제 삭제문 추가
-DROP TABLE MEMBER CASCADE CONSTRAINTS;
-
 -- 회원 정보 DB 생성
 CREATE TABLE MEMBER (
     MEMBER_ID   NUMBER(10) PRIMARY KEY,
@@ -43,20 +40,39 @@ CREATE TABLE MEMBER (
     DEL_DATE    TIMESTAMP
 );
 
+-- MEMBER_ID 시퀀스 생성
 CREATE SEQUENCE member_member_id_seq
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
-UPDATE MEMBER
-SET IS_DEL = 'PENDING_DELETION', -- 'Y' 대신 새로운 상태 값으로 변경
-    DEL_DATE = SYSTIMESTAMP + INTERVAL '7' DAY -- SQL 테스트용 (실제로는 자바문에서 7일 자동 추가 처리 해놓음)
-WHERE ID = 'user123' AND IS_DEL = 'ACTIVE';	-- 회원 상태의 사용자를 변경 (스프링 부트 안에선 :status로 enum으로 처리되도록 해놓음)
+-- ※ 참고: 아래 샘플 데이터는 웹 페이지(Spring Security) 상에서 로그인되지 않음.
+--          실제 테스트는 웹 회원가입 절차를 통해 진행할 것.
 
+-- 샘플 데이터(관리자용)
+-- 주의: Spring Security 암호화 처리로 인해, SQL에서 직접 삽입한 데이터는 웹 로그인 불가
+--INSERT INTO MEMBER (MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE)
+--VALUES (member_member_id_seq.NEXTVAL, 'A', 'test1', 'Test1234@', 'test1@kh.com', '01012345678', '관리자', '남', '부산', 'ACTIVE', NULL)
+--
+-- 샘플 데이터(이용자)
+-- 주의: Spring Security 암호화 처리로 인해, SQL에서 직접 삽입한 데이터는 웹 로그인 불가
+--INSERT INTO MEMBER (MEMBER_ID, GUBUN, ID, PWD, EMAIL, TEL, NICKNAME, GENDER, REGION, IS_DEL, DEL_DATE)
+--VALUES (member_member_id_seq.NEXTVAL, 'U', 'test7', 'Test1234!', 'test7@kh.com', '01098765432', '칠성사이다', '여', '서울', 'ACTIVE', NULL)
+
+-- DB로 테스트 할때 사용할 것들(회원 탈퇴 관련)
+
+-- 회원 탈퇴 요청 처리: IS_DEL을 'PENDING_DELETION'으로 설정, 삭제 예정일은 7일 후
+UPDATE MEMBER
+SET IS_DEL = 'PENDING_DELETION', -- 'Y' 대신 새로운 상태 값으로 변경 (PENDING_DELETION -> 회원 탈퇴 대기 상태)
+    DEL_DATE = SYSTIMESTAMP + INTERVAL '7' DAY -- SQL 테스트용 (실제로는 자바문에서 7일 자동 추가 처리 해놓음)
+WHERE ID = 'test7' AND IS_DEL = 'ACTIVE';	-- 회원 상태의 사용자를 변경 (스프링 부트 안에선 :status로 enum으로 처리되도록 해놓음)
+
+-- 탈퇴 요청 해제 처리: 회원 상태를 'ACTIVE'로 복귀, 삭제 예정일 초기화
+-- 현재 모닥불즈 웹에는 실제 적용은 보류 상태
 UPDATE MEMBER
 SET
-  IS_DEL = 'ACTIVE', -- 'N' 대신 새로운 상태 값으로 변경
+  IS_DEL = 'ACTIVE', -- 'N' 대신 새로운 상태 값으로 변경 ( ACTIVE -> 회원 상태 )
   DEL_DATE = NULL      -- 삭제 예정일 초기화
 WHERE
   MEMBER_ID = 1 AND IS_DEL = 'PENDING_DELETION' -- 탈퇴 요청 상태의 사용자만 변경 (스프링 부트 안에선 :status로 enum으로 처리되도록 해놓음)
@@ -117,17 +133,19 @@ CREATE TABLE CAMPING_INFO (
 
 SELECT * FROM CAMPING_INFO;
 
+-- [TRIGGER] 캠핑장 유형(induty)이 NULL인 경우 '일반야영장'으로 기본값 설정
+
 CREATE OR REPLACE TRIGGER TRG_SET_DEFAULT_INDUTY
 BEFORE INSERT OR UPDATE ON CAMPING_INFO
 FOR EACH ROW
 BEGIN
-    -- 새로 추가되거나 수정되는 데이터의 induty 값이 NULL이라면
+   -- induty가 NULL인 경우 기본값 '일반야영장' 설정
     IF :NEW.induty IS NULL THEN
-        -- '일반야영장'으로 값을 설정합니다.
         :NEW.induty := '일반야영장';
     END IF;
 END;
 /
+
 -------------------------------------------------------------------------------------------
 -- 3. 캠핑장 정보 DB -------------------------------------------------------------------------
 
@@ -145,7 +163,7 @@ CREATE TABLE CAMPSITES (
                 CHECK (SCORE BETWEEN 0 AND 5)
 );
 
--- 캠핑장 동기화 이후 실행
+-- 고캠핑 API 기반 캠핑장 수동 동기화 (테스트용)
 INSERT INTO CAMPSITES (CONTENT_ID, SC_C, VIEW_C, SCORE)
 SELECT C.CONTENTID, 0, 0, 1
 FROM CAMPING_INFO C
@@ -177,12 +195,14 @@ CREATE TABLE REVIEW (
                  CHECK (SCORE BETWEEN 0 AND 5)
 );
 
+-- REV_ID 시퀀스 생성
 CREATE SEQUENCE review_rev_id_seq
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
+-- [TRIGGER] 리뷰글 수정 시 UPDATED_AT 필드에 현재 시각 자동 반영
 CREATE OR REPLACE TRIGGER trg_set_review_updated_at
 BEFORE UPDATE ON REVIEW
 FOR EACH ROW
@@ -211,12 +231,14 @@ CREATE TABLE COMMUNITY (
     VIEW_C       NUMBER(10) DEFAULT 0 NOT NULL
 );
 
+-- CO_ID 시퀀스 생성
 CREATE SEQUENCE community_co_id_seq
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
+-- [TRIGGER] 게시글 수정 시 UPDATED_AT 필드에 현재 시각 자동 반영
 CREATE OR REPLACE TRIGGER trg_set_community_updated_at
 BEFORE UPDATE ON COMMUNITY
 FOR EACH ROW
@@ -249,12 +271,14 @@ PRC_COM_ID    NUMBER(10)
                        ON DELETE CASCADE
 );
 
+-- C_COM_ID 시퀀스 생성
 CREATE SEQUENCE co_comment_seq
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
+-- [TRIGGER] 댓글 수정 시 UPDATED_AT 필드에 현재 시각 자동 반영
 CREATE OR REPLACE TRIGGER trg_set_co_comment_updated_at
 BEFORE UPDATE ON CO_COMMENT
 FOR EACH ROW
@@ -280,6 +304,7 @@ CREATE TABLE FAQ (
     CREATED_AT  TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
 );
 
+-- FAQ_ID 시퀀스 생성
 CREATE SEQUENCE camp_faq_id_seq
 START WITH 1
 INCREMENT BY 1
@@ -311,12 +336,14 @@ PRC_COM_ID    NUMBER(10)
                        ON DELETE CASCADE
 );
 
+-- F_COM_ID 시퀀스 생성
 CREATE SEQUENCE faq_comment_seq
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
+-- [TRIGGER] 문의사항 게시판 댓글 수정 시 UPDATED_AT 필드에 현재 시각 자동 반영
 CREATE OR REPLACE TRIGGER trg_set_faq_comment_updated_at
 BEFORE UPDATE ON FAQ_COMMENT
 FOR EACH ROW
@@ -346,6 +373,7 @@ CREATE TABLE SCRAP (
     FACLT_NM VARCHAR2(200)
 );
 
+-- SCRAP_ID 시퀀스 샏성
 CREATE SEQUENCE camp_scrap_id_seq
 START WITH 1
 INCREMENT BY 1
@@ -381,7 +409,7 @@ CREATE TABLE FILES (
     -- 업로드 시각 기록. 정렬, 로그 관리 등에 활용
 );
 
-
+-- FILES_SEQ 시퀀스 생성
 CREATE SEQUENCE FILES_SEQ
     START WITH 1
     INCREMENT BY 1
@@ -406,6 +434,7 @@ CREATE TABLE KEYWORD (
     WORDS      VARCHAR2(255) UNIQUE NOT NULL
 );
 
+-- KEYWORD_ID 시퀀스 생성
 CREATE SEQUENCE keyword_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 -------------------------------------------------------------------------------------------
 -- 13. 리뷰 키워드 정보 DB--------------------------------------------------------------------
@@ -415,4 +444,5 @@ CREATE TABLE REVIEW_KEYWORD (
     PRIMARY KEY (REV_ID, KEYWORD_ID)
     );
 
+-- REVIEW_KEYWORD 시퀀스 생성
 CREATE SEQUENCE review_keyword_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;

@@ -3,14 +3,13 @@ package modackbulz.app.Application.web;
 
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.domain.member.svc.MemberSVC;
-import modackbulz.app.Application.global.service.EmailService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
@@ -20,8 +19,6 @@ import java.util.Optional;
 public class FindAccountController {
 
   private final MemberSVC memberSVC;
-  private final EmailService emailService;
-  private final PasswordEncoder passwordEncoder;
 
   // 아이디-비밀번호 찾기 메인 페이지
   @GetMapping
@@ -31,15 +28,15 @@ public class FindAccountController {
 
   // 아이디 찾기 결과
   @PostMapping("/id")
-  public String findId(@RequestParam("email") String email, Model model){
+  public String findId(@RequestParam("email") String email, RedirectAttributes redirectAttributes){
     Optional<String> foundId = memberSVC.findIdByEmail(email);
     if (foundId.isPresent()){
-      model.addAttribute("message", "회원님의 아이디는 [ " + foundId.get() + " ] 입니다");
+      redirectAttributes.addFlashAttribute("message", "회원님의 아이디는 [ " + foundId.get() + " ] 입니다");
     } else {
-      model.addAttribute("message", "해당 이메일로 가입된 아이디가 없습니다.");
+      redirectAttributes.addFlashAttribute("message", "해당 이메일로 가입된 아이디가 없습니다.");
     }
 
-    return "login/findResult";
+    return "redirect:/find/result";
   }
 
   // 비밀번호 재설정
@@ -47,14 +44,15 @@ public class FindAccountController {
   public String findPassword(
       @RequestParam("id") String id,
       @RequestParam("email") String email,
-      Model model){
+      RedirectAttributes redirectAttributes
+      ){
     boolean result = memberSVC.issueTempPassword(id, email);
     if (result){
-      model.addAttribute("message", "가입하신 이메일로 임시 비밀번호가 발송되었습니다.");
+      redirectAttributes.addFlashAttribute("message", "가입하신 이메일로 임시 비밀번호가 발송되었습니다.");
     } else {
-      model.addAttribute("message", "입력하신 정보와 일치하는 회원이 없습니다.");
+      redirectAttributes.addFlashAttribute("message", "입력하신 정보와 일치하는 회원이 없습니다.");
     }
-    return "login/findResult";
+    return "redirect:/find/result";
   }
 
   // 결과 페이지만을 보여주는 새로운 get 메소드

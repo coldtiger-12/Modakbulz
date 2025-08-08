@@ -1,5 +1,6 @@
 package modackbulz.app.Application.domain.review.svc;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import lombok.RequiredArgsConstructor;
 import modackbulz.app.Application.common.FileStore;
 import modackbulz.app.Application.domain.review.dao.ReviewDAO;
@@ -7,6 +8,7 @@ import modackbulz.app.Application.entity.Review;
 import modackbulz.app.Application.entity.UploadFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.io.IOException;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class ReviewSVCImpl implements ReviewSVC {
 
   private final ReviewDAO reviewDAO;
   private final FileStore fileStore;
+  private final ElasticsearchClient esClient; // 1. ElasticsearchClient 주입
 
   @Override
   public List<Review> findByContentId(Long contentId) {
@@ -33,8 +36,11 @@ public class ReviewSVCImpl implements ReviewSVC {
   @Override
   @Transactional
   public Long save(Review review) {
+    // 2. DB에 Review 원본을 먼저 저장 (기존 로직 유지)
     Long revId = reviewDAO.save(review);
+    review.setRevId(revId); // 생성된 ID를 review 객체에 설정
 
+    // -- 기존 DB 작업 (기존 로직 유지)--
     List<Long> keywordIds = review.getKeywordIds();
     if (keywordIds != null && !keywordIds.isEmpty()) {
       reviewDAO.insertKeywords(revId, keywordIds);
@@ -46,6 +52,24 @@ public class ReviewSVCImpl implements ReviewSVC {
     }
 
     updateAverageScore(review.getContentId());
+    // -- 기존 DB 작업 완료 --
+
+    // 3. Elasticsearch에 인덱싱 (모든 DB 작업 성공 후)
+    try{
+      // 위에서 저장 성공한 review 객체를 document로 사용
+      esClient.index(i -> i
+          .index("reviews") //인덱스 이름 지정
+          .id(revId.toString()) // DB에 저장된 ID를 문서 ID로 사용
+          .document(review)
+      );
+    } catch (IOException e){
+      // 실제 운영 코드에서는 여기에 에러 로그를 남기거나,
+      // 인덱싱 실패에 대한 정책을 정해야 합니다. (예: 재시도 큐에 넣기)
+      // 지금은 연습 단계이므로 스택 트레이스 출력만으로도 충분합니다.
+      e.printStackTrace();
+      // @Transactional에 의해 DB 작업까지 롤백할지 여부는 정책적으로 결정해야 합니다.
+      // 보통은 DB 저장은 성공시키고, 인덱싱 실패는 별도로 처리합니다.
+    }
 
     return revId;
   }
