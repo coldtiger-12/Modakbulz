@@ -11,6 +11,10 @@ from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 import oracledb  # Oracle DB 연결용
+from elasticsearch import Elasticsearch
+import csv
+import json
+import os
 
 class KakaoMapReviewCrawler:
     def __init__(self):
@@ -22,6 +26,12 @@ class KakaoMapReviewCrawler:
         self.chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         self.chrome_options.add_experimental_option('useAutomationExtension', False)
         self.chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        # Windows 환경에서 추가 옵션
+        self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_argument('--disable-extensions')
+        self.chrome_options.add_argument('--disable-plugins')
+        self.chrome_options.add_argument('--disable-images')
+        self.chrome_options.add_argument('--headless')  # 헤드리스 모드로 실행
         
         # 카카오맵 API 설정
         self.kakao_api_key = "22a3f23874d2dacc284c6ab7eea89e10"  # 실제 API 키
@@ -35,7 +45,17 @@ class KakaoMapReviewCrawler:
             'dsn': 'localhost:1521/xe'
         }
         
+        # Elasticsearch 설정
+        self.es = Elasticsearch(['http://localhost:9200'])
+        self.index_name = "reviews"
+        
+        # 파일 저장 경로 설정
+        self.output_dir = "crawled_data"
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        
         self.driver = None
+        self.all_reviews = []  # 모든 리뷰를 저장할 리스트
         
     def connect_database(self):
         """데이터베이스 연결"""
@@ -47,6 +67,54 @@ class KakaoMapReviewCrawler:
             print(f"데이터베이스 연결 실패: {e}")
             print("Oracle DB 서버가 실행 중인지 확인해주세요.")
             return None
+    
+    def check_elasticsearch_connection(self):
+        """Elasticsearch 연결 상태 확인"""
+        try:
+            if self.es.ping():
+                print("Elasticsearch 연결 성공!")
+                return True
+            else:
+                print("Elasticsearch 연결 실패!")
+                return False
+        except Exception as e:
+            print(f"Elasticsearch 연결 오류: {e}")
+            print("Elasticsearch 서버가 실행 중인지 확인해주세요.")
+            return False
+    
+    def create_index_if_not_exists(self):
+        """Elasticsearch 인덱스가 없으면 생성"""
+        if not self.es.indices.exists(index=self.index_name):
+            mapping = {
+                "mappings": {
+                    "properties": {
+                        "revId": {"type": "long"},
+                        "contentId": {"type": "long"},
+                        "memberId": {"type": "long"},
+                        "writer": {
+                            "type": "text",
+                            "analyzer": "standard"
+                        },
+                        "content": {
+                            "type": "text",
+                            "analyzer": "standard"
+                        },
+                        "createdAt": {"type": "date"},
+                        "updatedAt": {"type": "date"},
+                        "score": {"type": "integer"},
+                        "keywordIds": {"type": "long"},
+                        "campingName": {
+                            "type": "text",
+                            "analyzer": "standard"
+                        },
+                        "source": {"type": "keyword"}
+                    }
+                }
+            }
+            self.es.indices.create(index=self.index_name, body=mapping)
+            print(f"Elasticsearch 인덱스 '{self.index_name}' 생성 완료")
+        else:
+            print(f"Elasticsearch 인덱스 '{self.index_name}' 이미 존재")
     
     def get_camping_sites(self):
         """크롤링할 캠핑장 목록 조회"""
@@ -311,13 +379,37 @@ class KakaoMapReviewCrawler:
                                 except:
                                     continue
                             
+                            # 작성자명 추출
+                            writer = "카카오맵사용자"
+                            writer_selectors = [
+                                "span.name",
+                                ".name",
+                                ".writer",
+                                ".author",
+                                "span[class*='name']",
+                                "span[class*='writer']",
+                                ".user_name",
+                                ".reviewer"
+                            ]
+                            
+                            for writer_selector in writer_selectors:
+                                try:
+                                    writer_element = element.find_element(By.CSS_SELECTOR, writer_selector)
+                                    writer_text = writer_element.text.strip()
+                                    if writer_text and len(writer_text) > 1:
+                                        writer = writer_text
+                                        break
+                                except:
+                                    continue
+                            
                             if review_text and len(review_text) > 10:
                                 reviews.append({
                                     'content': review_text,
                                     'rating': rating,
-                                    'created_date': date_text
+                                    'created_date': date_text,
+                                    'writer': writer
                                 })
-                                print(f"리뷰 수집: {review_text[:50]}... (평점: {rating})")
+                                print(f"리뷰 수집: {writer} - {review_text[:50]}... (평점: {rating})")
                         except Exception as e:
                             print(f"리뷰 파싱 오류: {e}")
                             continue
@@ -340,51 +432,223 @@ class KakaoMapReviewCrawler:
                 pass
             return []
     
-    def save_reviews(self, camping_id, reviews):
-        """리뷰를 데이터베이스에 저장"""
+    def save_reviews(self, camping_id, camping_name, reviews):
+        """리뷰를 데이터베이스와 Elasticsearch에 저장"""
+        if not reviews:
+            print("저장할 리뷰가 없습니다.")
+            return
+        
+        # 1. Oracle DB에 저장
         connection = self.connect_database()
-        if not connection:
-            print("데이터베이스 연결 실패로 리뷰 저장을 건너뜁니다.")
+        if connection:
+            try:
+                with connection.cursor() as cursor:
+                    for review in reviews:
+                        # 작성자명 길이 제한 (20자)
+                        writer = review.get('writer', '카카오맵사용자')
+                        if len(writer) > 20:
+                            writer = writer[:20]
+                            print(f"작성자명이 20자를 초과하여 '{writer}'로 잘라냈습니다.")
+                        
+                        # Oracle DB용 쿼리 (실제 테이블 구조에 맞게 수정)
+                        sql = """
+                        INSERT INTO review (rev_id, content_id, member_id, writer, content, score)
+                        VALUES (review_rev_id_seq.NEXTVAL, :1, :2, :3, :4, :5)
+                        """
+                        cursor.execute(sql, (
+                            camping_id,
+                            1,  # member_id는 임시로 1로 설정
+                            writer,
+                            review['content'],
+                            review['rating']
+                        ))
+                
+                connection.commit()
+                print(f"캠핑장 ID {camping_id}: {len(reviews)}개 리뷰 DB 저장 완료")
+                
+            except Exception as e:
+                print(f"DB 리뷰 저장 중 오류: {e}")
+                connection.rollback()
+            finally:
+                connection.close()
+        else:
+            print("데이터베이스 연결 실패로 DB 저장을 건너뜁니다.")
             print(f"수집된 리뷰 {len(reviews)}개:")
             for i, review in enumerate(reviews[:3], 1):  # 처음 3개만 출력
                 print(f"  {i}. 평점: {review['rating']}, 내용: {review['content'][:50]}...")
-            return
         
+        # 2. Elasticsearch에 저장
         try:
-            with connection.cursor() as cursor:
-                for review in reviews:
-                    # Oracle DB용 쿼리 (실제 테이블 구조에 맞게 수정)
-                    sql = """
-                    INSERT INTO review (rev_id, content_id, member_id, writer, content, score)
-                    VALUES (review_rev_id_seq.NEXTVAL, :1, :2, :3, :4, :5)
-                    """
-                    cursor.execute(sql, (
-                        camping_id,
-                        1,  # member_id는 임시로 1로 설정
-                        "카카오맵사용자"[:20],  # WRITER 컬럼 길이 제한(20자)에 맞춤
-                        review['content'],
-                        review['rating']
-                    ))
+            # Elasticsearch 인덱스 생성 확인
+            self.create_index_if_not_exists()
             
-            connection.commit()
-            print(f"캠핑장 ID {camping_id}: {len(reviews)}개 리뷰 저장 완료")
+            for i, review in enumerate(reviews):
+                # 작성자명 길이 제한 (20자)
+                writer = review.get('writer', '카카오맵사용자')
+                if len(writer) > 20:
+                    writer = writer[:20]
+                
+                # Elasticsearch 문서 생성
+                doc = {
+                    'revId': None,  # Elasticsearch에서 자동 생성
+                    'contentId': camping_id,
+                    'memberId': 1,  # 임시 member_id
+                    'writer': writer,
+                    'content': review['content'],
+                    'createdAt': datetime.now().isoformat(),
+                    'updatedAt': datetime.now().isoformat(),
+                    'score': review['rating'],
+                    'keywordIds': [],
+                    'campingName': camping_name,
+                    'source': 'kakao_map'
+                }
+                
+                # Elasticsearch에 저장
+                response = self.es.index(index=self.index_name, body=doc)
+                print(f"Elasticsearch 리뷰 {i+1} 저장 완료: {response['result']} (ID: {response['_id']})")
+            
+            # 인덱스 새로고침
+            self.es.indices.refresh(index=self.index_name)
+            print(f"캠핑장 '{camping_name}': {len(reviews)}개 리뷰 Elasticsearch 저장 완료")
             
         except Exception as e:
-            print(f"리뷰 저장 중 오류: {e}")
-            connection.rollback()
-        finally:
-            connection.close()
+            print(f"Elasticsearch 저장 중 오류: {e}")
+    
+    def save_to_csv(self, reviews, camping_id, camping_name):
+        """리뷰를 CSV 파일로 저장"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{self.output_dir}/reviews_{camping_id}_{timestamp}.csv"
+        
+        try:
+            with open(filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                fieldnames = ['camping_id', 'camping_name', 'writer', 'content', 'rating', 'created_date', 'crawled_at']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                
+                for review in reviews:
+                    writer.writerow({
+                        'camping_id': camping_id,
+                        'camping_name': camping_name,
+                        'writer': review.get('writer', '카카오맵사용자'),
+                        'content': review['content'],
+                        'rating': review['rating'],
+                        'created_date': review.get('created_date', '날짜 정보 없음'),
+                        'crawled_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
+            
+            print(f"📄 CSV 파일 저장 완료: {filename}")
+            return filename
+            
+        except Exception as e:
+            print(f"❌ CSV 파일 저장 실패: {e}")
+            return None
+    
+    def save_to_json(self, reviews, camping_id, camping_name):
+        """리뷰를 JSON 파일로 저장"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{self.output_dir}/reviews_{camping_id}_{timestamp}.json"
+        
+        try:
+            data = {
+                'camping_info': {
+                    'camping_id': camping_id,
+                    'camping_name': camping_name,
+                    'total_reviews': len(reviews),
+                    'crawled_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                },
+                'reviews': []
+            }
+            
+            for review in reviews:
+                data['reviews'].append({
+                    'writer': review.get('writer', '카카오맵사용자'),
+                    'content': review['content'],
+                    'rating': review['rating'],
+                    'created_date': review.get('created_date', '날짜 정보 없음')
+                })
+            
+            with open(filename, 'w', encoding='utf-8') as jsonfile:
+                json.dump(data, jsonfile, ensure_ascii=False, indent=2)
+            
+            print(f"📄 JSON 파일 저장 완료: {filename}")
+            return filename
+            
+        except Exception as e:
+            print(f"❌ JSON 파일 저장 실패: {e}")
+            return None
+    
+    def save_all_reviews_to_files(self):
+        """모든 수집된 리뷰를 통합 파일로 저장"""
+        if not self.all_reviews:
+            print("❌ 저장할 리뷰가 없습니다.")
+            return
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # 통합 CSV 파일 저장
+        csv_filename = f"{self.output_dir}/all_reviews_{timestamp}.csv"
+        try:
+            with open(csv_filename, 'w', newline='', encoding='utf-8-sig') as csvfile:
+                fieldnames = ['camping_id', 'camping_name', 'writer', 'content', 'rating', 'created_date', 'crawled_at']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                
+                for review_data in self.all_reviews:
+                    writer.writerow(review_data)
+            
+            print(f"📄 통합 CSV 파일 저장 완료: {csv_filename}")
+            
+        except Exception as e:
+            print(f"❌ 통합 CSV 파일 저장 실패: {e}")
+        
+        # 통합 JSON 파일 저장
+        json_filename = f"{self.output_dir}/all_reviews_{timestamp}.json"
+        try:
+            data = {
+                'summary': {
+                    'total_reviews': len(self.all_reviews),
+                    'total_campings': len(set(review['camping_id'] for review in self.all_reviews)),
+                    'crawled_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                },
+                'reviews': self.all_reviews
+            }
+            
+            with open(json_filename, 'w', encoding='utf-8') as jsonfile:
+                json.dump(data, jsonfile, ensure_ascii=False, indent=2)
+            
+            print(f"📄 통합 JSON 파일 저장 완료: {json_filename}")
+            
+        except Exception as e:
+            print(f"❌ 통합 JSON 파일 저장 실패: {e}")
     
     def run(self):
         """크롤링 실행"""
         print("카카오맵 리뷰 크롤링을 시작합니다...")
         
+        # Elasticsearch 연결 확인 (선택사항)
+        if not self.check_elasticsearch_connection():
+            print("Elasticsearch 연결 실패. DB에만 저장됩니다.")
+        
         try:
-            # 크롬드라이버 설정 (webdriver-manager 사용)
+            # 크롬드라이버 설정 (로컬 chromedriver.exe 사용)
             print("크롬드라이버를 설정하는 중...")
-            service = Service(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
-            print("크롬드라이버 설정 완료!")
+            try:
+                # 로컬 chromedriver.exe 사용
+                chromedriver_path = r"../../chromedriver.exe"
+                service = Service(chromedriver_path)
+                self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
+                print("크롬드라이버 설정 완료!")
+            except Exception as e:
+                print(f"로컬 ChromeDriver 설정 실패: {e}")
+                print("webdriver-manager로 시도합니다...")
+                try:
+                    service = Service(ChromeDriverManager().install())
+                    self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
+                    print("webdriver-manager로 크롬드라이버 설정 완료!")
+                except Exception as e2:
+                    print(f"webdriver-manager도 실패: {e2}")
+                    print("Chrome 브라우저가 설치되어 있는지 확인해주세요.")
+                    return
             
             camping_sites = self.get_camping_sites()
             
@@ -407,11 +671,32 @@ class KakaoMapReviewCrawler:
                 
                 print(f" - {camping_name}: {len(reviews)}개 리뷰 수집")
                 
-                # 리뷰 저장
-                self.save_reviews(camping_id, reviews)
+                # 데이터베이스와 Elasticsearch에 저장
+                self.save_reviews(camping_id, camping_name, reviews)
+                
+                # 개별 캠핑장 CSV/JSON 파일 저장
+                self.save_to_csv(reviews, camping_id, camping_name)
+                self.save_to_json(reviews, camping_id, camping_name)
+                
+                # 전체 리뷰 리스트에 추가
+                for review in reviews:
+                    self.all_reviews.append({
+                        'camping_id': camping_id,
+                        'camping_name': camping_name,
+                        'writer': review.get('writer', '카카오맵사용자'),
+                        'content': review['content'],
+                        'rating': review['rating'],
+                        'created_date': review.get('created_date', '날짜 정보 없음'),
+                        'crawled_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
                 
                 # 요청 간격 조절
                 time.sleep(random.uniform(5, 10))
+            
+            # 통합 파일 저장
+            if self.all_reviews:
+                print(f"\n📊 총 {len(self.all_reviews)}개 리뷰 수집 완료!")
+                self.save_all_reviews_to_files()
                 
         except Exception as e:
             print(f"크롤링 중 오류 발생: {e}")

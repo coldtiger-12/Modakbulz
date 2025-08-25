@@ -1,11 +1,160 @@
-<!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
+<footer class="site-footer" th:fragment="site-footer">
+  <div class="footer-deco">
+    <div class="footer-container">
+      <picture class="deco001">
+        <source media="(max-width: 750px)" srcset="/images/캠핑카로고.png">
+        <img src="/images/캠핑카로고.png" alt="모닥불즈 캠핑카 로고">
+      </picture>
+      <img src="/images/footer-deco002.png" alt="" class="deco002">
+    </div>
+  </div>
+  <div class="footer-content">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-menu">
+          <ul class="footer-menu-list">
+            <li>
+              <a href="/privacy" class="fs-16bodyR">개인정보처리방침</a>
+            </li>
+            <li>
+              <a href="/email-rejection" class="fs-16bodyR">전자우편무단수집거부</a>
+            </li>
+          </ul>
+          <ul class="footer-menu-list">
+            <li>
+              <a href="/camping-guide" class="fs-16bodyR">캠핑장 이용안내</a>
+            </li>
+            <li>
+              <a href="/reservation-guide" class="fs-16bodyR">예약안내</a>
+            </li>
+          </ul>
+          <ul class="footer-menu-list">
+            <li>
+              <a href="javascript:;" onclick="contact();" class="fs-16bodyR">문의처 안내 (클릭)</a>
+            </li>
+          </ul>
+        </div>
+        <div class="relevant-button">
+          <a href="/admin/login" class="official-button" target="_blank">
+            <span class="fs-18bodyR fs-m_16bodyR">관리자</span>
+          </a>
+          <div href="" class="site-button" rel="click-event" data-event="toggleClass" data-class="open">
+            <span class="fs-18bodyR fs-m_16bodyR">관련사이트</span>
+            <ul class="site-list">
+              <li class="site-item">
+                <a href="https://www.weather.go.kr" class="fs-18bodyR fs-m_16bodyR" target="_blank">기상청</a>
+              </li>
+              <li class="site-item">
+                <a href="https://www.forest.go.kr" class="fs-18bodyR fs-m_16bodyR" target="_blank">산림청</a>
+              </li>
+              <li class="site-item">
+                <a href="https://www.gocamping.or.kr" class="fs-18bodyR fs-m_16bodyR" target="_blank">고캠핑</a>
+              </li>
+              <li class="site-item">
+                <a href="https://www.visitkorea.or.kr" class="fs-18bodyR fs-m_16bodyR" target="_blank">한국관광공사</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-item">
+          <ul class="company-info">
+            <li class="fs-caption fs-m_caption">모닥불즈 캠핑장</li>
+            <li class="fs-caption fs-m_caption">주소: 부산 부산진구 중앙대로 627 2층</li>
+            <li class="fs-caption fs-m_caption">사업자등록번호: 123-45-67890</li>
+            <li class="fs-caption fs-m_caption">대표: 정찬호</li>
+            <li class="fs-caption fs-m_caption">EMAIL: projectkdt@gmail.com</li>
+          </ul>
+          <div class="copyright fs-caption fs-m_caption">
+            Copyrights(c) 2025 모닥불즈 캠핑장 ALL RIGHTS RESERVED.
+          </div>
+        </div>
+        <div class="footer-bottom-item">
+          <ul class="sns-box">
+            <li class="sns-item">
+              <a href="https://instagram.com/modakbulz" target="_blank">
+                <img src="/images/icon-instagram.svg" alt="인스타그램">
+              </a>
+            </li>
+            <li class="sns-item">
+              <a href="https://blog.naver.com/modakbulz" target="_blank">
+                <img src="/images/icon-blog.svg" alt="블로그">
+              </a>
+            </li>
+            <li class="sns-item">
+              <a href="https://www.youtube.com/channel/modakbulz" target="_blank">
+                <img src="/images/icon-youtube.svg" alt="유튜브">
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
-</body>
-</html>
+  <!-- 문의처 안내 다이얼로그 -->
+  <div id="contactDialog" title="문의처 안내" style="display: none;">
+    <div style="line-height: 25px; font-size: 16px; word-break: keep-all;">
+      <div style="font-weight: bold; margin-bottom: 15px;">[문의처 안내]</div>
+      <div style="margin-bottom: 15px;">
+        <strong>예약 및 이용 문의</strong><br>
+        전화: 033-123-4567 (평일 09:00~18:00)<br>
+        이메일: reservation@modakbulz.com
+      </div>
+      <div style="margin-bottom: 15px;">
+        <strong>긴급 연락처</strong><br>
+        야간: 010-1234-5678 (22:00~08:00)
+      </div>
+      <div style="margin-bottom: 15px;">
+        <strong>사업자 문의</strong><br>
+        전화: 033-123-4568 (평일 09:00~18:00)<br>
+        이메일: business@modakbulz.com
+      </div>
+      <div style="font-size: 14px; color: #666;">
+        ※ 캠핑장 예약 및 정보 안내는 위 연락처로 문의 부탁드립니다.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  $(document).ready(function() {
+      // 문의처 다이얼로그 설정
+      $("#contactDialog").dialog({
+          autoOpen: false,
+          width: 'auto',
+          modal: true,
+          open: function(event, ui) {
+              var width = $(window).width();
+              if(width < 768) {
+                  $(this).css('width', '100%');
+              } else {
+                  $(this).css('width', '500px');
+                  $('.ui-dialog').css('left', ((width-500)/2)+'px');
+              }
+          },
+          buttons: {
+              "닫기": function() {
+                  $(this).dialog("close");
+              }
+          }
+      });
+
+      // 관련사이트 드롭다운 토글
+      $('.site-button').click(function() {
+          $(this).toggleClass('open');
+      });
+
+      // 외부 클릭시 드롭다운 닫기
+      $(document).click(function(e) {
+          if (!$(e.target).closest('.site-button').length) {
+              $('.site-button').removeClass('open');
+          }
+      });
+  });
+
+  function contact() {
+      $("#contactDialog").dialog("open");
+  }
+</script>

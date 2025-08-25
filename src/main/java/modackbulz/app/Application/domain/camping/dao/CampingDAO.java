@@ -1,9 +1,11 @@
 package modackbulz.app.Application.domain.camping.dao;
 
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
+import modackbulz.app.Application.entity.CampNm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CampingDAO {
@@ -12,6 +14,12 @@ public interface CampingDAO {
    * @param item 캠핑장 정보 DTO
    */
   void saveOrUpdate(GoCampingDto.Item item);
+
+  /**
+   * 전체 목록을 가져오기 위한 매서드
+   * @return List<CampNm>
+   */
+  List<CampNm> findAllForSync();
 
   /**
    * contentId로 DB에서 캠핑장 정보를 찾습니다.
@@ -41,4 +49,12 @@ public interface CampingDAO {
    * @return
    */
   Page<GoCampingDto.Item> findAllOrderByScrapCountDesc(Pageable pageable);
+
+  /**
+   * 지역으로 필터링하고 스크랩 순으로 정렬하여 캠핑장 목록을 조회합니다.
+   * @param region 검색할 지역 키워드
+   * @param pageable 페이징 정보
+   * @return Page<GoCampingDto.Item>
+   */
+  Page<GoCampingDto.Item> findAllByRegionOrderByScrapCountDesc(String region, Pageable pageable);
 }

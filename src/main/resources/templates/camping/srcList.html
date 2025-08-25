@@ -21,17 +21,19 @@
   <h1>캠핑장 & 글램핑장 검색 목록</h1>
   <form th:action="@{/camping/search}" method="get" class="search-form">
     <div class="search-fields">
-      <div class="form-row">
+      <div class="form-row keyword-container">
         <label>키워드</label>
         <input type="text" name="keyword" th:value="${keyword}" />
+        <div id="keyword-suggestions-Sl"></div>
       </div>
       <div class="form-row">
         <label>지역</label>
         <input type="text" name="region" th:value="${region}" />
       </div>
-      <div class="form-row">
-        <label>테마</label>
-        <input type="text" name="theme" th:value="${theme}" />
+      <div class="form-row search-container">
+        <label>캠핑장</label>
+        <input type="text" name="area" id="search-keyword" th:value="${facltNm}" autocomplete="off" />
+        <div id="autocomplete-suggestions-Sl"></div>
       </div>
     </div>
     <button type="submit" class="search-btn"></button>
@@ -140,6 +142,132 @@
       });
     });
   });
+
+    /**
+    * 자동완성 기능을 초기화하는 '만능 함수'
+    * 이 함수 하나로 여러 개의 자동완성 기능을 만들 수 있음
+    */
+
+    // 자동 완성 기능을 위한 JS () - 자동 완성 기능을 초기화 하는 만능 함수 제작
+    function initializeAutocomplete(inputId, suggestionsId, apiUrl, formatter, valueField) {
+
+      const inputElement = document.getElementById(inputId);
+      const suggestionsContainer = document.getElementById(suggestionsId);
+
+      if (!inputElement || !suggestionsContainer) {
+        // 필요한 HTML 요소가 없을시 함수를 조용히 종료 함
+        return;
+      }
+
+      // 검색 로직을 별도의 함수로 분리 (재사용을 위함)
+      const performAutocompleteSearch = async () => {
+        const keyword = inputElement.value;
+
+        if (keyword.length == 0) {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none'; // 창 숨기기
+          return;
+        }
+
+        try {
+          const response = await fetch(`${apiUrl}?keyword=${encodeURIComponent(keyword)}`);
+          if (!response.ok) {
+            throw new Error(`데이터 로딩 실패: ${response.status}`);
+          }
+
+          const suggestions = await response.json();
+
+          suggestionsContainer.innerHTML = '';
+
+          if (suggestions.length == 0) {
+            suggestionsContainer.style.display = 'none'; // 결과없으면 창 숨기기
+            return;
+          }
+          suggestionsContainer.style.display = 'block'; // 결과있으면 보여주기
+
+          suggestions.forEach(suggestion => {
+            const item = document.createElement('div');
+            // 어떤 필드를 보여줄지 displayField 파라미터로 결정 함
+            item.className = 'suggestion-item';
+            // '포매터 함수(formatter)' 를 호출하여 HTML 내용을 만듬
+            item.innerHTML = formatter(suggestion);
+
+            item.onclick = () => {
+              // 클릭 시 검색창에 캠핑장 이름을 넣고 검색을 실행 혹은 상세페이지로 이동
+              inputElement.value = suggestion[valueField];
+              suggestionsContainer.style.display = 'none';
+              // alert(`'${suggestion.facltNm}' 을 선택했습니다. 실제로는 이 값으로 검색을 실행합니다.`)
+              //document.getElementsByClassName('search-btn').click() // 검색 버튼 클릭 효과
+            };
+
+            suggestionsContainer.appendChild(item);
+
+          });
+        } catch (error) {
+          console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
+          suggestionsContainer.style.display = 'none';
+        }
+      };
+
+      // 이벤트 리스너들 등록
+
+      // 키를 입력시 마다 검색을 진행
+      inputElement.addEventListener('keyup', performAutocompleteSearch);
+
+      // input 창을 다시 클릭(포커스) 했을때, 내용이 있다면 검색을 다시 실행
+      inputElement.addEventListener('focus', performAutocompleteSearch);
+
+      // 검색창에서 포커스가 벗어나면 결과창 숨기기
+      inputElement.addEventListener('blur', function () {
+        // 약간의 딜레이를 줘서 클릭 이벤트 처리 할 시간 확보
+        setTimeout(() => {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none';
+        }, 200);
+      });
+    }
+
+    /**
+    * 페이지가 처음 로딩될 때, 위에서 만든 '만능 함수'를 호출해서
+    * 각 자동완성 기능을 실제로 적용함.
+    * 새로운 자동완성 기능을 추가하고 싶으면,
+    * 아래에 initializeAutocomplete(...) 호출 코드 한 줄만 더 추가하면 됨!
+    */
+
+    // 페이지가 로딩 될시 , 각 입력창에 맞게 만능 함수를 호출 함
+    document.addEventListener('DOMContentLoaded', function () {
+      // 캠핑장 + 지역 자동완성 기능에 적용
+      initializeAutocomplete(
+        'region-keyword',
+        'region-suggestions',
+        '/api/search/autocomplete/region',
+        // 캠핑장 + 지역을 페이지에 보여주는 특별한 값 전달
+        (suggestion) => `<span class="suggestion-name">${suggestion.facltNm}</span><span class="suggestion-region">(${suggestion.doNm})</span>`,
+        'facltNm'                              // 클릭시에는 캠핑장이 이름만 입력
+      );
+
+      // 캠핑장 자동완성 기능에 적용
+      initializeAutocomplete(
+        'search-keyword',                       // 캠핑장 입력창 id
+        'autocomplete-suggestions',             // 캠핑장 결과창 id
+        '/api/search/autocomplete/facltNm',     // 캠핑장 api 주소
+        // 캠핑장 이름 페이지에 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.facltNm,
+        'facltNm'                               // 보여줄 데이터 필드
+      );
+
+      // 키워드 자동완성 기능에 적용
+      initializeAutocomplete(
+        'keyword',                                // 키워드 입력창 id
+        'keyword-suggestions',                    // 키워드 결과창 id
+        '/api/search/autocomplete/keyword',       // 키워드 api 주소
+        // 키워드 목록 간단하게 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.keyword,
+        'keyword'                                 // 보여줄 데이터 필드
+      );
+
+    });
+
 </script>
 </body>
 </html>

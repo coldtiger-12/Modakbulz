@@ -1,6 +1,8 @@
 package modackbulz.app.Application.web;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
@@ -19,19 +21,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
-@RequiredArgsConstructor
 @RequestMapping("/camping")
+@RequiredArgsConstructor
 public class CampingController {
 
   private final GoCampingService goCampingService;
   private final CampingDAO campingDAO;
   private final ReviewSVC reviewSVC;
   private final CampScrapDAO campScrapDAO;
+  private final ElasticsearchClient esClient;
 
   /**
    * 전체 캠핑장 목록 (수정됨: DB 우선 조회)
@@ -60,17 +65,19 @@ public class CampingController {
   }
 
   /**
-   * 캠핑장 검색 (수정됨: DB 우선 조회)
+   * 캠핑장 검색 (수정됨: DB
+   * 우선 조회)
    */
   @GetMapping("/search")
   public String searchCamps(
       @RequestParam(name = "keyword", required = false) String keyword,
       @RequestParam(name = "region", required = false) String region,
       @RequestParam(name = "theme", required = false) String theme,
+      @RequestParam(name = "facltNm", required = false) String facltNm,
       @PageableDefault(size = 9) Pageable pageable,
       @AuthenticationPrincipal CustomUserDetails userDetails,
       Model model
-  ) {
+  ) throws IOException {
     // 로그인 여부 확인
     boolean isLoggedIn = (userDetails != null);
     model.addAttribute("loginMember", isLoggedIn ? userDetails : null);
@@ -78,7 +85,8 @@ public class CampingController {
     // 검색어 조합 처리
     String finalKeyword = (keyword != null ? keyword : "")
         + (region != null ? " " + region : "")
-        + (theme != null ? " " + theme : "");
+        + (theme != null ? " " + theme : "")
+        + (facltNm != null ? " " + facltNm : "");
     finalKeyword = finalKeyword.trim();
 
     // 캠핑장 검색 or 전체 목록
@@ -103,9 +111,12 @@ public class CampingController {
     model.addAttribute("keyword", keyword);
     model.addAttribute("region", region);
     model.addAttribute("theme", theme);
+    model.addAttribute("facltNm", facltNm);
 
     return "camping/srcList";
   }
+
+
 
   /**
    * 캠핑장 상세 정보 (수정됨: DB 우선 조회)
@@ -248,9 +259,16 @@ public class CampingController {
 
   @GetMapping("/recommendations") // 클래스의 /camping 과 합쳐져 /camping/recommendations 가 됨
   @ResponseBody // JSON 데이터를 반환하기 위해 필수
-  public Mono<List<GoCampingDto.Item>> getCampingRecommendations() {
+  public Mono<List<GoCampingDto.Item>> getCampingRecommendations(
+      @RequestParam(name = "region", required = false) String region
+  ) {
     int numberOfRecommendations = 8; // 메인에 보여줄 추천 개수
-    // 이전에 만든 '스크랩순 정렬' 서비스 메소드를 호출하도록 변경
-    return goCampingService.getRecommendedList(numberOfRecommendations);
+
+    // 지역 파라미터가 있으면 지역별 추천, 없으면 전체 추천
+    if (region != null && !region.trim().isEmpty()) {
+      return goCampingService.getRecommendedListByRegion(region.trim(), numberOfRecommendations);
+    } else {
+      return goCampingService.getRecommendedList(numberOfRecommendations);
+    }
   }
 }

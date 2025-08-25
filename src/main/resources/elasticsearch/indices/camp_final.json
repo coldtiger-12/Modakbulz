@@ -1,0 +1,86 @@
+{
+  "mappings": {
+    "properties":{
+      "trsagntNo":{
+        "type": "keyword"
+      },
+      "keyword_theme":{
+        "type": "search_as_you_type"
+      },
+      "keyword_all":{
+        "type" : "text",
+        "analyzer": "korean_synonym_analyzer"
+      },
+      "lctCl":{
+        "type": "text",
+        "analyzer": "korean_synonym_analyzer",
+        "copy_to": "keyword_all",
+        "fields": {
+          "keyword":{ "type": "keyword"}
+        }
+      },
+      "sbrsCl" : {
+        "type": "text",
+        "analyzer": "korean_synonym_analyzer",
+        "copy_to": "keyword_all",
+        "fields": {
+          "keyword":{ "type": "keyword"}
+        }
+      },
+      "facltNm": {
+        "type": "search_as_you_type",
+        "copy_to": "keyword_all"
+      },
+      "themaEnvrnCl":{
+        "type" :"text",
+        "analyzer": "korean_synonym_analyzer",
+        "copy_to": [
+          "keyword_all",
+          "keyword_theme"
+        ],
+        "fields": { "keyword":  {"type": "keyword"} }
+      },
+      "column2":{
+        "type" : "text",
+        "copy_to" : [
+          "keyword_all",
+          "keyword_theme"
+        ],
+        "fields": {
+          "keyword":{
+            "type": "keyword",
+            "ignore_above" : "256"
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "filter": {
+        "korean_synonym_filter":{
+          "type": "synonym",
+          "synonyms" : [
+            "바다,해수욕장 => 해변",
+            "물놀이,수영장 => 여름물놀이,수상레저",
+            "강아지,멍멍이,댕댕이,애견,고양이,냥이 => 반려동물",
+            "깨끗한,청소 상태가 좋은 => 깔끔한",
+            "MT,워크샵 => 단체",
+            "벚꽃,꽃놀이,꽃,유채꽃 => 봄꽃여행",
+            "해돋이 => 일출명소"
+          ]
+        }
+      },
+      "analyzer": {
+        "korean_synonym_analyzer":{
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter":[
+            "korean_synonym_filter"
+          ]
+        }
+      }
+    }
+  }
+}
+

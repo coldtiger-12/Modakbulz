@@ -7,6 +7,7 @@
   <link rel="stylesheet" th:href="@{/css/common.css}">
   <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
   <link rel="stylesheet" th:href="@{/css/review-all.css}">
+  <link rel="stylesheet" th:href="@{/css/weather-widget.css}">
 
   <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
 </head>
@@ -201,6 +202,12 @@
     <div id="map-placeholder">지도가 표시될 영역입니다.</div>
   </section>
 
+  <!-- 날씨 정보 섹션 추가 -->
+  <section class="detail-weather" th:if="${camp.mapY != null and camp.mapX != null}">
+    <h2>캠핑장 주변 날씨</h2>
+    <div id="weather-widget-container"></div>
+  </section>
+
 </div>
 
 <div class="camp-detail-container" th:unless="${camp}">
@@ -219,10 +226,78 @@
   var mapX = /*[[${camp.mapX}]]*/ null;
 </script>
 <script src="/js/camp-map.js"></script>
+
+<!-- 날씨 위젯 스크립트 추가 -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="/js/react-app.js"></script>
+
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = [[${loginMember != null}]];
     const scrapButton = document.querySelector('.scrap-btn');
+
+    // 캠핑장 위치 기반 날씨 위젯 초기화
+    const weatherContainer = document.getElementById('weather-widget-container');
+    if (weatherContainer && mapY && mapX) {
+      // 캠핑장 위치의 가장 가까운 도시 찾기
+      const nearestCity = findNearestCity(parseFloat(mapY), parseFloat(mapX));
+
+      // 날씨 위젯에 위치 정보 전달
+      window.campingLocation = nearestCity;
+
+      // React 날씨 위젯 렌더링
+      const weatherRoot = ReactDOM.createRoot(weatherContainer);
+      weatherRoot.render(React.createElement(WeatherWidget, { initialLocation: nearestCity }));
+    }
+
+    // 위도/경도로 가장 가까운 도시 찾기 함수
+    function findNearestCity(lat, lng) {
+      const cities = {
+        '서울': { lat: 37.5665, lng: 126.9780 },
+        '부산': { lat: 35.1796, lng: 129.0756 },
+        '대구': { lat: 35.8714, lng: 128.6014 },
+        '인천': { lat: 37.4563, lng: 126.7052 },
+        '광주': { lat: 35.1595, lng: 126.8526 },
+        '대전': { lat: 36.3504, lng: 127.3845 },
+        '울산': { lat: 35.5384, lng: 129.3114 },
+        '세종': { lat: 36.4800, lng: 127.2890 },
+        '경기': { lat: 37.4138, lng: 127.5183 },
+        '강원': { lat: 37.8228, lng: 128.1555 },
+        '충북': { lat: 36.8000, lng: 127.7000 },
+        '충남': { lat: 36.5184, lng: 126.8000 },
+        '전북': { lat: 35.7175, lng: 127.1530 },
+        '전남': { lat: 34.8679, lng: 126.9910 },
+        '경북': { lat: 36.4919, lng: 128.8889 },
+        '경남': { lat: 35.4606, lng: 128.2132 },
+        '제주': { lat: 33.4996, lng: 126.5312 }
+      };
+
+      let nearestCity = '서울';
+      let minDistance = Infinity;
+
+      for (const [city, coords] of Object.entries(cities)) {
+        const distance = calculateDistance(lat, lng, coords.lat, coords.lng);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestCity = city;
+        }
+      }
+
+      return nearestCity;
+    }
+
+    // 두 지점 간의 거리 계산 (Haversine formula)
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371; // 지구의 반지름 (km)
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
 
     if (scrapButton) {
       scrapButton.addEventListener('click', async (event) => {

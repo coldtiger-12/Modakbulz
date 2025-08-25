@@ -248,11 +248,11 @@ header {
     cursor: pointer;
 }
 
+/* --- 캠핑장 이름 자동완성 스타일 추가 --- */
 .search-container{
     position: relative;
 }
 
-/* --- 자동완성 스타일 추가 --- */
 #autocomplete-suggestions {
     position: absolute;
     top: 100%;
@@ -273,6 +273,118 @@ header {
     display : none;
 }
 
+#autocomplete-suggestions-Sl {
+    position: absolute;
+    top: 100%;
+    left: 83px;
+    width: calc(100% - 83px);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 설정 */
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    background-color: #ffffff;
+    width: 385px; /* 지역 입력창 너비에 맞게 조절 */
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    /* 평소에는 가림 처리 */
+    display : none;
+}
+
+/* --- 키워드 자동완성 스타일 추가 -- */
+
+.keyword-container{
+    position: relative;
+}
+
+#keyword-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 74px;
+    width: calc(100% - 74px);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 설정 */
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    background-color: #ffffff;
+    width: 385px; /* 지역 입력창 너비에 맞게 조절 */
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    /* 평소에는 가림 처리 */
+    display : none;
+}
+
+#keyword-suggestions-Sl {
+    position: absolute;
+    top: 100%;
+    left: 83px;
+    width: calc(100% - 83px);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 설정 */
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    background-color: #ffffff;
+    width: 385px; /* 지역 입력창 너비에 맞게 조절 */
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    /* 평소에는 가림 처리 */
+    display : none;
+}
+
+/* --- 캠핑장 (지역) 자동완성 스타일 추가 -- */
+
+.region-container{
+    position: relative;
+}
+
+#region-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 74px;
+    width: calc(100% - 74px);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 설정 */
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    background-color: #ffffff;
+    width: 385px; /* 지역 입력창 너비에 맞게 조절 */
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    /* 평소에는 가림 처리 */
+    display : none;
+}
+
+#region-suggestions-Sl {
+    position: absolute;
+    top: 100%;
+    left: 83px;
+    width: calc(100% - 83px);
+    z-index: 1000; /* 다른 요소들 위에 보이도록 설정 */
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    background-color: #ffffff;
+    width: 385px; /* 지역 입력창 너비에 맞게 조절 */
+    max-height: 250px;
+    overflow-y: auto;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid #dbdbdb;
+    border-top: none;
+    /* 평소에는 가림 처리 */
+    display : none;
+}
+
 .suggestion-item {
     padding: 10px 15px;
     cursor: pointer;
@@ -281,6 +393,7 @@ header {
     font-size: 14px;
     color: #333333
 }
+
 
 .suggestion-item:hover {
     background-color: #f0f0f0;

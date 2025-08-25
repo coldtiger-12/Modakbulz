@@ -6,6 +6,7 @@ import modackbulz.app.Application.config.auth.CustomLoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,6 +50,7 @@ public class SecurityConfig {
                 "/find/**",
                 "/member/**",
                 "/camping/**",
+                "/reviews/**",
                 "/posts/community/**",
                 "/api/**",  // ❗ 여기서 /api/**는 제외하거나 scrap보다 아래로 내려야 함
                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/upload-images/**"
@@ -83,6 +85,9 @@ public class SecurityConfig {
 
         // 4. 접근 거부 핸들러
         .exceptionHandling(exception -> exception
+            .authenticationEntryPoint((request, response, authException) -> {
+              response.setStatus(HttpStatus.NOT_FOUND.value());     // 비인가 사용자는 404 오류 발생 ( 로그인 루프 방지 )
+            })
             .accessDeniedPage("/access-denied")
         )
 

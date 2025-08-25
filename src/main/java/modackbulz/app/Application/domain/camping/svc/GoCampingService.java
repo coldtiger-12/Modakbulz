@@ -2,18 +2,18 @@ package modackbulz.app.Application.domain.camping.svc;
 
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
-import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.dto.CampingImageDto;
+import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,7 +98,6 @@ public class GoCampingService {
         .bodyToMono(CampingImageDto.class);
   }
 
-  // ... (이 아래 다른 메소드들은 수정 없이 그대로 사용하시면 됩니다) ...
   public Mono<List<GoCampingDto.Item>> getBasedList(int numOfRows) {
     Page<GoCampingDto.Item> dbPage = campingDAO.findAll(Pageable.ofSize(numOfRows));
     if (dbPage != null && !dbPage.getContent().isEmpty()) {
@@ -318,6 +317,25 @@ public class GoCampingService {
     } else {
       log.warn("스크랩된 캠핑장이 없어 최신순으로 목록을 반환합니다.");
       return getBasedList(numOfRows);
+    }
+  }
+
+  /**
+   * 지역으로 필터링된 추천 캠핑장 목록을 반환합니다.
+   * @param region    필터링할 지역 이름
+   * @param numOfRows 가져올 개수
+   * @return 캠핑장 목록 Mono
+   */
+  public Mono<List<GoCampingDto.Item>> getRecommendedListByRegion(String region, int numOfRows) {
+    Pageable pageable = Pageable.ofSize(numOfRows);
+    Page<GoCampingDto.Item> dbPage = campingDAO.findAllByRegionOrderByScrapCountDesc(region, pageable);
+
+    if (dbPage != null && !dbPage.getContent().isEmpty()) {
+      log.info("DB에서 '{}' 지역의 스크랩 순 추천 캠핑장 목록을 조회합니다. (개수: {})", region, dbPage.getContent().size());
+      return Mono.just(dbPage.getContent());
+    } else {
+      log.warn("'{}' 지역에 추천할 캠핑장이 없습니다. 빈 목록을 반환합니다.", region);
+      return Mono.just(Collections.emptyList()); // 결과가 없을 경우 비어있는 리스트 반환
     }
   }
 }

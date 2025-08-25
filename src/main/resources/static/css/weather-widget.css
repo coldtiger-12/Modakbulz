@@ -1,0 +1,563 @@
+/* 날씨 위젯 스타일 */
+.weather-section {
+  margin-bottom: 20px;
+}
+
+.weather-widget {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.weather-widget.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.weather-widget.error {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  text-align: center;
+}
+
+.weather-spinner {
+  font-size: 2rem;
+  animation: spin 2s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.weather-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.location-selector {
+  position: relative;
+}
+
+.location-select {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.location-select option {
+  background: #333;
+  color: white;
+}
+
+.weather-current {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.weather-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.temperature {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.feels-like {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.description {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.detail-item .label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.detail-item .value {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.camping-index {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.index-label {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+.index-stars {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.index-text {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.weather-forecast {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 15px;
+}
+
+.weather-forecast h4 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.forecast-items {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.forecast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 60px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.forecast-time {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.forecast-icon {
+  font-size: 1.5rem;
+}
+
+.forecast-temp {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.retry-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* 캠핑 지수 계산기 스타일 */
+.camping-index-section {
+  margin-bottom: 20px;
+}
+
+.camping-index-calculator {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.camping-index-calculator.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.camping-index-calculator.error {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  text-align: center;
+}
+
+.loading-spinner {
+  font-size: 2rem;
+  animation: spin 2s linear infinite;
+  margin-bottom: 10px;
+}
+
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calculator-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.current-weather {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.camping-index-display {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.index-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.index-header h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+}
+
+.index-score {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.index-grade {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.detailed-scores h5 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.score-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.score-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.score-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.score-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.score-details {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.camping-tips {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.camping-tips h5 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.tips-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .weather-current {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .weather-main {
+    justify-content: center;
+  }
+  
+  .weather-details {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .forecast-items {
+    justify-content: center;
+  }
+  
+  .calculator-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .location-selector {
+    width: 100%;
+  }
+  
+  .location-select {
+    width: 100%;
+  }
+}
+
+/* 로딩 오버레이 스타일 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.loading-container {
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Camp Pokémon 로고 스타일 */
+.camp-pokemon-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInUp 1s ease-out;
+}
+
+.camp-pokemon-image {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.camp-pokemon-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 20px;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  to {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+}
+
+.loading-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.camping-icon {
+  font-size: 3rem;
+  animation: bounce 2s infinite;
+}
+
+.logo-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.spinner-ring {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 5px;
+}
+
+.spinner-ring:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.spinner-ring:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.loading-text {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.progress-bar {
+  width: 300px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+

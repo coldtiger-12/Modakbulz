@@ -1,13 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>모닥불즈</title>
   <link rel="stylesheet" href="" th:href="@{/css/common.css}">
+  <link rel="stylesheet" href="" th:href="@{/css/weather-widget.css}">
+  <link rel="stylesheet" href="" th:href="@{/css/footer.css}">
 </head>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay" class="loading-overlay" style="display: flex;">
+  <div class="loading-container">
+    <div class="camp-pokemon-logo">
+      <img src="/images/Camp_pokemon_logo.png" alt="Camp Pokémon" class="camp-pokemon-image">
+      <div class="camp-pokemon-text">Camp Pokémon</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0%</div>
+  </div>
+</div>
 
 <body>
   <!-- 탑 메뉴 -->
@@ -18,52 +33,70 @@
   <div th:replace="~{fragments/topmenu :: header}"></div>
 
   <!-- 메인 페이지 -->
-  <div class="main-container">
+  <div class="main-container" style="opacity: 0; transition: opacity 0.5s ease;">
 
     <!-- 상단 -->
     <div class="top-area">
 
       <!-- 검색 + 커뮤니티 -->
       <div class="left-area">
+
+        <!-- 날씨 위젯 영역 -->
+        <div class="weather-section">
+          <div id="weather-widget-container"></div>
+        </div>
+
+        <!-- 캠핑 지수 계산기 영역 -->
+        <div class="camping-index-section">
+          <div id="camping-index-calculator-container"></div>
+        </div>
+
         <section class="search-area">
           <h2>캠핑장 & 글램핑장 검색</h2>
           <form th:action="@{/camping/search}" method="get">
             <div class="search-box">
               <div class="form-fields">
-                <div class="form-row">
+                <div class="form-row keyword-container">
                   <label>키워드</label>
-                  <input type="text" name="keyword" />
+                  <input type="text" name="keyword" id="keyword" autocomplete="off" />
+                  <div id="keyword-suggestions"></div>
+                </div>
+                <div class="form-row region-container">
+                  <label>지역</label>
+                  <input type="text" name="region" id="region-input" autocomplete="off"/>
+                  <div id="region-suggestions"></div>
                 </div>
                 <div class="form-row search-container">
-                  <label>지역</label>
-                  <input type="text" name="region" id="search-keyword" autocomplete="off" />
+                  <label>캠핑장</label>
+                  <input type="text" name="facltNm" id="search-keyword" autocomplete="off" />
                   <div id="autocomplete-suggestions"></div>
-                </div>
-                <div class="form-row">
-                  <label>테마</label>
-                  <input type="text" name="theme" />
                 </div>
               </div>
 
               <button type="submit" class="search-btn"></button>
             </div>
-
-
           </form>
+
           <div class="tags">
-            <a th:href="@{/camping/search(theme='여름물놀이')}" class="tag-link">#여름물놀이</a>
-            <a th:href="@{/camping/search(theme='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
-            <a th:href="@{/camping/search(theme='걷기길')}" class="tag-link">#걷기길</a>
-            <a th:href="@{/camping/search(theme='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
-            <a th:href="@{/camping/search(theme='낚시')}" class="tag-link">#낚시</a>
-            <a th:href="@{/camping/search(theme='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
-            <a th:href="@{/camping/search(theme='일몰명소')}" class="tag-link">#일몰명소</a>
-            <a th:href="@{/camping/search(theme='수상레저')}" class="tag-link">#수상레저</a>
-            <a th:href="@{/camping/search(theme='액티비티')}" class="tag-link">#액티비티</a>
-            <a th:href="@{/camping/search(theme='일출명소')}" class="tag-link">#일출명소</a>
-            <a th:href="@{/camping/search(theme='스키')}" class="tag-link">#스키</a>
-            <a th:href="@{/camping/search(theme='항공레저')}" class="tag-link">#항공레저</a>
+            <a th:href="@{/camping/search(keyword='여름물놀이')}" class="tag-link">#여름물놀이</a>
+            <a th:href="@{/camping/search(keyword='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
+            <a th:href="@{/camping/search(keyword='걷기길')}" class="tag-link">#걷기길</a>
+            <a th:href="@{/camping/search(keyword='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
+            <a th:href="@{/camping/search(keyword='낚시')}" class="tag-link">#낚시</a>
+            <a th:href="@{/camping/search(keyword='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
+            <a th:href="@{/camping/search(keyword='일몰명소')}" class="tag-link">#일몰명소</a>
+            <a th:href="@{/camping/search(keyword='수상레저')}" class="tag-link">#수상레저</a>
+            <a th:href="@{/camping/search(keyword='액티비티')}" class="tag-link">#액티비티</a>
+            <a th:href="@{/camping/search(keyword='일출명소')}" class="tag-link">#일출명소</a>
+            <a th:href="@{/camping/search(keyword='스키')}" class="tag-link">#스키</a>
+            <a th:href="@{/camping/search(keyword='항공레저')}" class="tag-link">#항공레저</a>
           </div>
+
+          <div class="popular-keywords" style="margin-top: 20px; border-top: 1px solid #84925a; padding-top: 20px;">
+            <h4 style="color: #fcfaf2; margin-bottom: 12px; font-size: 1rem; padding-left: 5px;">🔥 인기 검색어</h4>
+            <div class="tags" id="popular-keywords-container"></div>
+          </div>
+
         </section>
       </div>
 
@@ -142,8 +175,23 @@
         </div>
       </div>
     </section>
+
   </div>
 
+  <!-- Footer -->
+  <div th:replace="~{fragments/footer :: site-footer}"></div>
+
+  <!-- jQuery 및 jQuery UI -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+  <!-- React 스크립트 -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <script src="/js/ranking.js"></script>
+  <script src="/js/find-recommendation.js"></script>
   <script>
     // 페이지 로딩이 완료되면 자동으로 실행됩니다.
     document.addEventListener('DOMContentLoaded', () => {
@@ -180,83 +228,132 @@
           const container = document.getElementById('recommend-camps-container');
           container.innerHTML = '<p>정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
         });
-    });
 
-    // 자동 완성 기능을 위한 JS
-    document.addEventListener('DOMContentLoaded', function () {
+      });
 
-      const searchInput = document.getElementById('search-keyword');
-      const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+    /**
+    * 자동완성 기능을 초기화하는 '만능 함수'
+    * 이 함수 하나로 여러 개의 자동완성 기능을 만들 수 있음
+    */
 
-      // 검색창이 없는 페이지도 있을수 있으므로 , 요소가 있을 경우에만 이벤트를 추가
-      if (searchInput && suggestionsContainer) {
+    // 자동 완성 기능을 위한 JS () - 자동 완성 기능을 초기화 하는 만능 함수 제작
+    function initializeAutocomplete(inputId, suggestionsId, apiUrl, formatter, valueField) {
 
-        // 검색 로직을 별도의 함수로 분리 (재사용을 위함)
-        const performAutocompleteSearch = async () => {
-          const keyword = searchInput.value;
+      const inputElement = document.getElementById(inputId);
+      const suggestionsContainer = document.getElementById(suggestionsId);
 
-          if (keyword.length == 0) {
-            suggestionsContainer.innerHTML = '';
-            suggestionsContainer.style.display = 'none'; // 창 숨기기
+      if (!inputElement || !suggestionsContainer) {
+        // 필요한 HTML 요소가 없을시 함수를 조용히 종료 함
+        return;
+      }
+
+      // 검색 로직을 별도의 함수로 분리 (재사용을 위함)
+      const performAutocompleteSearch = async () => {
+        const keyword = inputElement.value;
+
+        if (keyword.length == 0) {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none'; // 창 숨기기
+          return;
+        }
+
+        try {
+          const response = await fetch(`${apiUrl}?keyword=${encodeURIComponent(keyword)}`);
+          if (!response.ok) {
+            throw new Error(`데이터 로딩 실패: ${response.status}`);
+          }
+
+          const suggestions = await response.json();
+
+          suggestionsContainer.innerHTML = '';
+
+          if (suggestions.length == 0) {
+            suggestionsContainer.style.display = 'none'; // 결과없으면 창 숨기기
             return;
           }
+          suggestionsContainer.style.display = 'block'; // 결과있으면 보여주기
 
-          try {
-            const response = await fetch(`/api/search/autocomplete?keyword=${encodeURIComponent(keyword)}`);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const suggestions = await response.json();
+          suggestions.forEach(suggestion => {
+            const item = document.createElement('div');
+            // 어떤 필드를 보여줄지 displayField 파라미터로 결정 함
+            item.className = 'suggestion-item';
+            // '포매터 함수(formatter)' 를 호출하여 HTML 내용을 만듬
+            item.innerHTML = formatter(suggestion);
 
-            suggestionsContainer.innerHTML = '';
+            item.onclick = () => {
+              // 클릭 시 검색창에 캠핑장 이름을 넣고 검색을 실행 혹은 상세페이지로 이동
+              inputElement.value = suggestion[valueField];
+              suggestionsContainer.style.display = 'none';
+              //document.getElementsByClassName('search-btn').click() // 검색 버튼 클릭 효과
+            };
 
-            if (suggestions.length == 0) {
-              suggestionsContainer.style.display = 'none'; // 결과없으면 창 숨기기
-              return;
-            }
-            suggestionsContainer.style.display = 'block'; // 결과있으면 보여주기
+            suggestionsContainer.appendChild(item);
 
-            suggestions.forEach(suggestion => {
-              const item = document.createElement('div');
-              item.textContent = `${suggestion.doNm}`;
-              item.className = 'suggestion-item';
+          });
+        } catch (error) {
+          console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
+          suggestionsContainer.style.display = 'none';
+        }
+      };
 
-              item.onclick = () => {
-                // 클릭 시 검색창에 캠핑장 이름을 넣고 검색을 실행 혹은 상세페이지로 이동
-                searchInput.value = suggestion.doNm;
-                suggestionsContainer.innerHTML = '';
-                suggestionsContainer.style.display = 'none';
-                // alert(`'${suggestion.facltNm}' 을 선택했습니다. 실제로는 이 값으로 검색을 실행합니다.`)
-                //document.getElementsByClassName('search-btn').click() // 검색 버튼 클릭 효과
-              };
+      // 이벤트 리스너들 등록
 
-              suggestionsContainer.appendChild(item);
+      // 키를 입력시 마다 검색을 진행
+      inputElement.addEventListener('keyup', performAutocompleteSearch);
 
-            });
-          } catch (error) {
-            console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
-            suggestionsContainer.style.display = 'none';
-          }
-        };
+      // input 창을 다시 클릭(포커스) 했을때, 내용이 있다면 검색을 다시 실행
+      inputElement.addEventListener('focus', performAutocompleteSearch);
 
-        // 이벤트 리스너들 등록
+      // 검색창에서 포커스가 벗어나면 결과창 숨기기
+      inputElement.addEventListener('blur', function () {
+        // 약간의 딜레이를 줘서 클릭 이벤트 처리 할 시간 확보
+        setTimeout(() => {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none';
+        }, 200);
+      });
+    }
 
-        // 키를 입력시 마다 검색을 진행
-        searchInput.addEventListener('keyup', performAutocompleteSearch);
+    /**
+    * 페이지가 처음 로딩될 때, 위에서 만든 '만능 함수'를 호출해서
+    * 각 자동완성 기능을 실제로 적용함.
+    * 새로운 자동완성 기능을 추가하고 싶으면,
+    * 아래에 initializeAutocomplete(...) 호출 코드 한 줄만 더 추가하면 됨!
+    */
 
-        // input 창을 다시 클릭(포커스) 했을때, 내용이 있다면 검색을 다시 실행
-        searchInput.addEventListener('focus', performAutocompleteSearch);
+    // 페이지가 로딩 될시 , 각 입력창에 맞게 만능 함수를 호출 함
+    document.addEventListener('DOMContentLoaded', function () {
+      // 캠핑장 + 지역 자동완성 기능에 적용
+      initializeAutocomplete(
+        'region-keyword',
+        'region-suggestions',
+        '/api/search/autocomplete/region',
+        // 캠핑장 + 지역을 페이지에 보여주는 특별한 값 전달
+        (suggestion) => `<span class="suggestion-name">${suggestion.facltNm}</span><span class="suggestion-region">(${suggestion.doNm})</span>`,
+        'facltNm'                              // 클릭시에는 캠핑장이 이름만 입력
+      );
 
-        // 검색창에서 포커스가 벗어나면 결과창 숨기기
-        searchInput.addEventListener('blur', function () {
-          // 약간의 딜레이를 줘서 클릭 이벤트 처리 할 시간 확보
-          setTimeout(() => {
-            suggestionsContainer.innerHTML = '';
-            suggestionsContainer.style.display = 'none';
-          }, 200);
-        });
-      }
-  });
+      // 캠핑장 자동완성 기능에 적용
+      initializeAutocomplete(
+        'search-keyword',                       // 캠핑장 입력창 id
+        'autocomplete-suggestions',             // 캠핑장 결과창 id
+        '/api/search/autocomplete/facltNm',     // 캠핑장 api 주소
+        // 캠핑장 이름 페이지에 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.facltNm,
+        'facltNm'                               // 보여줄 데이터 필드
+      );
+
+      // 키워드 자동완성 기능에 적용
+      initializeAutocomplete(
+        'keyword',                                // 키워드 입력창 id
+        'keyword-suggestions',                    // 키워드 결과창 id
+        '/api/search/autocomplete/keyword',       // 키워드 api 주소
+        // 테마 목록 간단하게 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.keyword,
+        'keyword'                                 // 보여줄 데이터 필드
+      );
+
+    });
 
   </script>
 
@@ -264,6 +361,7 @@
   <script
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
   <script src="/js/main-map.js"></script>
+  <script src="/js/react-app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       if (window.initMainMap) {

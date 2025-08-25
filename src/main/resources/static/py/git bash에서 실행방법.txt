@@ -1,0 +1,22 @@
+3팀 7명을 각1~7번에 배치하여 git bash에서 아래의 코드 실행
+
+# 배치 1 실행 (인덱스 0~617, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 1
+
+# 배치 2 실행 (인덱스 618~1235, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 2
+
+# 배치 3 실행 (인덱스 1236~1853, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 3
+
+# 배치 4 실행 (인덱스 0~617, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 4
+
+# 배치 5 실행 (인덱스 618~1235, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 5
+
+# 배치 6 실행 (인덱스 1236~1853, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 6
+
+# 배치 7 실행 (인덱스 1236~1853, 618개)
+python kakao_review_crawler_elasticsearch_fixed.py --batch 7

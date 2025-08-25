@@ -35,6 +35,7 @@ public class GoCampingDto {
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Item {
     private Long contentId;
+    private String doNm;    // 도 이름
     private String facltNm; // 야영장명
     private String lineIntro; // 한줄소개
     private String intro;   //캠핑장소개
