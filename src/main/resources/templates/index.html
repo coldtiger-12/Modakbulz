@@ -13,9 +13,9 @@
 <!-- 로딩 오버레이 -->
 <div id="loading-overlay" class="loading-overlay" style="display: flex;">
   <div class="loading-container">
-    <div class="camp-pokemon-logo">
-      <img src="/images/Camp_pokemon_logo.png" alt="Camp Pokémon" class="camp-pokemon-image">
-      <div class="camp-pokemon-text">Camp Pokémon</div>
+    <div class="camp-modakbulz-logo">
+      <img src="/images/모닥불즈로고.png" alt="Camp Modakbulz" class="camp-modakbulz-image">
+      <div class="camp-modakbulz-text">Camp Modakbulz</div>
     </div>
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill"></div>
@@ -136,42 +136,10 @@
     <section class="map-section box">
       <h2>캠핑장 지도</h2>
       <div class="map-container" style="position: relative;">
-        <!-- 지역 선택 드롭다운 -->
-        <div class="region-selector"
-          style="position: absolute; top: 10px; left: 10px; z-index: 10; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <label for="region-select" style="font-size: 12px; color: #666; margin-right: 8px;">지역 선택:</label>
-          <select id="region-select"
-            style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
-            <option value="recommended">추천 캠핑장</option>
-            <option value="all">전국</option>
-            <option value="서울">서울특별시</option>
-            <option value="부산">부산광역시</option>
-            <option value="대구">대구광역시</option>
-            <option value="인천">인천광역시</option>
-            <option value="광주">광주광역시</option>
-            <option value="대전">대전광역시</option>
-            <option value="울산">울산광역시</option>
-            <option value="세종">세종특별자치시</option>
-            <option value="경기">경기도</option>
-            <option value="강원">강원도</option>
-            <option value="충북">충청북도</option>
-            <option value="충남">충청남도</option>
-            <option value="전북">전라북도</option>
-            <option value="전남">전라남도</option>
-            <option value="경북">경상북도</option>
-            <option value="경남">경상남도</option>
-            <option value="제주">제주특별자치도</option>
-          </select>
-        </div>
-
         <div id="main-map" style="width: 100%; height: 500px;"></div>
         <div id="roadview-container" style="width:100%; height:400px; display:none;"></div>
         <div class="map-controls"
           style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 8px;">
-          <button id="map-btn" class="map-mode-btn active"
-            style="background: #ff9800; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">지도</button>
-          <button id="roadview-btn" class="map-mode-btn"
-            style="background: #4CAF50; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: bold; cursor: pointer;">로드뷰</button>
         </div>
       </div>
     </section>

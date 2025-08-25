@@ -581,49 +581,49 @@ window.initMainMap = function() {
 
 
 
-  // ====== 지도/로드뷰 모드 전환 ======
-  function setActiveMode(mode) {
-    var mapBtn = document.getElementById('map-btn');
-    var roadviewBtn = document.getElementById('roadview-btn');
-
-    if (mode === 'map') {
-      mapContainer.style.display = 'block';
-      roadviewContainer.style.display = 'none';
-      mapBtn.classList.add('active');
-      roadviewBtn.classList.remove('active');
-      currentMode = 'map';
-    } else if (mode === 'roadview') {
-      mapContainer.style.display = 'none';
-      roadviewContainer.style.display = 'block';
-      mapBtn.classList.remove('active');
-      roadviewBtn.classList.add('active');
-      currentMode = 'roadview';
-    }
-  }
-
-  // 지도 버튼 클릭 이벤트
-  document.getElementById('map-btn').onclick = function() {
-    setActiveMode('map');
-  };
-
-  // 로드뷰 버튼 클릭 이벤트
-  document.getElementById('roadview-btn').onclick = function() {
-    if (!roadview) {
-      roadview = new kakao.maps.Roadview(roadviewContainer);
-    }
-    setActiveMode('roadview');
-
-    // 로드뷰 초기화 (지도 중심 좌표 기준)
-    var roadviewClient = new kakao.maps.RoadviewClient();
-    roadviewClient.getNearestPanoId(map.getCenter(), 50, function(panoId) {
-      if (panoId) {
-        roadview.setPanoId(panoId, map.getCenter());
-      } else {
-        alert('해당 위치에는 로드뷰가 없습니다.');
-        setActiveMode('map');
-      }
-    });
-  };
+//  // ====== 지도/로드뷰 모드 전환 ======
+//  function setActiveMode(mode) {
+//    var mapBtn = document.getElementById('map-btn');
+//    var roadviewBtn = document.getElementById('roadview-btn');
+//
+//    if (mode === 'map') {
+//      mapContainer.style.display = 'block';
+//      roadviewContainer.style.display = 'none';
+//      mapBtn.classList.add('active');
+//      roadviewBtn.classList.remove('active');
+//      currentMode = 'map';
+//    } else if (mode === 'roadview') {
+//      mapContainer.style.display = 'none';
+//      roadviewContainer.style.display = 'block';
+//      mapBtn.classList.remove('active');
+//      roadviewBtn.classList.add('active');
+//      currentMode = 'roadview';
+//    }
+//  }
+//
+//  // 지도 버튼 클릭 이벤트
+//  document.getElementById('map-btn').onclick = function() {
+//    setActiveMode('map');
+//  };
+//
+//  // 로드뷰 버튼 클릭 이벤트
+//  document.getElementById('roadview-btn').onclick = function() {
+//    if (!roadview) {
+//      roadview = new kakao.maps.Roadview(roadviewContainer);
+//    }
+//    setActiveMode('roadview');
+//
+//    // 로드뷰 초기화 (지도 중심 좌표 기준)
+//    var roadviewClient = new kakao.maps.RoadviewClient();
+//    roadviewClient.getNearestPanoId(map.getCenter(), 50, function(panoId) {
+//      if (panoId) {
+//        roadview.setPanoId(panoId, map.getCenter());
+//      } else {
+//        alert('해당 위치에는 로드뷰가 없습니다.');
+//        setActiveMode('map');
+//      }
+//    });
+//  };
 
   // 추천 캠핑장 8개 (기본 마커)
   fetch('/camping/recommendations')
