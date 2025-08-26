@@ -221,126 +221,48 @@
   var campName = '[[${camp.facltNm}]]';
   var address = '[[${camp.addr1}]]';
   var campTel = '[[${camp.tel}]]';
-  // 위도/경도 변수 추가
   var mapY = /*[[${camp.mapY}]]*/ null;
   var mapX = /*[[${camp.mapX}]]*/ null;
 </script>
 <script src="/js/camp-map.js"></script>
 
-<!-- 날씨 위젯 스크립트 추가 -->
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="/js/react-app.js"></script>
+<!-- 바닐라 날씨 위젯 -->
+<script th:src="@{/js/weather-widget.js}"></script>
 
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
-    const isLoggedIn = [[${loginMember != null}]];
-    const scrapButton = document.querySelector('.scrap-btn');
-
-    // 캠핑장 위치 기반 날씨 위젯 초기화
     const weatherContainer = document.getElementById('weather-widget-container');
-    if (weatherContainer && mapY && mapX) {
-      // 캠핑장 위치의 가장 가까운 도시 찾기
-      const nearestCity = findNearestCity(parseFloat(mapY), parseFloat(mapX));
 
-      // 날씨 위젯에 위치 정보 전달
+    if (weatherContainer && mapY && mapX) {
+      const nearestCity = (function findNearestCity(lat, lng) {
+        const cities = {
+          '서울': { lat: 37.5665, lng: 126.9780 }, '부산': { lat: 35.1796, lng: 129.0756 },
+          '대구': { lat: 35.8714, lng: 128.6014 }, '인천': { lat: 37.4563, lng: 126.7052 },
+          '광주': { lat: 35.1595, lng: 126.8526 }, '대전': { lat: 36.3504, lng: 127.3845 },
+          '울산': { lat: 35.5384, lng: 129.3114 }, '세종': { lat: 36.4800, lng: 127.2890 },
+          '경기': { lat: 37.4138, lng: 127.5183 }, '강원': { lat: 37.8228, lng: 128.1555 },
+          '충북': { lat: 36.8000, lng: 127.7000 }, '충남': { lat: 36.5184, lng: 126.8000 },
+          '전북': { lat: 35.7175, lng: 127.1530 }, '전남': { lat: 34.8679, lng: 126.9910 },
+          '경북': { lat: 36.4919, lng: 128.8889 }, '경남': { lat: 35.4606, lng: 128.2132 },
+          '제주': { lat: 33.4996, lng: 126.5312 }
+        };
+        const R = 6371;
+        const d2r = Math.PI/180;
+        let best = '서울', min = Infinity;
+        for (const [city, c] of Object.entries(cities)) {
+          const dLat = (c.lat - lat) * d2r, dLng = (c.lng - lng) * d2r;
+          const a = Math.sin(dLat/2)**2 + Math.cos(lat*d2r)*Math.cos(c.lat*d2r)*Math.sin(dLng/2)**2;
+          const d = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * R;
+          if (d < min) { min = d; best = city; }
+        }
+        return best;
+      })(parseFloat(mapY), parseFloat(mapX));
+
+      // 전역 사용하고 싶다면 유지
       window.campingLocation = nearestCity;
 
-      // React 날씨 위젯 렌더링
-      const weatherRoot = ReactDOM.createRoot(weatherContainer);
-      weatherRoot.render(React.createElement(WeatherWidget, { initialLocation: nearestCity }));
-    }
-
-    // 위도/경도로 가장 가까운 도시 찾기 함수
-    function findNearestCity(lat, lng) {
-      const cities = {
-        '서울': { lat: 37.5665, lng: 126.9780 },
-        '부산': { lat: 35.1796, lng: 129.0756 },
-        '대구': { lat: 35.8714, lng: 128.6014 },
-        '인천': { lat: 37.4563, lng: 126.7052 },
-        '광주': { lat: 35.1595, lng: 126.8526 },
-        '대전': { lat: 36.3504, lng: 127.3845 },
-        '울산': { lat: 35.5384, lng: 129.3114 },
-        '세종': { lat: 36.4800, lng: 127.2890 },
-        '경기': { lat: 37.4138, lng: 127.5183 },
-        '강원': { lat: 37.8228, lng: 128.1555 },
-        '충북': { lat: 36.8000, lng: 127.7000 },
-        '충남': { lat: 36.5184, lng: 126.8000 },
-        '전북': { lat: 35.7175, lng: 127.1530 },
-        '전남': { lat: 34.8679, lng: 126.9910 },
-        '경북': { lat: 36.4919, lng: 128.8889 },
-        '경남': { lat: 35.4606, lng: 128.2132 },
-        '제주': { lat: 33.4996, lng: 126.5312 }
-      };
-
-      let nearestCity = '서울';
-      let minDistance = Infinity;
-
-      for (const [city, coords] of Object.entries(cities)) {
-        const distance = calculateDistance(lat, lng, coords.lat, coords.lng);
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestCity = city;
-        }
-      }
-
-      return nearestCity;
-    }
-
-    // 두 지점 간의 거리 계산 (Haversine formula)
-    function calculateDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371; // 지구의 반지름 (km)
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    if (scrapButton) {
-      scrapButton.addEventListener('click', async (event) => {
-        if (!isLoggedIn) {
-          alert('로그인이 필요한 기능입니다.');
-          window.location.href = '/login';
-          return;
-        }
-
-        const campItem = {
-            contentId: /*[[${camp.contentId}]]*/,
-            facltNm: /*[[${camp.facltNm}]]*/,
-            addr1: /*[[${camp.addr1}]]*/,
-            firstImageUrl: /*[[${camp.firstImageUrl}]]*/
-        };
-
-        try {
-          const response = await fetch('/api/scraps/toggle', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(campItem)
-          });
-
-          if (response.status === 401) {
-            alert('세션이 만료되었거나 로그인이 필요합니다.');
-            window.location.href = '/login';
-            return;
-          }
-
-          const result = await response.json();
-          event.target.textContent = result.isScrapped ? '★' : '☆';
-          if (result.isScrapped) {
-              alert('캠핑장을 스크랩했습니다.');
-          } else {
-              alert('캠핑장 스크랩을 취소했습니다.');
-          }
-
-        } catch (error) {
-          console.error('스크랩 오류:', error);
-          alert('스크랩 처리 중 오류가 발생했습니다.');
-        }
-      });
+      // 바닐라 위젯 마운트
+      initWeatherWidget(weatherContainer, nearestCity);
     }
   });
 </script>

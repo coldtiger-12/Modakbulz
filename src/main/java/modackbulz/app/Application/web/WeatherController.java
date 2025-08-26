@@ -32,155 +32,25 @@ public class WeatherController {
   }
 
   @GetMapping("/current")
-  public ResponseEntity<Map<String, Object>> getCurrentWeather(
-      @RequestParam("location") String location) {
-
+  public ResponseEntity<Map<String, Object>> getCurrentWeather(@RequestParam("location") String location) {
     log.info("실시간 날씨 API 호출 시작 - 위치: {}", location);
-
     try {
-      // 먼저 캐시된 데이터 확인
+      // 1) 캐시 먼저
       Map<String, Object> cachedData = weatherDataScheduler.getCachedWeatherData(location);
       if (cachedData != null) {
         log.info("캐시된 실시간 날씨 데이터 사용 - 위치: {}", location);
         return ResponseEntity.ok(cachedData);
       }
-/*
-            log.info("캐시된 데이터가 없어 실시간 API 호출 - 위치: {}", location);
 
-            // API 키 확인
-            if (apiKey == null || apiKey.isEmpty()) {
-                log.error("기상청 API 키가 설정되지 않았습니다.");
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "기상청 API 키가 설정되지 않았습니다.");
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
+      // 2) 캐시가 없으면 실시간 호출로 대체
+      return fetchLiveWeatherResponse(location);
 
-            // 위치에 따른 좌표 설정
-            int nx, ny;
-            switch (location) {
-                case "서울":
-                case "서울특별시":
-                    nx = 60; ny = 127; // 서울시청 좌표로 변경
-                    break;
-                case "부산":
-                case "부산광역시":
-                    nx = 98; ny = 76;
-                    break;
-                case "대구":
-                case "대구광역시":
-                    nx = 89; ny = 90;
-                    break;
-                case "인천":
-                case "인천광역시":
-                    nx = 55; ny = 124;
-                    break;
-                case "광주":
-                case "광주광역시":
-                    nx = 58; ny = 74;
-                    break;
-                case "대전":
-                case "대전광역시":
-                    nx = 67; ny = 100;
-                    break;
-                case "울산":
-                case "울산광역시":
-                    nx = 102; ny = 84;
-                    break;
-                case "세종":
-                case "세종특별자치시":
-                    nx = 66; ny = 103;
-                    break;
-                case "경기":
-                case "경기도":
-                    nx = 60; ny = 120;
-                    break;
-                case "강원":
-                case "강원도":
-                    nx = 73; ny = 134;
-                    break;
-                case "충북":
-                case "충청북도":
-                    nx = 69; ny = 107;
-                    break;
-                case "충남":
-                case "충청남도":
-                    nx = 55; ny = 110;
-                    break;
-                case "전북":
-                case "전라북도":
-                    nx = 63; ny = 89;
-                    break;
-                case "전남":
-                case "전라남도":
-                    nx = 51; ny = 67;
-                    break;
-                case "경북":
-                case "경상북도":
-                    nx = 89; ny = 91;
-                    break;
-                case "경남":
-                case "경상남도":
-                    nx = 91; ny = 76;
-                    break;
-                case "제주":
-                case "제주특별자치도":
-                    nx = 53; ny = 38;
-                    break;
-                default:
-                    // 기본값은 서울
-                    nx = 55; ny = 127;
-                    break;
-            }
-
-            // 실시간 관측 데이터 먼저 시도
-            Map<String, Object> currentWeather = fetchCurrentWeather(apiKey, nx, ny);
-            Map<String, Object> forecastWeather = fetchForecastWeather(apiKey, nx, ny);
-
-            log.info("실시간 관측 데이터 결과: {}", currentWeather);
-            log.info("단기예보 데이터 결과: {}", forecastWeather);
-
-            if (forecastWeather != null) {
-                Map<String, Object> combinedData = new HashMap<>();
-                combinedData.put("location", location);
-
-                // 실시간 관측 데이터가 있으면 사용, 없으면 단기예보 데이터 사용
-                if (currentWeather != null && !currentWeather.containsKey("error")) {
-                    combinedData.put("current", currentWeather);
-                    combinedData.put("data_type", "실시간관측");
-                    log.info("✅ {} 지역 실시간 관측 데이터 사용: {}", location, currentWeather);
-                } else {
-                    // 단기예보에서 현재 시간에 가장 가까운 데이터 사용
-                    Map<String, Object> forecastCurrent = (Map<String, Object>) forecastWeather.get("current");
-                    if (forecastCurrent != null) {
-                        combinedData.put("current", forecastCurrent);
-                        combinedData.put("data_type", "단기예보");
-                        log.warn("⚠️ {} 지역 실시간 관측 데이터 실패, 단기예보 데이터 사용: {}", location, forecastCurrent);
-                    } else {
-                        log.error("❌ {} 지역 날씨 데이터 추출 실패", location);
-                        Map<String, Object> errorResponse = new HashMap<>();
-                        errorResponse.put("error", "날씨 데이터를 가져올 수 없습니다.");
-                        return ResponseEntity.badRequest().body(errorResponse);
-                    }
-                }
-
-                combinedData.put("forecast", forecastWeather.get("forecast"));
-                combinedData.put("cached_at", System.currentTimeMillis());
-                return ResponseEntity.ok(combinedData);
-            }
-
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "날씨 데이터를 가져올 수 없습니다.");
-            return ResponseEntity.badRequest().body(errorResponse);
-            */
     } catch (Exception e) {
       log.error("날씨 API 호출 실패: {}", e.getMessage(), e);
-
       Map<String, Object> errorResponse = new HashMap<>();
       errorResponse.put("error", "날씨 정보를 불러오는데 실패했습니다: " + e.getMessage());
-
       return ResponseEntity.badRequest().body(errorResponse);
     }
-    return null;
   }
 
   /**
@@ -239,16 +109,16 @@ public class WeatherController {
   /**
    * 단기예보 데이터 가져오기
    */
-  private Map<String, Object> fetchForecastWeather(String apiKey, int nx, int ny) {
+  private Map<String, Object> fetchForecastWeather(String apiKey, int nx, int ny, String locationName) {
     try {
-      // 현재 시간에 맞는 base_time과 base_date 계산
       String baseTime = getBaseTime();
       String baseDate = getCurrentDate();
 
-      // 단기예보 API URL
+      String encodedApiKey = java.net.URLEncoder.encode(apiKey, "UTF-8");
+
       String url = String.format(
           "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=%s&pageNo=1&numOfRows=1000&dataType=JSON&base_date=%s&base_time=%s&nx=%d&ny=%d",
-          apiKey, baseDate, baseTime, nx, ny
+          encodedApiKey, baseDate, baseTime, nx, ny
       );
 
       HttpHeaders headers = new HttpHeaders();
@@ -258,12 +128,11 @@ public class WeatherController {
       ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
 
       if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-        return processWeatherData(response.getBody(), "forecast");
+        return processWeatherData(response.getBody(), locationName); // ← 제대로 전달
       } else {
         log.error("단기예보 API 응답 오류: {}", response.getStatusCode());
         return null;
       }
-
     } catch (Exception e) {
       log.error("단기예보 데이터 요청 중 오류: {}", e.getMessage());
       return null;
@@ -968,7 +837,7 @@ public class WeatherController {
 
       // 실시간 관측 데이터 먼저 시도
       Map<String, Object> currentWeather = fetchCurrentWeather(apiKey, nx, ny);
-      Map<String, Object> forecastWeather = fetchForecastWeather(apiKey, nx, ny);
+      Map<String, Object> forecastWeather = fetchForecastWeather(apiKey, nx, ny, location);
 
       log.info("실시간 관측 데이터 결과: {}", currentWeather);
       log.info("단기예보 데이터 결과: {}", forecastWeather);
@@ -1048,5 +917,87 @@ public class WeatherController {
       errorResponse.put("error", "모든 지역 날씨 데이터 조회 중 오류가 발생했습니다: " + e.getMessage());
       return ResponseEntity.badRequest().body(errorResponse);
     }
+  }
+
+  private ResponseEntity<Map<String, Object>> fetchLiveWeatherResponse(String location) {
+    log.info("실시간(캐시무시) 날씨 요청 - 위치: {}", location);
+
+    if (apiKey == null || apiKey.isEmpty()) {
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "기상청 API 키가 설정되지 않았습니다.");
+      return ResponseEntity.badRequest().body(error);
+    }
+
+    // 위치 → 격자 nx, ny
+    int nx, ny;
+    switch (location) {
+      case "서울":
+      case "서울특별시": nx=60; ny=127; break;
+      case "부산":
+      case "부산광역시": nx=98; ny=76; break;
+      case "대구":
+      case "대구광역시": nx=89; ny=90; break;
+      case "인천":
+      case "인천광역시": nx=55; ny=124; break;
+      case "광주":
+      case "광주광역시": nx=58; ny=74; break;
+      case "대전":
+      case "대전광역시": nx=67; ny=100; break;
+      case "울산":
+      case "울산광역시": nx=102; ny=84; break;
+      case "세종":
+      case "세종특별자치시": nx=66; ny=103; break;
+      case "경기":
+      case "경기도": nx=60; ny=120; break;
+      case "강원":
+      case "강원도": nx=73; ny=134; break;
+      case "충북":
+      case "충청북도": nx=69; ny=107; break;
+      case "충남":
+      case "충청남도": nx=55; ny=110; break;
+      case "전북":
+      case "전라북도": nx=63; ny=89; break;
+      case "전남":
+      case "전라남도": nx=51; ny=67; break;
+      case "경북":
+      case "경상북도": nx=89; ny=91; break;
+      case "경남":
+      case "경상남도": nx=91; ny=76; break;
+      case "제주":
+      case "제주특별자치도": nx=53; ny=38; break;
+      default: nx=60; ny=127; // 서울 기본
+    }
+
+    // 실시간 관측 + 단기예보 결합
+    Map<String, Object> currentWeather = fetchCurrentWeather(apiKey, nx, ny);
+    Map<String, Object> forecastWeather = fetchForecastWeather(apiKey, nx, ny, location); // ← (4)에서 시그니처 수정
+
+    if (forecastWeather == null) {
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "날씨 데이터를 가져올 수 없습니다.");
+      return ResponseEntity.badRequest().body(error);
+    }
+
+    Map<String, Object> combined = new HashMap<>();
+    combined.put("location", location);
+
+    if (currentWeather != null && !currentWeather.containsKey("error")) {
+      combined.put("current", currentWeather);
+      combined.put("data_type", "실시간관측");
+    } else {
+      Map<String, Object> forecastCurrent = (Map<String, Object>) forecastWeather.get("current");
+      if (forecastCurrent == null) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "현재 날씨 데이터를 추출하지 못했습니다.");
+        return ResponseEntity.badRequest().body(error);
+      }
+      combined.put("current", forecastCurrent);
+      combined.put("data_type", "단기예보");
+    }
+
+    combined.put("forecast", forecastWeather.get("forecast"));
+    combined.put("cached_at", System.currentTimeMillis());
+    combined.put("fresh_data", true);
+    return ResponseEntity.ok(combined);
   }
 }

@@ -126,18 +126,14 @@ header {
     background-color: #fcf3de;
 }
 
-/* 상단 2단 검색/커뮤니티 */
+/* 상단  */
 .top-area {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    align-items: stretch;
     gap: 25px;
 }
 
-.left-area {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
 
 /* 검색 영역 */
 .search-area {
@@ -424,7 +420,24 @@ header {
     text-decoration: none;
 }
 
+.right-area {
+    display: grid;
+    grid-template-rows: auto auto;  /* <- 고정 비율(1fr 1fr) 대신 자동 높이 */
+    row-gap: 20px;
+    align-content: start;
+}
+.right-area > .weather-section,
+.right-area > .community {
+  flex: 1.2 0.8 0;
+  min-height: 0;                /* flex overflow 방지 */
+  overflow: hidden;
+}
 /* 커뮤니티 */
+.community {
+  display: flex;
+  flex-direction: column;
+}
+
 .community-list {
   list-style: none;
   padding-left: 0;
@@ -472,6 +485,10 @@ header {
 .community-list a {
     color: #000;
     text-decoration: none;
+}
+
+.community-list li:nth-child(n+5) {
+    display:none;
 }
 
 /* 추천 캠핑장 영역 */
@@ -530,10 +547,6 @@ header {
 }
 
 /* 지도 영역 */
-.map-section {
-  margin-top: 20px;
-}
-
 .map-section h2 {
   font-size: 1.4rem;
   font-weight: 700;

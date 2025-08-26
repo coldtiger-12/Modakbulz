@@ -283,4 +283,7 @@ class PaginationUI {
   }
 }
 
-export { getBytesSize, ajax, loadScript, PaginationUI }
+window.getBytesSize = getBytesSize;
+window.ajax = ajax;
+window.loadScript = loadScript;
+window.PaginationUI = PaginationUI;

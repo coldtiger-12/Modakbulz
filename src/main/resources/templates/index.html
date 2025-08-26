@@ -10,20 +10,6 @@
   <link rel="stylesheet" href="" th:href="@{/css/footer.css}">
 </head>
 
-<!-- 로딩 오버레이 -->
-<div id="loading-overlay" class="loading-overlay" style="display: flex;">
-  <div class="loading-container">
-    <div class="camp-modakbulz-logo">
-      <img src="/images/모닥불즈로고.png" alt="Camp Modakbulz" class="camp-modakbulz-image">
-      <div class="camp-modakbulz-text">Camp Modakbulz</div>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="progress-text" id="progress-text">0%</div>
-  </div>
-</div>
-
 <body>
   <!-- 탑 메뉴 -->
   <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
@@ -38,83 +24,76 @@
     <!-- 상단 -->
     <div class="top-area">
 
-      <!-- 검색 + 커뮤니티 -->
-      <div class="left-area">
+      <!-- 검색 -->
+      <section class="search-area">
+        <h2>캠핑장 & 글램핑장 검색</h2>
+        <form th:action="@{/camping/search}" method="get">
+          <div class="search-box">
+            <div class="form-fields">
+              <div class="form-row keyword-container">
+                <label>키워드</label>
+                <input type="text" name="keyword" id="keyword" autocomplete="off" />
+                <div id="keyword-suggestions"></div>
+              </div>
+              <div class="form-row region-container">
+                <label>지역</label>
+                <input type="text" name="region" id="region-input" autocomplete="off"/>
+                <div id="region-suggestions"></div>
+              </div>
+              <div class="form-row search-container">
+                <label>캠핑장</label>
+                <input type="text" name="facltNm" id="search-keyword" autocomplete="off" />
+                <div id="autocomplete-suggestions"></div>
+              </div>
+            </div>
 
-        <!-- 날씨 위젯 영역 -->
+            <button type="submit" class="search-btn"></button>
+          </div>
+        </form>
+
+        <div class="tags">
+          <a th:href="@{/camping/search(keyword='여름물놀이')}" class="tag-link">#여름물놀이</a>
+          <a th:href="@{/camping/search(keyword='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
+          <a th:href="@{/camping/search(keyword='걷기길')}" class="tag-link">#걷기길</a>
+          <a th:href="@{/camping/search(keyword='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
+          <a th:href="@{/camping/search(keyword='낚시')}" class="tag-link">#낚시</a>
+          <a th:href="@{/camping/search(keyword='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
+          <a th:href="@{/camping/search(keyword='일몰명소')}" class="tag-link">#일몰명소</a>
+          <a th:href="@{/camping/search(keyword='수상레저')}" class="tag-link">#수상레저</a>
+          <a th:href="@{/camping/search(keyword='액티비티')}" class="tag-link">#액티비티</a>
+          <a th:href="@{/camping/search(keyword='일출명소')}" class="tag-link">#일출명소</a>
+          <a th:href="@{/camping/search(keyword='스키')}" class="tag-link">#스키</a>
+          <a th:href="@{/camping/search(keyword='항공레저')}" class="tag-link">#항공레저</a>
+        </div>
+
+        <div class="popular-keywords" style="margin-top: 20px; border-top: 1px solid #84925a;">
+          <h4 style="color: #fcfaf2; margin-bottom: 12px; font-size: 1rem; padding-left: 5px;">🔥 인기 검색어</h4>
+          <div class="tags" id="popular-keywords-container"></div>
+        </div>
+      </section>
+
+      <div class="right-area">
+        <!-- 날씨 -->
         <div class="weather-section">
           <div id="weather-widget-container"></div>
         </div>
 
-        <!-- 캠핑 지수 계산기 영역 -->
-        <div class="camping-index-section">
-          <div id="camping-index-calculator-container"></div>
+        <div class="community box">
+          <h3>
+            커뮤니티
+            <a class="more" href="/posts/community">더보기</a>
+          </h3>
+          <ul class="community-list">
+            <li th:each="post : ${recentPosts}">
+              <a class="post-title" th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
+              <span class="post-meta">
+            <span class="post-writer" th:text="${post.writer}">작성자</span> |
+            <span class="post-date" th:text="${#temporals.format(post.createdAt, 'MM-dd')}">07-02</span> |
+            <span class="post-views">조회수 <span th:text="${post.viewC}">0</span></span>
+          </span>
+            </li>
+          </ul>
         </div>
-
-        <section class="search-area">
-          <h2>캠핑장 & 글램핑장 검색</h2>
-          <form th:action="@{/camping/search}" method="get">
-            <div class="search-box">
-              <div class="form-fields">
-                <div class="form-row keyword-container">
-                  <label>키워드</label>
-                  <input type="text" name="keyword" id="keyword" autocomplete="off" />
-                  <div id="keyword-suggestions"></div>
-                </div>
-                <div class="form-row region-container">
-                  <label>지역</label>
-                  <input type="text" name="region" id="region-input" autocomplete="off"/>
-                  <div id="region-suggestions"></div>
-                </div>
-                <div class="form-row search-container">
-                  <label>캠핑장</label>
-                  <input type="text" name="facltNm" id="search-keyword" autocomplete="off" />
-                  <div id="autocomplete-suggestions"></div>
-                </div>
-              </div>
-
-              <button type="submit" class="search-btn"></button>
-            </div>
-          </form>
-
-          <div class="tags">
-            <a th:href="@{/camping/search(keyword='여름물놀이')}" class="tag-link">#여름물놀이</a>
-            <a th:href="@{/camping/search(keyword='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
-            <a th:href="@{/camping/search(keyword='걷기길')}" class="tag-link">#걷기길</a>
-            <a th:href="@{/camping/search(keyword='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
-            <a th:href="@{/camping/search(keyword='낚시')}" class="tag-link">#낚시</a>
-            <a th:href="@{/camping/search(keyword='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
-            <a th:href="@{/camping/search(keyword='일몰명소')}" class="tag-link">#일몰명소</a>
-            <a th:href="@{/camping/search(keyword='수상레저')}" class="tag-link">#수상레저</a>
-            <a th:href="@{/camping/search(keyword='액티비티')}" class="tag-link">#액티비티</a>
-            <a th:href="@{/camping/search(keyword='일출명소')}" class="tag-link">#일출명소</a>
-            <a th:href="@{/camping/search(keyword='스키')}" class="tag-link">#스키</a>
-            <a th:href="@{/camping/search(keyword='항공레저')}" class="tag-link">#항공레저</a>
-          </div>
-
-          <div class="popular-keywords" style="margin-top: 20px; border-top: 1px solid #84925a; padding-top: 20px;">
-            <h4 style="color: #fcfaf2; margin-bottom: 12px; font-size: 1rem; padding-left: 5px;">🔥 인기 검색어</h4>
-            <div class="tags" id="popular-keywords-container"></div>
-          </div>
-
-        </section>
-      </div>
-
-      <div class="community box">
-        <h3>
-          커뮤니티
-          <a class="more" href="/posts/community">더보기</a>
-        </h3>
-        <ul class="community-list">
-          <li th:each="post : ${recentPosts}">
-            <a th:href="@{/posts/community/{id}(id=${post.coId})}" th:text="${post.title}">글 제목</a>
-            <span class="post-meta">
-              <span class="post-writer" th:text="${post.writer}">작성자</span> |
-              <span class="post-date" th:text="${#temporals.format(post.createdAt, 'MM-dd')}">07-02</span> |
-              <span class="post-views">조회수 <span th:text="${post.viewC}">0</span></span>
-            </span>
-          </li>
-        </ul>
       </div>
     </div>
 
@@ -154,15 +133,14 @@
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
-  <!-- React 스크립트 -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
   <script src="/js/ranking.js"></script>
-  <script src="/js/find-recommendation.js"></script>
   <script>
     // 페이지 로딩이 완료되면 자동으로 실행됩니다.
     document.addEventListener('DOMContentLoaded', () => {
+      const main = document.querySelector('.main-container');
+        if (main) {
+          main.style.opacity = 1;
+        }
       // 추천 캠핑장 데이터를 비동기로 요청합니다.
       fetch('/camping/recommendations')
         .then(response => response.json())
@@ -293,7 +271,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       // 캠핑장 + 지역 자동완성 기능에 적용
       initializeAutocomplete(
-        'region-keyword',
+        'region-input',
         'region-suggestions',
         '/api/search/autocomplete/region',
         // 캠핑장 + 지역을 페이지에 보여주는 특별한 값 전달
@@ -329,11 +307,16 @@
   <script
     src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
   <script src="/js/main-map.js"></script>
-  <script src="/js/react-app.js"></script>
+
+  <!-- 날씨 위젯 -->
+  <script src="/js/weather-widget.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.initMainMap) {
-        window.initMainMap();
+      if (window.initMainMap) window.initMainMap();
+
+      const el = document.getElementById('weather-widget-container');
+      if (el && window.mountWeatherWidget) {
+        mountWeatherWidget(el, '서울');
       }
     });
   </script>

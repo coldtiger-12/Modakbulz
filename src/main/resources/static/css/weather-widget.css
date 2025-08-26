@@ -1,16 +1,24 @@
 /* 날씨 위젯 스타일 */
 .weather-section {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+#weather-widget-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;     /* 내용이 더 크면 내부 스크롤로 처리 (잘림 X) */
 }
 
 .weather-widget {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #84925a;
   border-radius: 15px;
-  padding: 20px;
+  padding: 10px;
   color: white;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  height: auto;
 }
 
 .weather-widget.loading {
@@ -18,7 +26,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
 }
 
 .weather-widget.error {
@@ -71,16 +78,23 @@
 }
 
 .weather-current {
+    flex: 1 1 35%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.weather-top-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  gap: 16px;
+  align-items: stretch;
 }
 
 .weather-main {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: nowrap;
+    min-width: 0;
 }
 
 .weather-icon {
@@ -135,11 +149,11 @@
 }
 
 .camping-index {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  text-align: center;
+    flex: 0 0 220px;         /* 필요시 200~260px로 조절 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .index-label {
@@ -170,22 +184,25 @@
 }
 
 .forecast-items {
-  display: flex;
-  gap: 15px;
-  overflow-x: auto;
-  padding-bottom: 5px;
+    display: grid;
+    grid-auto-flow: column;   /* 아이템을 가로(컬럼) 방향으로 자동 배치 */
+    grid-auto-columns: 1fr;   /* 각 아이템을 동일한 너비로 */
+    gap: 10px;
+    overflow-x: hidden;       /* 데스크톱에선 스크롤 숨김 (꽉 차게) */
+    padding: 0;
 }
 
 .forecast-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  min-width: 60px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;             /* 줄바꿈/수축 허용(넘침 방지) */
+    padding: 8px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+
 }
 
 .forecast-time {
