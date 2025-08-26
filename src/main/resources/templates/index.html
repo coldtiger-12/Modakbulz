@@ -17,6 +17,8 @@
 
   <!-- 헤더 영역 -->
   <div th:replace="~{fragments/topmenu :: header}"></div>
+  <th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
+
 
   <!-- 메인 페이지 -->
   <div class="main-container" style="opacity: 0; transition: opacity 0.5s ease;">

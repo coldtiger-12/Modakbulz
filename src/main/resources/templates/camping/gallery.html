@@ -63,6 +63,7 @@
 <div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
 <div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
 
 <div class="gallery-all-container">
     <div class="gallery-all-title" th:text="${camp.facltNm} + ' 갤러리 전체보기'">갤러리 전체보기</div>

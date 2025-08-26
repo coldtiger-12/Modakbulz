@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<th:block th:fragment="scrollingToolbar">
+  <nav class="sticky-toolbar">
+    <div class="toolbar-container">
+
+      <a th:href="@{/}" class="toolbar-logo">
+        <img th:src="@{/images/모닥불즈로고.png}" alt="모닥불즈 로고"/>
+        <span>모닥불즈</span>
+      </a>
+
+      <div class="toolbar-menu">
+        <a th:href="@{/camping}">캠핑장 목록</a>
+        <a th:href="@{/posts/community}">커뮤니티</a>
+        <a th:href="@{/mypage}" sec:authorize="isAuthenticated()">마이페이지</a>
+      </div>
+
+      <div class="toolbar-search">
+        <form th:action="@{/camping/search}" method="get">
+          <input type="text" name="facltNm" placeholder="캠핑장 검색">
+          <button type="submit">검색</button>
+        </form>
+      </div>
+
+    </div>
+  </nav>
+</th:block>
+
+</html>

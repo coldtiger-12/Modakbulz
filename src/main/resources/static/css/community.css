@@ -84,7 +84,7 @@ label {
 }
 
 /* 기존 input, textarea 스타일 유지 (하위 호환성) */
-input[type="text"], textarea {
+.container input[type="text"], .container textarea {
     width: 100%;
     box-sizing: border-box;
     padding: 10px;

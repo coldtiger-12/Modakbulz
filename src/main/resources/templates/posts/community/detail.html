@@ -12,6 +12,7 @@
 <th:block sec:authorize="isAuthenticated()" th:replace="~{fragments/topmenu :: afterLoginTop}"></th:block>
 
 <div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
 
 <main class="container">
   <h1>게시글 상세</h1>
