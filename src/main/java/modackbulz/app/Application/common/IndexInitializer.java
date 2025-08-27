@@ -1,6 +1,7 @@
 package modackbulz.app.Application.common;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import java.util.List;
 public class IndexInitializer {
 
   private final ElasticsearchClient esClient;
-  private final List<String> indexNames = List.of("camping_search");
+  private final List<String> indexNames = List.of("camping_search","search-logs");
 
   @PostConstruct
   public void initializeIndices() {
