@@ -24,16 +24,17 @@
     <div class="search-fields">
       <div class="form-row keyword-container">
         <label>키워드</label>
-        <input type="text" name="keyword" th:value="${keyword}" />
+        <input type="text" name="keyword" id="keyword" th:value="${keyword}" autocomplete="off"/>
         <div id="keyword-suggestions-Sl"></div>
       </div>
-      <div class="form-row">
+      <div class="form-row region-container">
         <label>지역</label>
-        <input type="text" name="region" th:value="${region}" />
+        <input type="text" name="region" id="region-keyword" th:value="${region}" autocomplete="off" />
+        <div id="region-suggestions-Sl"></div>
       </div>
       <div class="form-row search-container">
         <label>캠핑장</label>
-        <input type="text" name="area" id="search-keyword" th:value="${facltNm}" autocomplete="off" />
+        <input type="text" name="facltNm" id="search-keyword" th:value="${facltNm}" autocomplete="off" />
         <div id="autocomplete-suggestions-Sl"></div>
       </div>
     </div>
@@ -240,7 +241,7 @@
       // 캠핑장 + 지역 자동완성 기능에 적용
       initializeAutocomplete(
         'region-keyword',
-        'region-suggestions',
+        'region-suggestions-Sl',
         '/api/search/autocomplete/region',
         // 캠핑장 + 지역을 페이지에 보여주는 특별한 값 전달
         (suggestion) => `<span class="suggestion-name">${suggestion.facltNm}</span><span class="suggestion-region">(${suggestion.doNm})</span>`,
@@ -250,7 +251,7 @@
       // 캠핑장 자동완성 기능에 적용
       initializeAutocomplete(
         'search-keyword',                       // 캠핑장 입력창 id
-        'autocomplete-suggestions',             // 캠핑장 결과창 id
+        'autocomplete-suggestions-Sl',             // 캠핑장 결과창 id
         '/api/search/autocomplete/facltNm',     // 캠핑장 api 주소
         // 캠핑장 이름 페이지에 보여주는 '기본 값' 전달
         (suggestion) => suggestion.facltNm,
@@ -260,7 +261,7 @@
       // 키워드 자동완성 기능에 적용
       initializeAutocomplete(
         'keyword',                                // 키워드 입력창 id
-        'keyword-suggestions',                    // 키워드 결과창 id
+        'keyword-suggestions-Sl',                    // 키워드 결과창 id
         '/api/search/autocomplete/keyword',       // 키워드 api 주소
         // 키워드 목록 간단하게 보여주는 '기본 값' 전달
         (suggestion) => suggestion.keyword,

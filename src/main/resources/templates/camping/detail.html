@@ -115,11 +115,14 @@
         <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
       </div>
     </div>
-    <div class="review-summary">
+
+    <div class="review-summary" id="review-summary">
+
       <div class="avg-score">
         <span class="score" th:text="${#numbers.formatDecimal(reviewStats.avg, 1, 1)}">5.0</span>
         <span class="slash">/ 5</span>
       </div>
+
       <div class="score-bars">
         <div class="score-bar" th:each="i : ${#numbers.sequence(4,0)}">
           <span class="star-label">★ <span th:text="${i + 1}">5</span></span>
@@ -129,12 +132,19 @@
         </div>
       </div>
 
-      <div class="review-keywords">
+    </div>
+
+    <div class="all-keywords">
+
+      <div class="review-keywords" th:if="${naverKeywords != null and not #lists.isEmpty(naverKeywords)}">
         <h4>연관 키워드</h4>
         <div class="tag-cloud">
-          <span class="tag" th:each="word : ${reviewStats.keywords}" th:text="${word}">조용해요</span>
+            <span class="tag" th:each="keyword : ${naverKeywords}" th:text="'#' + ${keyword}">
+              #깨끗해요
+            </span>
         </div>
       </div>
+
     </div>
 
     <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">

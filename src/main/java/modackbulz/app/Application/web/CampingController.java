@@ -1,9 +1,12 @@
 package modackbulz.app.Application.web;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import modackbulz.app.Application.config.auth.CustomUserDetails;
+import modackbulz.app.Application.domain.autocomplete.dto.CampSearchDto;
+import modackbulz.app.Application.domain.autocomplete.svc.SearchSVC;
 import modackbulz.app.Application.domain.camping.dao.CampingDAO;
 import modackbulz.app.Application.domain.camping.dto.GoCampingDto;
 import modackbulz.app.Application.domain.camping.svc.GoCampingService;
@@ -12,6 +15,7 @@ import modackbulz.app.Application.domain.scrap.dao.CampScrapDAO;
 import modackbulz.app.Application.entity.Review;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +39,7 @@ public class CampingController {
   private final GoCampingService goCampingService;
   private final CampingDAO campingDAO;
   private final ReviewSVC reviewSVC;
+  private final SearchSVC searchSVC;
   private final CampScrapDAO campScrapDAO;
   private final ElasticsearchClient esClient;
 
@@ -82,19 +87,49 @@ public class CampingController {
     boolean isLoggedIn = (userDetails != null);
     model.addAttribute("loginMember", isLoggedIn ? userDetails : null);
 
-    // 검색어 조합 처리
-    String finalKeyword = (keyword != null ? keyword : "")
-        + (region != null ? " " + region : "")
-        + (theme != null ? " " + theme : "")
-        + (facltNm != null ? " " + facltNm : "");
-    finalKeyword = finalKeyword.trim();
-
-    // 캠핑장 검색 or 전체 목록
     Page<GoCampingDto.Item> campPage;
-    if (finalKeyword.isBlank()) {
-      campPage = goCampingService.getCampListPage(pageable).block();
+
+    // 'keyword' 파라미터에 값이 있는지 선 확인
+    if (keyword != null && !keyword.isBlank()){
+
+      // 'keyword' 파라미터가 존재한다면 elasticsearch 인덱스 매치를 먼저 이용 함
+      log.info("----- Elasticsearch로 키워드 검색 실행 : {}", keyword);
+
+      SearchResponse<CampSearchDto> response = esClient.search(s -> s
+              .index("camping_search")
+              .query(q -> q
+                  .match( m -> m
+                      .field("keyword_all")
+                      .query(keyword)
+                  )
+              )
+              .from((int) pageable.getOffset())
+              .size(pageable.getPageSize()),
+          CampSearchDto.class
+      );
+
+      List<GoCampingDto.Item> items = response.hits().hits().stream()
+          .map(hit -> convertCampNmToDtoItem(hit.source()))
+          .collect(Collectors.toList());
+
+      campPage = new PageImpl<>(items, pageable, response.hits().total().value());
+
+
     } else {
-      campPage = goCampingService.searchCampList(finalKeyword, pageable).block();
+
+      // 검색어 조합 처리
+      String finalKeyword = (keyword != null ? keyword : "")
+          + (region != null ? " " + region : "")
+          + (theme != null ? " " + theme : "")
+          + (facltNm != null ? " " + facltNm : "");
+      finalKeyword = finalKeyword.trim();
+
+      // 캠핑장 검색 or 전체 목록
+      if (finalKeyword.isBlank()) {
+        campPage = goCampingService.getCampListPage(pageable).block();
+      } else {
+        campPage = goCampingService.searchCampList(finalKeyword, pageable).block();
+      }
     }
 
     // 스크랩 여부 설정 (로그인한 경우에만)
@@ -115,6 +150,22 @@ public class CampingController {
 
     return "camping/srcList";
   }
+
+  private GoCampingDto.Item convertCampNmToDtoItem(CampSearchDto campSearchDto){
+    if (campSearchDto == null) return null;
+    GoCampingDto.Item item = new GoCampingDto.Item();
+
+    item.setContentId(campSearchDto.getContentId().toString());
+    item.setFacltNm(campSearchDto.getFacltNm());
+    item.setLineIntro(campSearchDto.getLineIntro());
+    item.setFirstImageUrl(campSearchDto.getFirstImageUrl());
+    item.setAddr1(campSearchDto.getAddr1());
+    item.setDoNm(campSearchDto.getDoNm());
+
+    return item;
+  }
+
+
 
 
 
@@ -142,6 +193,10 @@ public class CampingController {
     // 해당 캠핑장의 리뷰 목록을 조회하여 모델에 추가
     List<Review> review = reviewSVC.findByContentId(contentId);
     model.addAttribute("reviews", reviews);
+
+    // 해당 캠핑장의 키워드 목록을 조회하여 모델에 추가
+    List<String> naverKeywords = searchSVC.getNaverKeywordForCamp(contentId);
+    model.addAttribute("naverKeywords", naverKeywords);
 
     // 리뷰 통계 정보 추가 (평점 + 개수)
     Double avgRating = reviewSVC.calculateAverageScore(contentId);

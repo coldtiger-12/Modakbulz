@@ -11,4 +11,6 @@ public interface SearchSVC {
   List<AutocompleteDto.CampResponse> getAutocompleteCampsites(String keyword);
 
   List<AutocompleteDto.KeywordResponse> getAutocompleteKeywords(String keyword);
+
+  List<String> getNaverKeywordForCamp(Long contentId);
 }

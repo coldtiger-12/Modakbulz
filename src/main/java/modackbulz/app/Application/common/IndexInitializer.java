@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 public class IndexInitializer {
 
   private final ElasticsearchClient esClient;
-  private final String INDEX_NAME = "camp_final";
+  private final String INDEX_NAME = "camping_search";
 
   @PostConstruct  // 스프링 부트가 시작될때 마다 한번만 실행되도록 하는 애플리케이션
   public void initializeIndex(){

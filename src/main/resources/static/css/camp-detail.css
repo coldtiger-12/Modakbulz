@@ -659,12 +659,12 @@
 }
 
 /* 리뷰 상단 요약 영역 */
-.review-summary {
+#review-summary {
   display: flex;
   gap: 30px;
   padding: 20px 0 40px;
-  border-bottom: 1px solid #ddd;
   flex-wrap: wrap;
+  margin-bottom: 2px;
 =======
 >>>>>>> 30e2bd5 (2025-07-14-16)
 }
@@ -951,9 +951,16 @@
 }
 <<<<<<< HEAD
 
+.all-keywords{
+   padding : 0 0 1px;
+}
+
 .review-keywords {
   flex: 1;
   min-width: 200px;
+  border-bottom: 1px solid #ddd;
+  padding: 0 0 40px;
+  margin-bottom: 32px;
 }
 
 .review-keywords h4 {

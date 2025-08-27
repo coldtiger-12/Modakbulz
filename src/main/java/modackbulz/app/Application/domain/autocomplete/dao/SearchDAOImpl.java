@@ -4,7 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
-import modackbulz.app.Application.entity.CampNm;
+import modackbulz.app.Application.domain.autocomplete.dto.CampSearchDto;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -14,11 +14,11 @@ import java.io.IOException;
 public class SearchDAOImpl implements SearchDAO {
 
   private final ElasticsearchClient esClient;
-  private final String CAMP_INDEX = "camp_final";
+  private final String CAMP_INDEX = "camping_search";
 
   // 캠핑장 이름 (지역) 자동완성 - 지역 기반
   @Override
-  public SearchResponse<CampNm> searchCampsitesByRegion(String keyword) throws IOException{
+  public SearchResponse<CampSearchDto> searchCampsitesByRegion(String keyword) throws IOException{
     return  esClient.search(s -> s
         .index(CAMP_INDEX)
         .query(q -> q
@@ -28,14 +28,14 @@ public class SearchDAOImpl implements SearchDAO {
             )
         )
         .size(10),
-        CampNm.class
+        CampSearchDto.class
     );
 
   }
 
   // 캠핑장 이름 자동완성
   @Override
-  public SearchResponse<CampNm> searchCampsitesByName(String keyword) throws IOException {
+  public SearchResponse<CampSearchDto> searchCampsitesByName(String keyword) throws IOException {
     return esClient.search(s -> s
             .index(CAMP_INDEX)
             .query(q -> q
@@ -45,7 +45,7 @@ public class SearchDAOImpl implements SearchDAO {
                 )
             )
             .size(100), // 서비스단에서 처리할 수 있도록 충분히 가져옵니다.
-        CampNm.class
+        CampSearchDto.class
     );
   }
 
@@ -73,5 +73,15 @@ public class SearchDAOImpl implements SearchDAO {
             ),
         Void.class
     );
+  }
+
+  @Override
+  public CampSearchDto findCampById(String contentId) throws IOException{
+    // esClient.get()을 사용하여 Id로 문서 직접 조회
+    return esClient.get( g -> g
+        .index(CAMP_INDEX)
+        .id(contentId),
+        CampSearchDto.class
+    ).source();
   }
 }
