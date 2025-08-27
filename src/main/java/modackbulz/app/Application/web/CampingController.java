@@ -99,7 +99,7 @@ public class CampingController {
               .index("camping_search")
               .query(q -> q
                   .match( m -> m
-                      .field("keyword_theme")
+                      .field("keyword_all")
                       .query(keyword)
                   )
               )
