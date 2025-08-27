@@ -1,0 +1,308 @@
+{
+    "settings": {
+        "index": {
+		"number_of_shards":1,
+		"number_of_replicas":4,
+            "analysis": {
+				"normalizer":{
+					"lowercase_norm":{
+						"filter":[
+							"lowercase"
+						],
+						"type":"custom"
+					}
+				},
+                "analyzer": {
+                    "jamo-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "keyword",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_jamo",
+                            "edge_ngram_filter"
+                        ]
+                    },
+                    "chosung-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "keyword",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_chosung",
+                            "edge_ngram_filter"
+                        ]
+                    },
+                    "search-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "keyword",
+                        "filter": [
+                            "lowercase",
+                            "synonym",
+                            "javacafe_jamo"
+                        ],
+                        "char_filter": [
+                            "cleanse_blank"
+                        ]
+                    },
+                    "hname-middle-match-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_ngram_tokenizer",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_jamo"
+                        ]
+                    },
+                    "hname-highlight-jamo-1t2f-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_ngram_tokenizer",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_jamo",
+                            "edge_2gram_filter"
+                        ]
+                    },
+                    "hname-jamo-2t4f-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_2gram_tokenizer",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_jamo",
+                            "edge_4gram_filter"
+                        ]
+                    },
+                    "hname-highlight-chosung-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_ngram_tokenizer",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_chosung"
+                        ]
+                    },
+                    "hname-highlight-chosung-2t-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_2gram_tokenizer",
+                        "filter": [
+                            "lowercase",
+                            "javacafe_chosung"
+                        ],
+                        "char_filter": [
+                            "cleanse_blank"
+                        ]
+                    },
+                    "ename-middle-match-analyzer": {
+                        "type":"custom",
+                        "tokenizer": "char_ngram_tokenizer",
+                        "filter":["lowercase"],
+                        "char_filter": [
+                            "cleanse_blank"
+                        ]
+                    },
+                    "front-match-analyzer":{
+                        "type":"custom",
+                        "tokenizer":"keyword",
+                        "filter":[
+                            "lowercase",
+                            "whitespace_edge_ngram_filter"
+                        ],
+                        "char_filter": [
+                            "cleanse_blank"
+                        ]
+                    },
+                    "highlight-analyzer": {
+                        "type": "custom",
+                        "tokenizer": "char_ngram_tokenizer",
+                        "filter": [
+                            "lowercase"
+                        ]
+                    }
+                },
+                "tokenizer": {
+                    "char_ngram_tokenizer": {
+                        "type": "ngram",
+						"custom_token_chars":"[]{}\\~*%$#^&.:;'\"/()-_!<>?+=",
+                        "min_gram": 1,
+                        "max_gram": 1,
+                        "token_chars": [
+                            "letter",
+                            "digit",
+							"custom"
+                        ]
+                    },
+                    "char_2gram_tokenizer": {
+                        "type": "ngram",
+						"custom_token_chars":"[]{}\\~*%$#^&.:;'\"/()-_!<>?+=",
+                        "min_gram": 2,
+                        "max_gram": 2,
+                        "token_chars": [
+                            "letter",
+                            "digit",
+							"custom"
+                        ]
+                    }
+                },
+                "filter": {
+                    "edge_ngram_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 1,
+                        "max_gram": 20
+                    },
+                    "edge_4gram_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 4,
+                        "max_gram": 20
+                    },
+                    "edge_2gram_filter": {
+                        "type": "edge_ngram",
+                        "min_gram": 2,
+                        "max_gram": 2
+                    },
+                    "whitespace_edge_ngram_filter":{
+                      "type":"edge_ngram",
+                      "min_gram": 1,
+                      "max_gram": 60,
+                      "token_chars":[
+                          "letter",
+                          "digit",
+                          "symbol",
+                          "whitespace"
+                        ]
+                    },
+                    "synonym":{
+                        "type": "synonym",
+                        "synonyms":["ㄲ => ㄱㄱ, ㄲ", "ㄸ => ㄷㄷ,ㄸ", "ㅃ=> ㅂㅂ,ㅃ", "ㅆ=>ㅅㅅ,ㅆ", "ㅉ=>ㅈㅈ, ㅉ", "ㅆㅉ=>ㅅㅅㅈㅈ"]
+                    }
+                },
+                "char_filter": {
+                    "cleanse_blank": {
+                        "type": "pattern_replace",
+                        "pattern": " ",
+                        "replace": ""
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "hname": {
+                "type": "text",
+                "fields": {
+                    "jamo": {
+                        "type": "text",
+                        "analyzer": "jamo-analyzer",
+                        "search_analyzer": "search-analyzer"
+                    },
+                    "chosung": {
+                        "type": "text",
+                        "analyzer": "chosung-analyzer",
+                        "search_analyzer": "search-analyzer"
+                    },
+                    "middle-match": {
+                        "type": "text",
+                        "analyzer": "hname-middle-match-analyzer"
+                    },
+                    "highlight": {
+                        "type": "text",
+                        "analyzer": "highlight-analyzer"
+                    },
+                    "highlight-jamo-1t2f": {
+                        "type": "text",
+                        "analyzer": "hname-highlight-jamo-1t2f-analyzer"
+                    },
+                    "jamo-2t4f": {
+                        "type": "text",
+                        "analyzer": "hname-jamo-2t4f-analyzer",
+                        "search_analyzer": "search-analyzer"
+                    },
+                    "highlight-chosung": {
+                        "type": "text",
+                        "analyzer": "hname-highlight-chosung-analyzer",
+                        "search_analyzer": "search-analyzer"
+                    },
+                    "highlight-chosung-2t": {
+                        "type": "text",
+                        "analyzer": "hname-highlight-chosung-2t-analyzer"
+                    },
+                    "order_hname": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "sigagubun": {
+                "type": "keyword"
+            },
+            "mkt_gb": {
+                "type": "keyword"
+            },
+            "ename": {
+                "type": "text",
+                "fields": {
+                  "search_K":{
+                    "type":"text",
+                    "analyzer":"front-match-analyzer",
+                    "search_analyzer":"search-analyzer"
+                  },
+                  "search_G":{
+                    "type":"text",
+                    "analyzer":"ename-middle-match-analyzer"
+                  },
+                  "highlight":{
+                    "type":"text",
+                    "analyzer":"highlight-analyzer"
+                  },
+                  "order-name":{
+                    "type":"keyword"
+                  }
+                }
+            },
+            "shcode": {
+                "type": "text",
+                "fields": {
+				  "raw":{
+					"type":"keyword",
+					"normalizer":"lowercase_norm"
+				  },
+                  "search":{
+                    "type":"text",
+                    "analyzer":"front-match-analyzer",
+                    "search_analyzer":"search-analyzer"
+                  },
+                    "highlight": {
+                        "type": "text",
+                        "analyzer": "highlight-analyzer"
+                    }
+                }
+            },
+            "sector_gb": {
+                "type": "keyword",
+                "null_value": "null"
+            },
+            "symbol": {
+                "type": "text",
+                "fields": {
+				  "raw":{
+					"type":"keyword",
+					"normalizer":"lowercase_norm"
+				  },
+                  "search":{
+                    "type":"text",
+                    "analyzer":"front-match-analyzer",
+                    "search_analyzer":"search-analyzer"
+                  },
+                    "highlight": {
+                        "type": "text",
+                        "analyzer": "highlight-analyzer"
+                    }
+                }
+            },
+            "grossamount":{
+              "type": "long"
+            },
+            "mkt_name":{
+              "type": "text"
+            },
+            "sortorder":{
+              "type": "float"
+            }
+        }
+    }
+}

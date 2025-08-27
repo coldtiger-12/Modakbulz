@@ -37,8 +37,7 @@
         "copy_to": [
           "keyword_all",
           "keyword_theme"
-        ],
-        "fields": { "keyword":  {"type": "keyword"} }
+        ]
       },
       "column2":{
         "type" : "text",
@@ -56,6 +55,7 @@
     }
   },
   "settings": {
+    "index.max_ngram_diff": 20,
     "analysis": {
       "filter": {
         "korean_synonym_filter":{
@@ -69,6 +69,15 @@
             "벚꽃,꽃놀이,꽃,유채꽃 => 봄꽃여행",
             "해돋이 => 일출명소"
           ]
+        },
+        "nori_posfilter": {
+          "type": "nori_part_of_speech",
+          "stoptags": [ "E", "IC", "J", "MAJ", "MM", "SP", "SSC", "SSO", "SC", "SE", "XPN", "XSA", "XSN", "XSV", "UNA", "NA", "VSV" ]
+        },
+        "ngram_filter": {
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 10
         }
       },
       "analyzer": {
@@ -76,7 +85,7 @@
           "type": "custom",
           "tokenizer": "nori_tokenizer",
           "filter":[
-            "korean_synonym_filter"
+            "korean_synonym_filter","nori_posfilter","ngram_filter"
           ]
         }
       }
