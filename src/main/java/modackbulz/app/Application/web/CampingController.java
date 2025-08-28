@@ -1,6 +1,7 @@
 package modackbulz.app.Application.web;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
@@ -77,68 +79,77 @@ public class CampingController {
   public String searchCamps(
       @RequestParam(name = "keyword", required = false) String keyword,
       @RequestParam(name = "region", required = false) String region,
-      @RequestParam(name = "theme", required = false) String theme,
+      @RequestParam(name = "theme", required = false) String theme, // theme 파라미터 유지
       @RequestParam(name = "facltNm", required = false) String facltNm,
       @PageableDefault(size = 9) Pageable pageable,
       @AuthenticationPrincipal CustomUserDetails userDetails,
       Model model
   ) throws IOException {
-    // 로그인 여부 확인
-    boolean isLoggedIn = (userDetails != null);
-    model.addAttribute("loginMember", isLoggedIn ? userDetails : null);
 
-    Page<GoCampingDto.Item> campPage;
+    // --- 수정된 로직 시작 ---
 
-    // 'keyword' 파라미터에 값이 있는지 선 확인
-    if (keyword != null && !keyword.isBlank()){
+    log.info("----- 다중 조건 검색 실행: keyword={}, region={}, facltNm={}, theme={}", keyword, region, facltNm, theme);
 
-      // 'keyword' 파라미터가 존재한다면 elasticsearch 인덱스 매치를 먼저 이용 함
-      log.info("----- Elasticsearch로 키워드 검색 실행 : {}", keyword);
+    // 1. BoolQuery.Builder를 생성합니다.
+    BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
 
-      SearchResponse<CampSearchDto> response = esClient.search(s -> s
-              .index("camping_search")
-              .query(q -> q
-                  .match( m -> m
-                      .field("keyword_all")
-                      .query(keyword)
-                  )
-              )
-              .from((int) pageable.getOffset())
-              .size(pageable.getPageSize()),
-          CampSearchDto.class
+    // 2. 'keyword' 또는 'theme' 조건: 값이 있을 때만 must 조건으로 추가합니다.
+    // 두 파라미터 모두 keyword_all 필드를 검색하도록 합니다.
+    String mainKeyword = StringUtils.hasText(keyword) ? keyword : theme;
+    if (StringUtils.hasText(mainKeyword)) {
+      boolQueryBuilder.must(m -> m
+          .match(t -> t
+              .field("keyword_all")
+              .query(mainKeyword)
+          )
       );
-
-      List<GoCampingDto.Item> items = response.hits().hits().stream()
-          .map(hit -> convertCampNmToDtoItem(hit.source()))
-          .collect(Collectors.toList());
-
-      campPage = new PageImpl<>(items, pageable, response.hits().total().value());
-
-
-    } else {
-
-      // 검색어 조합 처리
-      String finalKeyword = (keyword != null ? keyword : "")
-          + (region != null ? " " + region : "")
-          + (theme != null ? " " + theme : "")
-          + (facltNm != null ? " " + facltNm : "");
-      finalKeyword = finalKeyword.trim();
-
-      // 캠핑장 검색 or 전체 목록
-      if (finalKeyword.isBlank()) {
-        campPage = goCampingService.getCampListPage(pageable).block();
-      } else {
-        campPage = goCampingService.searchCampList(finalKeyword, pageable).block();
-      }
     }
 
+    // 3. 'region'(지역) 조건: 값이 있을 때만 must 조건으로 추가합니다.
+    // addr1 필드에서 지역명을 검색합니다.
+    if (StringUtils.hasText(region)) {
+      boolQueryBuilder.must(m -> m
+          .match(t -> t
+              .field("addr1") // 지역 정보가 있는 필드
+              .query(region)
+          )
+      );
+    }
+
+    // 4. 'facltNm'(캠핑장 이름) 조건: 값이 있을 때만 must 조건으로 추가합니다.
+    if (StringUtils.hasText(facltNm)) {
+      boolQueryBuilder.must(m -> m
+          .match(t -> t
+              .field("facltNm")
+              .query(facltNm)
+          )
+      );
+    }
+
+    // 5. 최종 쿼리로 Elasticsearch 검색을 실행합니다.
+    SearchResponse<CampSearchDto> response = esClient.search(s -> s
+            .index("camping_search")
+            .query(q -> q.bool(boolQueryBuilder.build())) // ★ BoolQuery 적용
+            .from((int) pageable.getOffset())
+            .size(pageable.getPageSize()),
+        CampSearchDto.class
+    );
+
+    // 검색 결과 DTO 변환 및 페이지 생성
+    List<GoCampingDto.Item> items = response.hits().hits().stream()
+        .map(hit -> convertCampNmToDtoItem(hit.source()))
+        .collect(Collectors.toList());
+
+    Page<GoCampingDto.Item> campPage = new PageImpl<>(items, pageable, response.hits().total().value());
+
     // 스크랩 여부 설정 (로그인한 경우에만)
-    if (isLoggedIn) {
+    if (userDetails != null) {
       Long memberId = userDetails.getMemberId();
       for (GoCampingDto.Item item : campPage) {
         boolean scrapped = campScrapDAO.findByMemberIdAndContentId(memberId, item.getContentId()).isPresent();
         item.setScrapped(scrapped);
       }
+      model.addAttribute("loginMember", userDetails);
     }
 
     // 모델 속성 추가
@@ -150,6 +161,7 @@ public class CampingController {
 
     return "camping/srcList";
   }
+
 
   private GoCampingDto.Item convertCampNmToDtoItem(CampSearchDto campSearchDto){
     if (campSearchDto == null) return null;
