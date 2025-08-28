@@ -29,7 +29,7 @@
       <!-- 검색 -->
       <section class="search-area">
         <h2>캠핑장 & 글램핑장 검색</h2>
-        <form th:action="@{/camping/search}" method="get">
+        <form th:action="@{/camping/search}" method="get" id="searchForm" class="search-form">
           <div class="search-box">
             <div class="form-fields">
               <div class="form-row keyword-container">
@@ -52,22 +52,6 @@
             <button type="submit" class="search-btn"></button>
           </div>
         </form>
-
-        <div class="tags">
-          <a th:href="@{/camping/search(keyword='여름물놀이')}" class="tag-link">#여름물놀이</a>
-          <a th:href="@{/camping/search(keyword='가을단풍명소')}" class="tag-link">#가을단풍명소</a>
-          <a th:href="@{/camping/search(keyword='걷기길')}" class="tag-link">#걷기길</a>
-          <a th:href="@{/camping/search(keyword='봄꽃여행')}" class="tag-link">#봄꽃여행</a>
-          <a th:href="@{/camping/search(keyword='낚시')}" class="tag-link">#낚시</a>
-          <a th:href="@{/camping/search(keyword='겨울눈꽃명소')}" class="tag-link">#겨울눈꽃명소</a>
-          <a th:href="@{/camping/search(keyword='일몰명소')}" class="tag-link">#일몰명소</a>
-          <a th:href="@{/camping/search(keyword='수상레저')}" class="tag-link">#수상레저</a>
-          <a th:href="@{/camping/search(keyword='액티비티')}" class="tag-link">#액티비티</a>
-          <a th:href="@{/camping/search(keyword='일출명소')}" class="tag-link">#일출명소</a>
-          <a th:href="@{/camping/search(keyword='스키')}" class="tag-link">#스키</a>
-          <a th:href="@{/camping/search(keyword='항공레저')}" class="tag-link">#항공레저</a>
-        </div>
-
         <div class="popular-keywords" style="margin-top: 20px; border-top: 1px solid #84925a;">
           <h4 style="color: #fcfaf2; margin-bottom: 12px; font-size: 1rem; padding-left: 5px;">🔥 인기 검색어</h4>
           <div class="tags" id="popular-keywords-container"></div>
@@ -136,6 +120,7 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
   <script src="/js/ranking.js"></script>
+  <script src="/js/find-recommendation.js"></script>
   <script>
     // 페이지 로딩이 완료되면 자동으로 실행됩니다.
     document.addEventListener('DOMContentLoaded', () => {

@@ -1,0 +1,12 @@
+{
+  "mappings": {
+    "properties": {
+      "keyword": {
+        "type": "keyword"
+      },
+      "searched_at": {
+        "type": "date"
+      }
+    }
+  }
+}

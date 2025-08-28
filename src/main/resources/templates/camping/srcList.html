@@ -20,7 +20,7 @@
 <!-- 메인 페이지 -->
 <div class="camping-list-container">
   <h1>캠핑장 & 글램핑장 검색 목록</h1>
-  <form th:action="@{/camping/search}" method="get" class="search-form">
+  <form th:action="@{/camping/search}" method="get" class="search-form" id="searchForm">
     <div class="search-fields">
       <div class="form-row keyword-container">
         <label>키워드</label>
@@ -93,6 +93,7 @@
   </div>
 </div>
 <p class="hidden" th:text="${loginMember != null}">로그인 상태</p>
+<script src="/js/ranking.js"></script>
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = [[${loginMember != null}]];
