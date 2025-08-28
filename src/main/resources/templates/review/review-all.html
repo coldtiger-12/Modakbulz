@@ -32,12 +32,6 @@
     </div>
     <div class="summary-right">
       <a th:href="@{/reviews/write(campingId=${param.campingId})}" class="write-review-btn review-all-write-btn">리뷰 작성</a>
-      <div class="keyword-box">
-        <div class="keyword-title">언급된 키워드들</div>
-        <div class="keyword-list">
-          <span class="keyword" th:each="kw : ${keywords}" th:text="${kw}">키워드</span>
-        </div>
-      </div>
     </div>
   </div>
   <hr>

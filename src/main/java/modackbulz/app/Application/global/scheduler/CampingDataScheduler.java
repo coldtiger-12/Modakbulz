@@ -23,7 +23,7 @@ public class CampingDataScheduler {
    * "0 0 4 * * ?" = 매일 새벽 4시 0분 0초에 실행
    */
 
-  @Scheduled(cron = "0 0 4 * * ?")
+  @Scheduled(cron = "0 37 14 * * ?")
   public void syncCampingData() {
     log.info("🏕️ 캠핑장 데이터 동기화 배치 작업을 시작합니다.");
     long startTime = System.currentTimeMillis();
